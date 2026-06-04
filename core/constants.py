@@ -19,6 +19,20 @@ UPLOAD_DIR = os.path.join(DATA_DIR, "uploads")
 FEATURES_FILE = os.path.join(DATA_DIR, "features.json")
 SETTINGS_FILE = os.path.join(DATA_DIR, "settings.json")
 
+# Organization scope
+# ArgoDesk runs one install per client, so the instance *is* the organization.
+# Org-level data (shared knowledge, wiki, company memory) is stored with this
+# sentinel as its ``owner`` instead of a real username. User-facing reads include
+# both the user's own rows and ORG_OWNER rows (see ``org_owner_filter`` /
+# ``ORG_SCOPE_OWNERS`` in src/auth_helpers.py). No tenant columns, no migrations:
+# this generalizes the existing per-user ``owner`` pattern to the company level.
+ORG_OWNER = "__org__"
+
+# Instance mode: "freelance" (single-user, simplified UI, user/role management
+# hidden) vs "azienda" (full org with multiple users and roles). Chosen at setup,
+# changeable later by an admin. Default falls back to env, then "freelance".
+DEFAULT_INSTANCE_MODE = os.getenv("INSTANCE_MODE", "freelance").strip().lower()
+
 # API Configuration
 MAX_CONTEXT_MESSAGES = 90
 REQUEST_TIMEOUT = 20

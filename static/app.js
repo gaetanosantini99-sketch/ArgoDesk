@@ -394,6 +394,49 @@ function initializeEventListeners() {
     });
   }
 
+  // Export: branded client report (Brain-to-PDF). Asks the LLM to structure
+  // the conversation into a report, then opens a branded HTML page the user
+  // can print to PDF (or save). Report type is picked via a small prompt.
+  const exportReportBtn = el('export-report-btn');
+  if (exportReportBtn) {
+    exportReportBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      exportMenu.classList.remove('open');
+      const sessionId = sessionModule.getCurrentSessionId();
+      if (!sessionId) { uiModule.showError('Nessuna sessione attiva'); return; }
+      let reportType = 'consulenza';
+      try {
+        const tRes = await fetch(`${API_BASE}/api/export/report/types`, { credentials: 'same-origin' });
+        const tData = await tRes.json();
+        const types = tData.types || [];
+        if (types.length && uiModule.styledPrompt) {
+          const choice = await uiModule.styledPrompt(
+            'Tipo di report (' + types.map(t => t.id).join(' / ') + ')',
+            { defaultValue: 'consulenza' }
+          );
+          if (choice === null) return;
+          if (choice && types.some(t => t.id === choice.trim())) reportType = choice.trim();
+        }
+      } catch (_) {}
+      uiModule.showToast('Generazione report...');
+      try {
+        const res = await fetch(`${API_BASE}/api/export/report`, {
+          method: 'POST', credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId, report_type: reportType }),
+        });
+        const data = await res.json();
+        if (!res.ok) { uiModule.showError(data.detail || 'Generazione fallita'); return; }
+        const w = window.open('', '_blank');
+        if (w) { w.document.open(); w.document.write(data.html); w.document.close(); }
+        else uiModule.showError('Popup bloccato: consenti i popup per aprire il report');
+      } catch (err) {
+        console.error('Report export failed:', err);
+        uiModule.showError('Generazione report fallita');
+      }
+    });
+  }
+
   // Rename session from top bar
   const exportRenameBtn = el('export-rename-btn');
   if (exportRenameBtn) {
@@ -1131,6 +1174,15 @@ function initializeEventListeners() {
     .then(r => r.json())
     .then(d => {
       window._isAdmin = !!d.is_admin;
+      // ArgoDesk instance mode: "freelance" hides user/role management for a
+      // solo professional; "azienda" exposes the full org admin surface. We
+      // record it globally and reflect it on <body> so CSS (.instance-freelance
+      // / .instance-azienda) and feature code can branch without re-fetching.
+      window._instanceMode = (d.instance_mode === 'azienda') ? 'azienda' : 'freelance';
+      try {
+        document.body.classList.remove('instance-freelance', 'instance-azienda');
+        document.body.classList.add('instance-' + window._instanceMode);
+      } catch (_) {}
       if (d.is_admin && userBarAdmin) userBarAdmin.style.display = '';
       const userBarName = el('user-bar-name');
       const userBarAvatar = el('user-bar-avatar');

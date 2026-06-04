@@ -125,3 +125,39 @@ def owner_filter(query, model_cls, user: str, *, include_shared: bool = True):
     if include_shared:
         return query.filter((model_cls.owner == user) | (model_cls.owner == None))  # noqa: E711
     return query.filter(model_cls.owner == user)
+
+
+def org_scope_owners(user: str) -> list:
+    """The set of ``owner`` values a read for ``user`` should see at the company
+    level: the user's own rows, legacy null-owner 'shared' rows, and ArgoDesk
+    org-level rows (``ORG_OWNER``). Used by Chroma ``where`` filters (e.g.
+    ``{"owner": {"$in": org_scope_owners(user)}}``) and any ad-hoc scoping that
+    needs the company knowledge/memory in addition to personal data.
+
+    In single-user / freelance mode ``user`` is often empty; we still return the
+    org sentinel so company-scoped data created via the org tooling stays
+    reachable, plus ``None`` for legacy rows.
+    """
+    from core.constants import ORG_OWNER
+
+    owners = [ORG_OWNER, None]
+    if user:
+        owners.insert(0, user)
+    return owners
+
+
+def org_owner_filter(query, model_cls, user: str):
+    """SQLAlchemy variant of :func:`owner_filter` that also lets ArgoDesk
+    org-level rows (``owner == ORG_OWNER``) through, on top of the user's own
+    rows and legacy null-owner shared rows. Use this on reads that should draw
+    from company knowledge/memory as well as the caller's personal data. No-op
+    when ``user`` is empty (single-user mode already sees everything)."""
+    if not user:
+        return query
+    from core.constants import ORG_OWNER
+
+    return query.filter(
+        (model_cls.owner == user)
+        | (model_cls.owner == None)  # noqa: E711
+        | (model_cls.owner == ORG_OWNER)
+    )

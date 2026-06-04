@@ -1,5 +1,5 @@
 # routes/memory_routes.py
-from fastapi import APIRouter, Form, HTTPException, Request, UploadFile, File
+from fastapi import APIRouter, Form, HTTPException, Request, UploadFile, File, Depends
 from typing import Dict, Any, Optional, List
 import json
 import os
@@ -29,6 +29,8 @@ from src.llm_core import llm_call_async
 from services.memory.memory_extractor import audit_memories
 from src.auth_helpers import get_current_user, require_user
 from src.endpoint_resolver import resolve_endpoint
+from core.middleware import require_admin
+from core.constants import ORG_OWNER
 
 logger = logging.getLogger(__name__)
 
@@ -461,6 +463,56 @@ def setup_memory_routes(memory_manager: MemoryManager, session_manager: SessionM
         except Exception as e:
             logger.error(f"Memory import extraction failed: {e}")
             raise HTTPException(502, f"LLM extraction failed: {str(e)}")
+
+    # ── ArgoDesk company memory (owner = ORG_OWNER) ──
+    # Standing instructions / policy / tone-of-voice that apply to EVERY user.
+    # Admin-only; pinned by default so they're always injected into chat.
+    # Registered before the wildcard /{memory_id} routes so "/org" isn't
+    # swallowed as a memory id.
+    @router.get("/org")
+    def api_get_org_memory(request: Request, _admin: None = Depends(require_admin)):
+        return {"memory": memory_manager.load(owner=ORG_OWNER)}
+
+    @router.post("/org/add")
+    async def api_add_org_memory(request: Request, _admin: None = Depends(require_admin)):
+        form = await request.form()
+        text = (form.get("text") or "").strip()
+        category = form.get("category", "policy")
+        pinned = str(form.get("pinned", "true")).lower() != "false"
+        if not text:
+            raise HTTPException(400, "empty memory")
+        org_mem = memory_manager.load(owner=ORG_OWNER)
+        if memory_manager.find_duplicates(text, org_mem):
+            return {"ok": True, "count": len(org_mem), "message": "Memory already exists"}
+        new_entry = memory_manager.add_entry(text, "admin", category, owner=ORG_OWNER)
+        new_entry["pinned"] = pinned
+        all_mem = memory_manager.load_all()
+        all_mem.append(new_entry)
+        memory_manager.save(all_mem)
+        if memory_vector and memory_vector.healthy:
+            memory_vector.add(new_entry["id"], text)
+        return {"ok": True, "count": len(memory_manager.load(owner=ORG_OWNER))}
+
+    @router.post("/org/{memory_id}/pin")
+    def pin_org_memory(request: Request, memory_id: str, pinned: bool = Form(True), _admin: None = Depends(require_admin)):
+        all_mem = memory_manager.load_all()
+        for i, memory in enumerate(all_mem):
+            if memory["id"] == memory_id and memory.get("owner") == ORG_OWNER:
+                all_mem[i]["pinned"] = pinned
+                memory_manager.save(all_mem)
+                return {"ok": True, "pinned": pinned}
+        raise HTTPException(404, "Company memory not found")
+
+    @router.delete("/org/{memory_id}")
+    def delete_org_memory(request: Request, memory_id: str, _admin: None = Depends(require_admin)):
+        all_mem = memory_manager.load_all()
+        target = next((m for m in all_mem if m["id"] == memory_id and m.get("owner") == ORG_OWNER), None)
+        if not target:
+            raise HTTPException(404, "Company memory not found")
+        memory_manager.save([m for m in all_mem if m["id"] != memory_id])
+        if memory_vector and memory_vector.healthy:
+            memory_vector.remove(memory_id)
+        return {"ok": True}
 
     @router.post("/{memory_id}/pin")
     def pin_memory(request: Request, memory_id: str, pinned: bool = Form(True)):

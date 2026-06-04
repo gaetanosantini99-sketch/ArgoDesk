@@ -644,6 +644,54 @@ class Memory(Base):
         Index('ix_memories_session', 'session_id', 'timestamp'),  # Composite for session-based queries
     )
 
+class WikiPage(TimestampMixin, Base):
+    """ArgoDesk company wiki page — curated, authoritative knowledge the agent
+    consults *before* free-form RAG. Pages are owned at the company level
+    (owner = ORG_OWNER) and also indexed into ChromaDB for high-confidence
+    retrieval. ``valid_from`` / ``valid_to`` let an org mark a page's validity
+    window (e.g. a procedure effective from a date)."""
+    __tablename__ = "wiki_pages"
+
+    id = Column(String, primary_key=True, index=True)
+    title = Column(String, nullable=False)
+    content = Column(Text, nullable=False, default="")
+    # Comma-separated tags (kept simple; UI splits/join).
+    tags = Column(String, nullable=True, default="")
+    # Validity window (nullable = always valid).
+    valid_from = Column(DateTime, nullable=True)
+    valid_to = Column(DateTime, nullable=True)
+    # Owner: ORG_OWNER for company pages; a username for personal drafts.
+    owner = Column(String, nullable=True, index=True)
+    updated_by = Column(String, nullable=True)
+
+    __table_args__ = (
+        Index('ix_wiki_owner_title', 'owner', 'title'),
+    )
+
+
+class AuditLog(Base):
+    """ArgoDesk audit trail for GDPR / EU AI Act basics: who did what, when.
+
+    Records sensitive actions (logins, access to documents/email, admin
+    changes, LLM queries when enabled). Retention is configurable
+    (``audit_retention_days`` setting) and enforced by ``src.audit.purge_old``."""
+    __tablename__ = "audit_logs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, nullable=False, index=True)
+    username = Column(String, nullable=True, index=True)
+    action = Column(String, nullable=False, index=True)   # e.g. "login", "doc.read"
+    resource = Column(String, nullable=True)               # affected object id/name
+    detail = Column(Text, nullable=True)                   # short context (no secrets)
+    ip = Column(String, nullable=True)
+    status = Column(String, nullable=True)                 # "ok" | "fail" | http code
+
+    __table_args__ = (
+        Index('ix_audit_user_time', 'username', 'timestamp'),
+        Index('ix_audit_action_time', 'action', 'timestamp'),
+    )
+
+
 def _migrate_add_last_message_at_column():
     """Add last_message_at to sessions + backfill from the latest message
     timestamp per session (fallback to last_accessed / created_at when a

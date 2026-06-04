@@ -1,7 +1,7 @@
 {
-  "name": "Odysseus",
-  "short_name": "Odysseus",
-  "description": "Self-hosted AI chat with memory, documents, and tools",
+  "name": "ArgoDesk",
+  "short_name": "ArgoDesk",
+  "description": "Assistente AI aziendale self-hosted con conoscenza, memoria, documenti e strumenti",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

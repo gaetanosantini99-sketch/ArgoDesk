@@ -54,12 +54,42 @@ async function loadUsers() {
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
+          <select class="admin-select azienda-only" data-adm-role-user="${esc(u.username)}" title="Ruolo" style="font-size:11px;padding:3px 6px;">
+            <option value="utente" ${u.role === 'utente' ? 'selected' : ''}>Utente</option>
+            <option value="guest" ${u.role === 'guest' ? 'selected' : ''}>Guest</option>
+            <option value="admin_azienda" ${u.role === 'admin_azienda' ? 'selected' : ''}>Admin</option>
+          </select>
           <button class="admin-btn-sm" data-adm-rename-user="${esc(u.username)}" style="font-size:11px;">Rename</button>
           ${u.is_admin ? '' : `<button class="admin-btn-delete" data-adm-del-user="${esc(u.username)}" style="font-size:11px;">Remove</button>`}
           ${u.is_admin ? '' : '<svg class="admin-user-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3;transition:transform 0.2s,opacity 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>'}
         </div>
       `;
       row.appendChild(header);
+
+      // Role selector (admin_azienda | utente | guest). Setting a role applies
+      // the matching privilege preset server-side; reload to reflect the change.
+      const roleSel = header.querySelector('[data-adm-role-user]');
+      if (roleSel) {
+        roleSel.addEventListener('click', (e) => e.stopPropagation());
+        roleSel.addEventListener('change', async (e) => {
+          e.stopPropagation();
+          const username = roleSel.dataset.admRoleUser;
+          const role = roleSel.value;
+          roleSel.disabled = true;
+          try {
+            const res = await fetch(`/api/auth/users/${encodeURIComponent(username)}/role`, {
+              method: 'PUT', credentials: 'same-origin',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ role }),
+            });
+            if (!res.ok) {
+              const data = await res.json().catch(() => ({}));
+              uiModule.showError(data.detail || 'Impossibile cambiare ruolo');
+            }
+          } catch (_) { uiModule.showError('Impossibile cambiare ruolo'); }
+          loadUsers();
+        });
+      }
 
       // Privileges panel (hidden by default, not for admins)
       if (!u.is_admin) {
@@ -108,7 +138,7 @@ async function loadUsers() {
         // Toggle panel visibility + rotate chevron + load models
         let _modelsLoaded = false;
         header.addEventListener('click', (e) => {
-          if (e.target.closest('.admin-btn-delete, [data-adm-rename-user]')) return;
+          if (e.target.closest('.admin-btn-delete, [data-adm-rename-user], [data-adm-role-user]')) return;
           privPanel.classList.toggle('hidden');
           const chevron = header.querySelector('.admin-user-chevron');
           if (chevron) {
@@ -273,6 +303,323 @@ function initSignupToggle() {
       toggle.checked = data.signup_enabled;
     } catch (e) { toggle.checked = !toggle.checked; }
   });
+}
+
+function initInstanceMode() {
+  const sel = el('adm-instanceMode');
+  const hint = el('adm-instanceModeHint');
+  if (!sel) return;
+  const _setHint = (mode) => {
+    if (!hint) return;
+    hint.textContent = (mode === 'azienda')
+      ? 'Gestione utenti e ruoli attiva. Adatto a team e aziende.'
+      : 'Installazione per un solo professionista: gestione utenti nascosta.';
+  };
+  fetch('/api/auth/status', { credentials: 'same-origin' })
+    .then(r => r.json())
+    .then(d => {
+      const mode = (d.instance_mode === 'azienda') ? 'azienda' : 'freelance';
+      sel.value = mode;
+      _setHint(mode);
+    })
+    .catch(e => console.warn('Instance mode fetch failed:', e));
+  sel.addEventListener('change', async () => {
+    const mode = sel.value;
+    sel.disabled = true;
+    try {
+      const res = await fetch('/api/auth/instance-mode', {
+        method: 'PUT', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const applied = data.instance_mode || mode;
+        window._instanceMode = applied;
+        try {
+          document.body.classList.remove('instance-freelance', 'instance-azienda');
+          document.body.classList.add('instance-' + applied);
+        } catch (_) {}
+        _setHint(applied);
+      }
+    } catch (e) { console.warn('Set instance mode failed:', e); }
+    sel.disabled = false;
+  });
+}
+
+let _editingWikiId = null;
+
+function initKnowledge() {
+  const uploadBtn = el('kn-uploadBtn');
+  if (!uploadBtn) return;
+
+  async function loadStats() {
+    const box = el('kn-stats');
+    if (!box) return;
+    try {
+      const res = await fetch('/api/personal/stats', { credentials: 'same-origin' });
+      const d = await res.json();
+      if (!d.available) { box.textContent = 'Indice non disponibile (servizio embedding offline?).'; return; }
+      const total = d.document_count != null ? d.document_count : '?';
+      const org = d.org_chunk_count != null ? d.org_chunk_count : '?';
+      box.textContent = `Indice: ${total} frammenti totali · ${org} aziendali condivisi.`;
+    } catch (_) { box.textContent = ''; }
+  }
+
+  uploadBtn.addEventListener('click', async () => {
+    const input = el('kn-uploadFile');
+    const msg = el('kn-uploadMsg');
+    if (!input || !input.files || input.files.length === 0) {
+      if (msg) { msg.textContent = 'Seleziona almeno un file'; msg.className = 'admin-error'; }
+      return;
+    }
+    const fd = new FormData();
+    for (const f of input.files) fd.append('files', f);
+    fd.append('shared', 'true');
+    uploadBtn.disabled = true;
+    if (msg) { msg.textContent = 'Caricamento...'; msg.className = ''; }
+    try {
+      const res = await fetch('/api/personal/upload', { method: 'POST', credentials: 'same-origin', body: fd });
+      const d = await res.json();
+      if (res.ok) {
+        if (msg) { msg.textContent = `Indicizzati ${d.indexed_count} frammenti`; msg.className = 'admin-success'; }
+        input.value = '';
+        loadStats();
+      } else {
+        if (msg) { msg.textContent = d.detail || 'Caricamento fallito'; msg.className = 'admin-error'; }
+      }
+    } catch (_) { if (msg) { msg.textContent = 'Caricamento fallito'; msg.className = 'admin-error'; } }
+    uploadBtn.disabled = false;
+  });
+
+  // ── Wiki CRUD ──
+  async function loadWikiList() {
+    const list = el('kn-wikiList');
+    if (!list) return;
+    try {
+      const res = await fetch('/api/wiki', { credentials: 'same-origin' });
+      const d = await res.json();
+      const pages = d.pages || [];
+      if (pages.length === 0) { list.innerHTML = '<div class="admin-empty">Nessuna pagina wiki.</div>'; return; }
+      list.innerHTML = '';
+      pages.forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'admin-user-row';
+        row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 0;';
+        row.innerHTML = `
+          <div style="min-width:0;">
+            <div class="admin-user-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(p.title)}</div>
+            <div style="font-size:10px;opacity:0.4;">${(p.tags || []).map(esc).join(', ')}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0;">
+            <button class="admin-btn-sm" data-kn-edit="${esc(p.id)}" style="font-size:11px;">Modifica</button>
+            <button class="admin-btn-delete" data-kn-del="${esc(p.id)}" style="font-size:11px;">Elimina</button>
+          </div>`;
+        list.appendChild(row);
+      });
+      list.querySelectorAll('[data-kn-edit]').forEach(b => b.addEventListener('click', async () => {
+        try {
+          const res = await fetch(`/api/wiki/${encodeURIComponent(b.dataset.knEdit)}`, { credentials: 'same-origin' });
+          const p = await res.json();
+          _editingWikiId = p.id;
+          el('kn-wikiTitle').value = p.title || '';
+          el('kn-wikiContent').value = p.content || '';
+          el('kn-wikiTags').value = (p.tags || []).join(', ');
+        } catch (_) {}
+      }));
+      list.querySelectorAll('[data-kn-del]').forEach(b => b.addEventListener('click', async () => {
+        if (!confirm('Eliminare questa pagina wiki?')) return;
+        await fetch(`/api/wiki/${encodeURIComponent(b.dataset.knDel)}`, { method: 'DELETE', credentials: 'same-origin' });
+        if (_editingWikiId === b.dataset.knDel) _clearWiki();
+        loadWikiList();
+      }));
+    } catch (_) { list.innerHTML = '<div class="admin-empty">Errore caricamento wiki.</div>'; }
+  }
+
+  function _clearWiki() {
+    _editingWikiId = null;
+    el('kn-wikiTitle').value = '';
+    el('kn-wikiContent').value = '';
+    el('kn-wikiTags').value = '';
+  }
+
+  el('kn-wikiClearBtn')?.addEventListener('click', _clearWiki);
+  el('kn-wikiSaveBtn')?.addEventListener('click', async () => {
+    const msg = el('kn-wikiMsg');
+    const title = el('kn-wikiTitle').value.trim();
+    if (!title) { if (msg) { msg.textContent = 'Titolo richiesto'; msg.className = 'admin-error'; } return; }
+    const body = {
+      title,
+      content: el('kn-wikiContent').value,
+      tags: el('kn-wikiTags').value.split(',').map(t => t.trim()).filter(Boolean),
+    };
+    const url = _editingWikiId ? `/api/wiki/${encodeURIComponent(_editingWikiId)}` : '/api/wiki';
+    const method = _editingWikiId ? 'PUT' : 'POST';
+    try {
+      const res = await fetch(url, { method, credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      if (res.ok) {
+        if (msg) { msg.textContent = 'Salvata'; msg.className = 'admin-success'; }
+        _clearWiki();
+        loadWikiList();
+      } else {
+        const d = await res.json().catch(() => ({}));
+        if (msg) { msg.textContent = d.detail || 'Salvataggio fallito'; msg.className = 'admin-error'; }
+      }
+    } catch (_) { if (msg) { msg.textContent = 'Salvataggio fallito'; msg.className = 'admin-error'; } }
+  });
+
+  // ── Company memory (policy) ──
+  async function loadOrgMem() {
+    const list = el('kn-orgMemList');
+    if (!list) return;
+    try {
+      const res = await fetch('/api/memory/org', { credentials: 'same-origin' });
+      const d = await res.json();
+      const mems = d.memory || [];
+      if (mems.length === 0) { list.innerHTML = '<div class="admin-empty">Nessuna policy aziendale.</div>'; return; }
+      list.innerHTML = '';
+      mems.forEach(m => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:6px 0;gap:8px;';
+        row.innerHTML = `
+          <div style="min-width:0;font-size:12px;">${esc(m.text)}</div>
+          <div style="display:flex;gap:6px;flex-shrink:0;align-items:center;">
+            <span style="font-size:10px;opacity:0.4;">${m.pinned ? 'sempre attiva' : 'a richiamo'}</span>
+            <button class="admin-btn-delete" data-orgmem-del="${esc(m.id)}" style="font-size:11px;">Elimina</button>
+          </div>`;
+        list.appendChild(row);
+      });
+      list.querySelectorAll('[data-orgmem-del]').forEach(b => b.addEventListener('click', async () => {
+        if (!confirm('Eliminare questa policy?')) return;
+        await fetch(`/api/memory/org/${encodeURIComponent(b.dataset.orgmemDel)}`, { method: 'DELETE', credentials: 'same-origin' });
+        loadOrgMem();
+      }));
+    } catch (_) { list.innerHTML = '<div class="admin-empty">Errore caricamento.</div>'; }
+  }
+
+  el('kn-orgMemAddBtn')?.addEventListener('click', async () => {
+    const msg = el('kn-orgMemMsg');
+    const text = el('kn-orgMemText').value.trim();
+    if (!text) { if (msg) { msg.textContent = 'Testo richiesto'; msg.className = 'admin-error'; } return; }
+    const fd = new FormData();
+    fd.append('text', text);
+    fd.append('pinned', 'true');
+    try {
+      const res = await fetch('/api/memory/org/add', { method: 'POST', credentials: 'same-origin', body: fd });
+      if (res.ok) {
+        if (msg) { msg.textContent = 'Aggiunta'; msg.className = 'admin-success'; }
+        el('kn-orgMemText').value = '';
+        loadOrgMem();
+      } else {
+        const d = await res.json().catch(() => ({}));
+        if (msg) { msg.textContent = d.detail || 'Errore'; msg.className = 'admin-error'; }
+      }
+    } catch (_) { if (msg) { msg.textContent = 'Errore'; msg.className = 'admin-error'; } }
+  });
+
+  loadStats();
+  loadWikiList();
+  loadOrgMem();
+}
+
+function initBranding() {
+  const saveBtn = el('adm-brandingSave');
+  if (!saveBtn) return;
+  const nameEl = el('adm-companyName');
+  const logoEl = el('adm-companyLogo');
+  const langEl = el('adm-defaultLang');
+  const msg = el('adm-brandingMsg');
+
+  (async () => {
+    try {
+      const res = await fetch('/api/auth/settings', { credentials: 'same-origin' });
+      const s = await res.json();
+      if (nameEl) nameEl.value = s.company_name || '';
+      if (logoEl) logoEl.value = s.company_logo_url || '';
+      if (langEl) langEl.value = s.default_language != null ? s.default_language : 'it';
+    } catch (_) {}
+  })();
+
+  saveBtn.addEventListener('click', async () => {
+    const body = {
+      company_name: nameEl ? nameEl.value.trim() : '',
+      company_logo_url: logoEl ? logoEl.value.trim() : '',
+      default_language: langEl ? langEl.value : 'it',
+    };
+    try {
+      const res = await fetch('/api/auth/settings', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (msg) { msg.textContent = res.ok ? 'Salvato' : 'Errore'; msg.className = res.ok ? 'admin-success' : 'admin-error'; }
+    } catch (_) { if (msg) { msg.textContent = 'Errore'; msg.className = 'admin-error'; } }
+  });
+}
+
+function initAudit() {
+  const listEl = el('adm-auditList');
+  const retInput = el('adm-auditRetention');
+  if (!listEl && !retInput) return;
+  const msg = el('adm-auditMsg');
+
+  async function loadEvents() {
+    if (!listEl) return;
+    listEl.innerHTML = '<div class="admin-empty">Caricamento...</div>';
+    try {
+      const res = await fetch('/api/audit?limit=200', { credentials: 'same-origin' });
+      const d = await res.json();
+      const ev = d.events || [];
+      if (ev.length === 0) { listEl.innerHTML = '<div class="admin-empty">Nessun evento registrato.</div>'; return; }
+      listEl.innerHTML = ev.map(e => {
+        const ts = e.timestamp ? e.timestamp.replace('T', ' ').slice(0, 19) : '';
+        const who = esc(e.username || '—');
+        const act = esc(e.action || '');
+        const st = e.status === 'fail' ? '<span style="color:var(--red,#e55)">fail</span>' : esc(e.status || '');
+        return `<div style="display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--border);">
+          <span style="opacity:0.5;white-space:nowrap;">${ts}</span>
+          <span style="flex:1;">${act} · ${who}</span>
+          <span>${st}</span></div>`;
+      }).join('');
+    } catch (_) { listEl.innerHTML = '<div class="admin-empty">Errore caricamento.</div>'; }
+  }
+
+  async function loadRetention() {
+    if (!retInput) return;
+    try {
+      const res = await fetch('/api/audit/retention', { credentials: 'same-origin' });
+      const d = await res.json();
+      retInput.value = d.days != null ? d.days : 90;
+    } catch (_) {}
+  }
+
+  el('adm-auditRetentionSave')?.addEventListener('click', async () => {
+    const days = parseInt(retInput.value) || 0;
+    try {
+      const res = await fetch('/api/audit/retention', {
+        method: 'PUT', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ days }),
+      });
+      const d = await res.json();
+      if (msg) { msg.textContent = res.ok ? `Salvato (rimossi ${d.purged || 0})` : 'Errore'; msg.className = res.ok ? 'admin-success' : 'admin-error'; }
+      loadEvents();
+    } catch (_) { if (msg) { msg.textContent = 'Errore'; msg.className = 'admin-error'; } }
+  });
+
+  el('adm-auditPurge')?.addEventListener('click', async () => {
+    try {
+      const res = await fetch('/api/audit/purge', { method: 'POST', credentials: 'same-origin' });
+      const d = await res.json();
+      if (msg) { msg.textContent = `Rimossi ${d.purged || 0} eventi`; msg.className = 'admin-success'; }
+      loadEvents();
+    } catch (_) {}
+  });
+
+  el('adm-auditRefresh')?.addEventListener('click', loadEvents);
+
+  loadRetention();
+  loadEvents();
 }
 
 function initAddUser() {
@@ -2044,7 +2391,7 @@ function initDangerZone() {
    ═══════════════════════════════════════════ */
 function initAll() {
   modalEl = el('settings-modal');
-  const inits = [initSignupToggle, initAddUser, initEndpointForm, initMcpForm, initCalDAV, initBackup, initDangerZone, () => settingsModule.initIntegrations()];
+  const inits = [initInstanceMode, initBranding, initKnowledge, initAudit, initSignupToggle, initAddUser, initEndpointForm, initMcpForm, initCalDAV, initBackup, initDangerZone, () => settingsModule.initIntegrations()];
   for (const fn of inits) {
     try { fn(); } catch (e) { console.error('Admin init error in', fn.name || 'anonymous', e); }
   }

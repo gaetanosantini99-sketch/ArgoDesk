@@ -42,6 +42,8 @@ class LoginRequest(BaseModel):
 class SetupRequest(BaseModel):
     username: str
     password: str
+    instance_mode: Optional[str] = None  # "freelance" | "azienda"
+    company_name: Optional[str] = None
 
 
 class SignupRequest(BaseModel):
@@ -70,7 +72,13 @@ class RenameUserRequest(BaseModel):
 class SetOpenRegistrationRequest(BaseModel):
     enabled: bool
 
-SESSION_COOKIE = "odysseus_session"
+class SetInstanceModeRequest(BaseModel):
+    mode: str
+
+class SetRoleRequest(BaseModel):
+    role: str
+
+SESSION_COOKIE = "argodesk_session"
 
 
 def setup_auth_routes(auth_manager: AuthManager) -> APIRouter:
@@ -96,6 +104,21 @@ def setup_auth_routes(auth_manager: AuthManager) -> APIRouter:
         ok = await asyncio.to_thread(auth_manager.setup, body.username, body.password)
         if not ok:
             raise HTTPException(500, "Setup failed")
+        # ArgoDesk first-run wizard: persist the chosen instance mode + company
+        # name so the install is configured in one step.
+        try:
+            from src.settings import set_instance_mode, load_settings, save_settings
+            if body.instance_mode:
+                try:
+                    set_instance_mode(body.instance_mode)
+                except ValueError:
+                    pass
+            if body.company_name:
+                s = load_settings()
+                s["company_name"] = body.company_name.strip()
+                save_settings(s)
+        except Exception:
+            pass
         return {"ok": True, "message": "Admin account created"}
 
     @router.post("/signup")
@@ -123,6 +146,11 @@ def setup_auth_routes(auth_manager: AuthManager) -> APIRouter:
         # Verify password first
         username = body.username.strip().lower()
         if not await asyncio.to_thread(auth_manager.verify_password, username, body.password):
+            try:
+                from src.audit import log_event
+                log_event("login", username=username, status="fail", request=request)
+            except Exception:
+                pass
             raise HTTPException(401, "Invalid credentials")
         # Check 2FA if enabled
         if auth_manager.totp_enabled(username):
@@ -146,6 +174,11 @@ def setup_auth_routes(auth_manager: AuthManager) -> APIRouter:
         if body.remember:
             cookie_kwargs["max_age"] = 60 * 60 * 24 * 7  # 7 days
         response.set_cookie(**cookie_kwargs)
+        try:
+            from src.audit import log_event
+            log_event("login", username=username, status="ok", request=request)
+        except Exception:
+            pass
         return {"ok": True, "username": username}
 
     @router.post("/logout")
@@ -161,6 +194,13 @@ def setup_auth_routes(auth_manager: AuthManager) -> APIRouter:
         token = request.cookies.get(SESSION_COOKIE)
         result = auth_manager.status(token)
         result["signup_enabled"] = auth_manager.signup_enabled
+        # ArgoDesk instance mode drives whether the frontend shows user/role
+        # management (azienda) or hides it for a solo professional (freelance).
+        try:
+            from src.settings import get_instance_mode
+            result["instance_mode"] = get_instance_mode()
+        except Exception:
+            result["instance_mode"] = "freelance"
         # Include the caller's effective privileges so the frontend can
         # hide / dim UI controls the user isn't allowed to use. Admins get
         # ADMIN_PRIVILEGES (everything on), regular users get their stored
@@ -277,6 +317,21 @@ def setup_auth_routes(auth_manager: AuthManager) -> APIRouter:
             raise HTTPException(404, "User not found or is admin")
         return {"ok": True, "privileges": auth_manager.get_privileges(username)}
 
+    @router.put("/users/{username}/role")
+    async def update_user_role(username: str, body: SetRoleRequest, request: Request):
+        """Set a user's ArgoDesk role (admin_azienda | utente | guest). Admin only."""
+        user = _get_current_user(request)
+        if not user or not auth_manager.is_admin(user):
+            raise HTTPException(403, "Admin only")
+        try:
+            ok = auth_manager.apply_role(username, body.role)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        if not ok:
+            raise HTTPException(404, "User not found")
+        return {"ok": True, "role": auth_manager.role_of(username),
+                "privileges": auth_manager.get_privileges(username)}
+
     @router.put("/users/{username}/rename")
     async def rename_user(username: str, body: RenameUserRequest, request: Request):
         user = _get_current_user(request)
@@ -366,6 +421,19 @@ def setup_auth_routes(auth_manager: AuthManager) -> APIRouter:
             raise HTTPException(403, "Admin only")
         auth_manager.signup_enabled = body.enabled
         return {"ok": True,"signup_enabled": auth_manager.signup_enabled}
+
+    @router.put("/instance-mode")
+    async def set_instance_mode_route(body: SetInstanceModeRequest, request: Request):
+        """Set the ArgoDesk instance mode ("freelance" | "azienda"). Admin only."""
+        user = _get_current_user(request)
+        if not user or not auth_manager.is_admin(user):
+            raise HTTPException(403, "Admin only")
+        from src.settings import set_instance_mode
+        try:
+            mode = set_instance_mode(body.mode)
+        except ValueError as e:
+            raise HTTPException(400, str(e))
+        return {"ok": True, "instance_mode": mode}
 
     @router.delete("/users")
     async def admin_delete_user(body: DeleteUserRequest, request: Request):

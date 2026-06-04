@@ -4,9 +4,9 @@ import os
 import logging
 import uuid
 from typing import List, Tuple
-from fastapi import APIRouter, HTTPException, Query, Request, UploadFile, File, Depends
+from fastapi import APIRouter, HTTPException, Query, Request, UploadFile, File, Form, Depends
 from src.request_models import DirectoryRequest
-from core.constants import BASE_DIR, PERSONAL_DIR
+from core.constants import BASE_DIR, PERSONAL_DIR, ORG_OWNER
 from src.rag_singleton import get_rag_manager
 from src.auth_helpers import get_current_user, require_user
 from core.middleware import require_admin
@@ -90,6 +90,25 @@ def setup_personal_routes(personal_docs_manager, rag_manager, rag_available):
         directories = personal_docs_manager.get_indexed_directories() if hasattr(personal_docs_manager, "get_indexed_directories") else []
         return {"files": files, "directories": directories}
     
+    @router.get("/stats")
+    def api_personal_stats(owner: str = Depends(require_user), _admin: None = Depends(require_admin)):
+        """RAG index stats for the Knowledge admin panel, including how many
+        chunks belong to the shared company knowledge (owner = ORG_OWNER)."""
+        rag = _rag()
+        if not rag or not getattr(rag, "healthy", False):
+            return {"available": False}
+        stats = rag.get_stats()
+        org_chunks = None
+        try:
+            coll = rag.collection
+            if coll is not None:
+                org_chunks = len(coll.get(where={"owner": ORG_OWNER}, include=[]).get("ids", []))
+        except Exception:
+            org_chunks = None
+        stats["available"] = True
+        stats["org_chunk_count"] = org_chunks
+        return stats
+
     @router.post("/reload")
     def api_personal_reload(owner: str = Depends(require_user), _admin: None = Depends(require_admin)):
         personal_docs_manager.refresh_index()
@@ -192,14 +211,29 @@ def setup_personal_routes(personal_docs_manager, rag_manager, rag_available):
             raise HTTPException(500, f"Failed to remove directory: {str(e)}")
     
     @router.post("/upload")
-    async def upload_files_to_rag(request: Request, files: List[UploadFile] = File(...)):
-        """Upload files directly into RAG. Supports text and PDF."""
+    async def upload_files_to_rag(
+        request: Request,
+        files: List[UploadFile] = File(...),
+        shared: bool = Form(False),
+    ):
+        """Upload files directly into RAG. Supports text and PDF.
+
+        When ``shared`` is true the documents are ingested as ArgoDesk *company
+        knowledge* (owner = ORG_OWNER), visible to every user's chat retrieval.
+        Company ingestion is admin-only; personal uploads stay scoped to the
+        uploader as before."""
         user = get_current_user(request)
+        if shared:
+            # Company-wide knowledge: admins only.
+            require_admin(request)
+            doc_owner = ORG_OWNER
+        else:
+            doc_owner = user
         rag = _rag()
         if not rag:
             raise HTTPException(503, "RAG system is not available — is the embedding service running?")
 
-        upload_dir = _personal_upload_dir_for_owner(user)
+        upload_dir = _personal_upload_dir_for_owner(doc_owner)
 
         total_indexed = 0
         total_failed = 0
@@ -238,8 +272,8 @@ def setup_personal_routes(personal_docs_manager, rag_manager, rag_available):
                         "type": ext,
                         "chunk_id": i,
                     }
-                    if user:
-                        metadata["owner"] = user
+                    if doc_owner:
+                        metadata["owner"] = doc_owner
                     if rag.add_document(chunk, metadata):
                         total_indexed += 1
                     else:

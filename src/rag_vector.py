@@ -24,7 +24,7 @@ DEFAULT_FILE_EXTENSIONS: Set[str] = {
 VECTOR_WEIGHT = 0.7
 KEYWORD_WEIGHT = 0.3
 
-COLLECTION_NAME = "odysseus_rag"
+COLLECTION_NAME = "argodesk_rag"
 
 
 def _generate_doc_id(text: str, owner: str = "") -> str:
@@ -181,7 +181,12 @@ class VectorRAG:
     # Search — hybrid: vector similarity + keyword overlap
     # ------------------------------------------------------------------
 
-    def search(self, query: str, k: int = 5, owner: Optional[str] = None) -> List[Dict[str, Any]]:
+    def search(self, query: str, k: int = 5, owner: Optional[str] = None,
+               owners: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+        """Hybrid search. Scope by a single ``owner`` (exact match) OR by a list
+        of ``owners`` (Chroma ``$in``) — the latter lets an ArgoDesk user see
+        both their own documents and the shared company knowledge (ORG_OWNER) in
+        one query. ``owners`` takes precedence over ``owner`` when both given."""
         if not self.healthy:
             return []
         if not query or not isinstance(query, str):
@@ -189,16 +194,28 @@ class VectorRAG:
         if self._collection.count() == 0:
             return []
 
+        # Normalize scope into a single Chroma where filter.
+        scope_owners = None
+        if owners:
+            scope_owners = [o for o in owners if o]
+        elif owner:
+            scope_owners = [owner]
+
         try:
             # Fetch extra candidates when owner-filtering
             fetch_k = min(k * 3, max(k, 20), self._collection.count())
-            if owner:
+            if scope_owners:
                 fetch_k = min(fetch_k * 2, self._collection.count())
 
             query_embeddings = self._embed([query])
 
-            # Use ChromaDB where filter for owner if specified
-            where_filter = {"owner": owner} if owner else None
+            # Use ChromaDB where filter for owner scope if specified
+            if not scope_owners:
+                where_filter = None
+            elif len(scope_owners) == 1:
+                where_filter = {"owner": scope_owners[0]}
+            else:
+                where_filter = {"owner": {"$in": scope_owners}}
 
             results = self._collection.query(
                 query_embeddings=query_embeddings,
@@ -243,9 +260,12 @@ class VectorRAG:
 
         except Exception as e:
             logger.error(f"search failed: {e}")
-            return self._keyword_search_fallback(query, k, owner=owner)
+            return self._keyword_search_fallback(query, k, owners=scope_owners)
 
-    def _keyword_search_fallback(self, query: str, k: int = 5, owner: Optional[str] = None) -> List[Dict[str, Any]]:
+    def _keyword_search_fallback(self, query: str, k: int = 5, owner: Optional[str] = None,
+                                 owners: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+        # Accept the same single/list scope as search(); membership test below.
+        scope = set(o for o in (owners or ([owner] if owner else [])) if o)
         try:
             if self._collection.count() == 0:
                 return []
@@ -259,12 +279,12 @@ class VectorRAG:
             scored = []
             for i, doc in enumerate(all_docs["documents"]):
                 meta = all_docs["metadatas"][i]
-                if owner:
-                    # Match the primary path's strict where={"owner": owner}
+                if scope:
+                    # Match the primary path's where={"owner": {"$in": scope}}
                     # filter. The old `if doc_owner and doc_owner != owner`
                     # let docs with a missing/empty owner fall through, leaking
                     # owner-less documents into another user's results.
-                    if meta.get("owner") != owner:
+                    if meta.get("owner") not in scope:
                         continue
                 doc_lower = doc.lower()
                 score = sum(1 for w in query_words if w in doc_lower)

@@ -13308,6 +13308,18 @@ body:has(.doc-version-panel:not(.hidden)) .hamburger-btn {
   justify-content: space-between;
   align-items: center;
 }
+/* ArgoDesk instance mode: hide org/team-only UI when running as a solo
+   professional (freelance). Toggled by the body.instance-* class set in app.js
+   from /api/auth/status. */
+body.instance-freelance .azienda-only { display: none !important; }
+.admin-select {
+  background: var(--input-bg, var(--bg2, #1e1e1e));
+  color: var(--fg);
+  border: 1px solid color-mix(in srgb, var(--fg) 20%, transparent);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 13px;
+}
 .admin-toggle-label {
   font-size: 13px;
   font-weight: 500;

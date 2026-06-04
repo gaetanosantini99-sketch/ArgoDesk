@@ -132,6 +132,16 @@ class MemoryManager:
             return entries
         return [e for e in entries if e.get("owner") == owner]
 
+    def load_scoped(self, owner: str = None) -> List[Dict]:
+        """Load a user's own memories PLUS company-level memories (ORG_OWNER).
+        ArgoDesk injects both into chat so company policy / tone-of-voice apply
+        to every user. With no owner (single-user mode) returns everything."""
+        from core.constants import ORG_OWNER
+        entries = self.load_all()
+        if owner is None:
+            return entries
+        return [e for e in entries if e.get("owner") in (owner, ORG_OWNER)]
+
     def claim_ownerless(self, owner: str):
         """Assign all ownerless memory entries to the given owner. Run once to migrate."""
         entries = self.load_all()

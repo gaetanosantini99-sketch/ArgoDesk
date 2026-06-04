@@ -51,6 +51,10 @@ class ChatProcessor:
     # Minimum similarity score for RAG results to be injected
     RAG_SIMILARITY_THRESHOLD = 0.35
 
+    # Higher bar for company wiki pages: they're injected as *authoritative*
+    # knowledge ahead of free RAG, so we only surface confident matches.
+    WIKI_SIMILARITY_THRESHOLD = 0.5
+
     def _hybrid_retrieve(self, message: str, mem_entries: list, k: int = 5) -> list:
         """Retrieve memories relevant to the message.
 
@@ -190,13 +194,50 @@ class ChatProcessor:
             "content": UNTRUSTED_CONTEXT_POLICY,
         })
 
+        # ArgoDesk default-language directive (targets Italian SMEs). Mirrors the
+        # user's language when they write in another, so it's safe as a default.
+        try:
+            from src.settings import get_setting
+            _lang = (get_setting("default_language") or "").strip().lower()
+        except Exception:
+            _lang = ""
+        if _lang == "it":
+            preface.append({
+                "role": "system",
+                "content": ("Rispondi in italiano, salvo quando l'utente scrive in "
+                            "un'altra lingua o chiede esplicitamente una lingua diversa."),
+            })
+        elif _lang and _lang != "en":
+            preface.append({
+                "role": "system",
+                "content": f"Reply in the user's configured language ('{_lang}') unless they write in another language.",
+            })
+
         # Memory: pinned (always included) + extended (RAG-retrieved when relevant)
         self._last_used_memories = []  # track what was injected
         if use_memory:
+            from core.constants import ORG_OWNER
             mem_entries = self.memory_manager.load(owner=owner)
+            # ArgoDesk: company-level memories (policy, tone-of-voice, client
+            # rules, mandatory disclaimers) apply to every user.
+            org_entries = self.memory_manager.load(owner=ORG_OWNER) if owner else []
+
+            # Company "standing instructions" = pinned org memories, injected as
+            # an authoritative policy block ahead of personal facts.
+            org_pinned = [m for m in org_entries if m.get("pinned")]
+            if org_pinned:
+                org_text = "\n- ".join([m["text"] for m in org_pinned])
+                preface.append(untrusted_context_message(
+                    "company policy & standing instructions — always follow",
+                    f"Company policy for this organization:\n- {org_text}",
+                ))
+                for m in org_pinned:
+                    self._last_used_memories.append({"text": m["text"], "category": m.get("category", "fact"), "type": "org_policy"})
 
             pinned = [m for m in mem_entries if m.get("pinned")]
-            extended = [m for m in mem_entries if not m.get("pinned")]
+            # Non-pinned org memories join the personal pool for relevance-based recall.
+            extended = [m for m in mem_entries if not m.get("pinned")] + \
+                       [m for m in org_entries if not m.get("pinned")]
 
             _used_ids: list = []
             if pinned:
@@ -236,12 +277,40 @@ class ChatProcessor:
             # (skills index injection moved out — see below; only fires in
             # agent mode so chat mode and incognito stay clean.)
 
+        # Company wiki: consult curated, authoritative pages BEFORE free RAG.
+        # A high-confidence match is injected as authoritative company knowledge
+        # so the model prefers it over inferred answers. Gated on use_rag (the
+        # "knowledge" toggle) so it follows the same on/off switch as RAG.
+        if use_rag:
+            try:
+                from src.wiki import search_wiki
+                wiki_hits = [w for w in search_wiki(message, k=3)
+                             if w.get("similarity", 0) >= self.WIKI_SIMILARITY_THRESHOLD]
+                if wiki_hits:
+                    logger.info(f"Wiki: {len(wiki_hits)} authoritative page(s) matched")
+                    wiki_content = "\n\n---\n\n".join(
+                        f"[{w['title']}]\n{w['document']}" for w in wiki_hits
+                    )
+                    if len(wiki_content) > 8000:
+                        wiki_content = wiki_content[:8000] + "\n[Truncated]"
+                    preface.append(untrusted_context_message(
+                        "official company knowledge (wiki) — prefer this over inference",
+                        wiki_content,
+                    ))
+            except Exception as e:
+                logger.warning(f"Wiki retrieval failed: {e}")
+
         # RAG: search if enabled and rag_manager available, inject only above threshold
         if use_rag:
             try:
                 rag_manager = getattr(self.personal_docs_manager, 'rag_manager', None)
                 if rag_manager:
-                    results = rag_manager.search(message, k=5, owner=owner)
+                    # ArgoDesk: retrieve from the user's own documents AND the
+                    # shared company knowledge (ORG_OWNER) in one query, so every
+                    # user benefits from documents the admin ingested org-wide.
+                    from src.auth_helpers import org_scope_owners
+                    scope = org_scope_owners(owner) if owner else None
+                    results = rag_manager.search(message, k=5, owner=owner, owners=scope)
                     # Filter by similarity threshold
                     relevant = [r for r in results if r.get("similarity", 0) >= self.RAG_SIMILARITY_THRESHOLD]
                     if relevant:

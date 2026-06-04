@@ -35,6 +35,33 @@ DEFAULT_PRIVILEGES = {
 # Admins get everything
 ADMIN_PRIVILEGES = {k: (True if isinstance(v, bool) else (0 if isinstance(v, int) else [])) for k, v in DEFAULT_PRIVILEGES.items()}
 
+# ArgoDesk "guest": read-only knowledge consumer. Can chat and query the company
+# knowledge/wiki (retrieval happens inside chat, not gated here), but cannot run
+# the agent, shell, browser, document editor, research, image generation, or
+# touch memory. Used for external collaborators / temporary access.
+GUEST_PRIVILEGES = {
+    **DEFAULT_PRIVILEGES,
+    "can_use_agent": False,
+    "can_use_browser": False,
+    "can_use_bash": False,
+    "can_use_documents": False,
+    "can_use_research": False,
+    "can_generate_images": False,
+    "can_manage_memory": False,
+}
+
+# Named ArgoDesk roles. "admin_azienda" is represented by is_admin=True (it does
+# not live in privileges); the other two are privilege presets applied to a
+# non-admin account. ROLE_PRESETS maps a non-admin role -> privilege dict.
+ROLE_ADMIN = "admin_azienda"
+ROLE_USER = "utente"
+ROLE_GUEST = "guest"
+ROLE_PRESETS = {
+    ROLE_USER: DEFAULT_PRIVILEGES,
+    ROLE_GUEST: GUEST_PRIVILEGES,
+}
+VALID_ROLES = (ROLE_ADMIN, ROLE_USER, ROLE_GUEST)
+
 DEFAULT_AUTH_PATH = os.path.join(
     Path(__file__).parent.parent, "data", "auth.json"
 )
@@ -283,7 +310,8 @@ class AuthManager:
 
     def list_users(self) -> List[Dict[str, Any]]:
         return [
-            {"username": u, "is_admin": d.get("is_admin", False), "privileges": self.get_privileges(u)}
+            {"username": u, "is_admin": d.get("is_admin", False),
+             "role": self.role_of(u), "privileges": self.get_privileges(u)}
             for u, d in self.users.items()
         ]
 
@@ -311,6 +339,43 @@ class AuthManager:
         self._config["users"][username]["privileges"] = current
         self._save()
         logger.info(f"Updated privileges for '{username}': {current}")
+        return True
+
+    def role_of(self, username: str) -> str:
+        """Derive the ArgoDesk role of a user from their stored flags.
+        Admins → admin_azienda; non-admins whose gating privileges match the
+        guest preset → guest; everyone else → utente."""
+        user = self.users.get(username, {})
+        if user.get("is_admin"):
+            return ROLE_ADMIN
+        privs = user.get("privileges", {}) or {}
+        # Guest = the read-only consumer: agent + documents + research all off.
+        if (privs.get("can_use_agent") is False
+                and privs.get("can_use_documents") is False
+                and privs.get("can_use_research") is False):
+            return ROLE_GUEST
+        return ROLE_USER
+
+    def apply_role(self, username: str, role: str) -> bool:
+        """Set a user's ArgoDesk role, mapping it onto is_admin + privileges.
+        Raises ValueError on an unknown role or when demoting the last admin."""
+        username = username.strip().lower()
+        if username not in self.users:
+            return False
+        if role not in VALID_ROLES:
+            raise ValueError(f"role must be one of {VALID_ROLES}")
+        if role == ROLE_ADMIN:
+            self._config["users"][username]["is_admin"] = True
+        else:
+            # Guard: never strip the last admin, or the instance locks itself out.
+            if self.users[username].get("is_admin"):
+                admins = [u for u, d in self.users.items() if d.get("is_admin")]
+                if len(admins) <= 1:
+                    raise ValueError("Cannot change the role of the last admin")
+            self._config["users"][username]["is_admin"] = False
+            self._config["users"][username]["privileges"] = dict(ROLE_PRESETS[role])
+        self._save()
+        logger.info(f"Set role for '{username}': {role}")
         return True
 
     def change_password(self, username: str, current_password: str, new_password: str) -> bool:
@@ -345,7 +410,7 @@ class AuthManager:
     def totp_get_provisioning_uri(self, username: str, secret: str) -> str:
         """Get the otpauth:// URI for QR code generation."""
         totp = pyotp.TOTP(secret)
-        return totp.provisioning_uri(name=username, issuer_name="Odysseus")
+        return totp.provisioning_uri(name=username, issuer_name="ArgoDesk")
 
     def totp_confirm_enable(self, username: str, code: str) -> bool:
         """Verify a TOTP code against the pending secret, then enable 2FA."""

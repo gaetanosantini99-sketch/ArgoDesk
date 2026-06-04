@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-visual">
-<title>Odysseus — Login</title>
+<title>ArgoDesk — Login</title>
+<script src="/static/js/i18n.js"></script>
 <script nonce="{{CSP_NONCE}}">
 (function(){
   // Per-theme bg-effect defaults — mirrors THEME_DEFAULT_* maps in
@@ -250,14 +251,14 @@
 <body>
 <main class="card">
   <h1 class="logo">
-    <svg class="logo-boat" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M16 4L16 22L6 22Z" fill="currentColor"/><path d="M16 8L16 22L24 22Z" fill="currentColor" opacity="0.6"/><path d="M4 24Q10 20 16 24Q22 28 28 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg><span>Odysseus</span>
+    <svg class="logo-boat" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M16 4L16 22L6 22Z" fill="currentColor"/><path d="M16 8L16 22L24 22Z" fill="currentColor" opacity="0.6"/><path d="M4 24Q10 20 16 24Q22 28 28 24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg><span>ArgoDesk</span>
   </h1>
   <p class="setup-note" id="setupNote" style="display:none"></p>
 
   <div class="error" id="error" role="alert" aria-live="assertive"></div>
 
   <form id="authForm" autocomplete="on">
-    <label for="username">Username</label>
+    <label for="username" data-i18n="login.username">Username</label>
     <div class="pw-wrapper">
       <input id="username" name="username" type="text" required autofocus autocomplete="username">
       <label class="remember-toggle" id="rememberToggle" title="Remember me">
@@ -266,7 +267,7 @@
       </label>
     </div>
 
-    <label for="password">Password</label>
+    <label for="password" data-i18n="login.password">Password</label>
     <div class="pw-wrapper">
       <input id="password" name="password" type="password" required autocomplete="current-password">
       <button type="button" class="pw-toggle" id="pwToggle" tabindex="-1" aria-label="Show password">
@@ -284,6 +285,16 @@
       </div>
     </div>
 
+    <div id="setupExtraGroup" style="display:none">
+      <label for="instanceMode">Tipo di installazione</label>
+      <select id="instanceMode" name="instanceMode" style="width:100%;padding:10px;border-radius:8px;">
+        <option value="freelance">Freelance / libero professionista (singolo)</option>
+        <option value="azienda">Azienda / team (più utenti e ruoli)</option>
+      </select>
+      <label for="companyName">Nome azienda (opzionale)</label>
+      <input id="companyName" name="companyName" type="text" autocomplete="organization" placeholder="Es. Studio Rossi">
+    </div>
+
     <button type="submit" id="submitBtn">Sign In</button>
   </form>
 
@@ -297,6 +308,9 @@
 
 <script nonce="{{CSP_NONCE}}">
 (async () => {
+  // ArgoDesk i18n: translate static labels (default Italian). Dynamic button
+  // text below is managed by the auth-mode logic and stays as-is.
+  try { if (window.ArgoI18n) { await window.ArgoI18n.init(); window.ArgoI18n.apply(document); } } catch (_) {}
   // Load version
   try {
     const vr = await fetch('/api/version');
@@ -328,14 +342,16 @@
 
   const rememberToggle = document.getElementById('rememberToggle');
 
+  const setupExtraGroup = document.getElementById('setupExtraGroup');
   function setMode(m) {
     mode = m;
     errEl.style.display = 'none';
+    if (setupExtraGroup) setupExtraGroup.style.display = (m === 'setup') ? 'block' : 'none';
     if (m === 'setup') {
-      setupNote.textContent = 'First-time setup — create your admin account';
+      setupNote.textContent = 'Primo avvio — crea il tuo account amministratore';
       setupNote.style.display = 'block';
       confirmGroup.style.display = 'block';
-      submitBtn.textContent = 'Create Admin Account';
+      submitBtn.textContent = 'Crea account amministratore';
       toggleArea.style.display = 'none';
       rememberToggle.style.display = 'none';
     } else if (m === 'signup') {
@@ -434,12 +450,19 @@
     // Setup or signup first
     if (mode === 'setup' || mode === 'signup') {
       const endpoint = mode === 'setup' ? '/api/auth/setup' : '/api/auth/signup';
+      const setupBody = { username, password };
+      if (mode === 'setup') {
+        const modeSel = document.getElementById('instanceMode');
+        const compEl = document.getElementById('companyName');
+        if (modeSel) setupBody.instance_mode = modeSel.value;
+        if (compEl && compEl.value.trim()) setupBody.company_name = compEl.value.trim();
+      }
       try {
         const res = await fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'same-origin',
-          body: JSON.stringify({ username, password })
+          body: JSON.stringify(setupBody)
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || 'Account creation failed');

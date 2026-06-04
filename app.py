@@ -97,8 +97,8 @@ app.add_middleware(
         "Content-Type",
         "X-API-Key",
         "X-Auth-Token",
-        "X-Odysseus-Internal-Token",
-        "X-Odysseus-Owner",
+        "X-ArgoDesk-Internal-Token",
+        "X-ArgoDesk-Owner",
         "X-Requested-With",
         "X-TZ-Offset",
     ],
@@ -264,10 +264,10 @@ if AUTH_ENABLED:
                 _hdr = request.headers.get(INTERNAL_TOOL_HEADER)
                 if _hdr and secrets.compare_digest(_hdr, _ITT) and _is_trusted_loopback(request):
                     # Impersonation: when the agent's loopback call sets
-                    # X-Odysseus-Owner, attribute the request to that user only
+                    # X-ArgoDesk-Owner, attribute the request to that user only
                     # if they exist. Authorization checks remain separate; this
                     # is just owner attribution for notes/calendar/etc.
-                    _impersonate = (request.headers.get("X-Odysseus-Owner") or "").strip()
+                    _impersonate = (request.headers.get("X-ArgoDesk-Owner") or "").strip()
                     _auth_mgr = getattr(request.app.state, "auth_manager", None) or auth_manager
                     if _impersonate and _impersonate in getattr(_auth_mgr, "users", {}):
                         request.state.current_user = _impersonate
@@ -540,6 +540,12 @@ from routes.memory_routes import setup_memory_routes
 app.include_router(setup_memory_routes(memory_manager, session_manager, memory_vector=memory_vector))
 from routes.skills_routes import setup_skills_routes
 app.include_router(setup_skills_routes(skills_manager))
+from routes.wiki_routes import setup_wiki_routes
+app.include_router(setup_wiki_routes())
+from routes.export_routes import setup_export_routes
+app.include_router(setup_export_routes(session_manager))
+from routes.audit_routes import setup_audit_routes
+app.include_router(setup_audit_routes())
 
 # Chat
 from routes.chat_routes import setup_chat_routes
@@ -1008,6 +1014,12 @@ async def _startup_event():
                 await asyncio.sleep(3600)
                 from core.database import _migrate_assign_legacy_owner
                 await asyncio.to_thread(_migrate_assign_legacy_owner)
+                # ArgoDesk audit retention: enforce the configured window hourly.
+                try:
+                    from src.audit import purge_old
+                    await asyncio.to_thread(purge_old)
+                except Exception as _e:
+                    logger.debug(f"Audit purge skipped: {_e}")
             except Exception as e:
                 logger.debug(f"Null-owner sweep skipped: {e}")
                 await asyncio.sleep(3600)

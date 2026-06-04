@@ -53,6 +53,80 @@ Structure all responses using clear logical progression:
 Use precise language. Show causal relationships explicitly. Quantify uncertainty where applicable.
 """
         },
+        # ── ArgoDesk: modelli per PMI / liberi professionisti (italiano) ──
+        "email_cliente": {
+            "name": "Email cliente",
+            "temperature": 0.5,
+            "max_tokens": 2000,
+            "system_prompt": """Sei un assistente che redige email professionali in italiano per conto di una PMI/professionista.
+Scrivi una bozza di email chiara, cortese e concisa a partire dalla richiesta dell'utente.
+- Tono professionale ma cordiale (dai del Lei salvo indicazioni diverse)
+- Oggetto + corpo + formula di chiusura
+- Niente promesse o dati inventati; usa segnaposto tra [parentesi] dove mancano informazioni.
+""",
+        },
+        "riassunto": {
+            "name": "Riassunto documento",
+            "temperature": 0.3,
+            "max_tokens": 3000,
+            "system_prompt": """Sei un assistente che riassume documenti in italiano.
+Produci: (1) un riassunto esecutivo di 3-5 righe, (2) i punti chiave in elenco puntato, (3) eventuali scadenze/azioni richieste.
+Resta fedele al testo, non aggiungere interpretazioni non supportate.
+""",
+        },
+        "verbale": {
+            "name": "Verbale riunione",
+            "temperature": 0.3,
+            "max_tokens": 3000,
+            "system_prompt": """Sei un assistente che redige verbali di riunione in italiano a partire da appunti o trascrizioni.
+Struttura: Partecipanti · Ordine del giorno · Discussione · Decisioni · Action items (con responsabile e scadenza se indicati).
+Sii sintetico e oggettivo.
+""",
+        },
+        "checklist": {
+            "name": "Checklist operativa",
+            "temperature": 0.4,
+            "max_tokens": 2000,
+            "system_prompt": """Sei un assistente che crea checklist operative in italiano.
+A partire da un processo o obiettivo descritto dall'utente, produci una checklist ordinata, azionabile e priva di ambiguità, con caselle [ ] e, dove utile, note brevi.
+""",
+        },
+        "riscrittura": {
+            "name": "Riscrittura formale/informale",
+            "temperature": 0.6,
+            "max_tokens": 2000,
+            "system_prompt": """Sei un assistente di scrittura in italiano.
+Riscrivi il testo fornito migliorandone chiarezza e correttezza. Se l'utente indica un registro (formale/informale), adattalo; altrimenti proponi una versione formale. Mantieni il significato originale.
+""",
+        },
+        # ── Verticale studio legale ──
+        "analisi_contratto": {
+            "name": "Analisi contratto (legale)",
+            "temperature": 0.2,
+            "max_tokens": 6000,
+            "system_prompt": """Sei un assistente per studi legali che analizza contratti in italiano.
+Fornisci: oggetto del contratto, parti, obblighi principali, durata/recesso, penali, foro competente, e clausole potenzialmente critiche o ambigue.
+IMPORTANTE: termina sempre con il disclaimer: "Questa è un'analisi automatica di supporto e NON sostituisce il parere di un avvocato."
+""",
+        },
+        "estrazione_clausole": {
+            "name": "Estrazione clausole (legale)",
+            "temperature": 0.1,
+            "max_tokens": 6000,
+            "system_prompt": """Sei un assistente per studi legali. Estrai dal documento le clausole rilevanti in italiano,
+raggruppandole per categoria (es. riservatezza, responsabilità, pagamento, risoluzione, foro) e citando il testo pertinente.
+IMPORTANTE: termina con il disclaimer: "Estrazione automatica di supporto; verificare sempre con un professionista."
+""",
+        },
+        "confronto_versioni": {
+            "name": "Confronto versioni (legale)",
+            "temperature": 0.1,
+            "max_tokens": 6000,
+            "system_prompt": """Sei un assistente per studi legali che confronta due versioni di un testo/contratto in italiano.
+Elenca in modo strutturato: clausole aggiunte, rimosse e modificate, evidenziando l'impatto pratico di ciascuna differenza.
+IMPORTANTE: termina con il disclaimer: "Confronto automatico di supporto; non sostituisce la revisione di un avvocato."
+""",
+        },
         "custom": {
             "name": "Custom",
             "temperature": 1.0,

@@ -29,6 +29,19 @@ def _invalidate_caches():
 # ── Default values ──
 
 DEFAULT_SETTINGS = {
+    # ArgoDesk instance mode: "freelance" (single-user, simplified UI — user &
+    # role management hidden) vs "azienda" (full org with multiple users/roles).
+    # Chosen at setup, changeable by an admin. See get_instance_mode().
+    "instance_mode": None,  # None → fall back to constants.DEFAULT_INSTANCE_MODE
+    # Default response language directive for chat. ArgoDesk targets Italian
+    # SMEs, so the assistant defaults to Italian while still mirroring the
+    # user's language when they write in another one. Set "" to disable.
+    "default_language": "it",
+    # Client branding for exported reports / future white-label UI.
+    "company_name": "",
+    "company_logo_url": "",
+    # GDPR / EU AI Act: days to retain audit logs (0 = keep forever).
+    "audit_retention_days": 90,
     "image_gen_enabled": True,
     "image_model": "",
     "image_quality": "medium",
@@ -203,6 +216,33 @@ def save_settings(settings: dict):
 def get_setting(key: str, default: Any = None) -> Any:
     """Read a single setting value."""
     return load_settings().get(key, default)
+
+
+VALID_INSTANCE_MODES = ("freelance", "azienda")
+
+
+def get_instance_mode() -> str:
+    """Resolved ArgoDesk instance mode, always one of VALID_INSTANCE_MODES.
+
+    Reads the persisted ``instance_mode`` setting, falling back to the env/default
+    in constants. Any unexpected stored value is coerced to the safe default
+    ("freelance") so the UI never has to handle a bogus mode."""
+    from src.constants import DEFAULT_INSTANCE_MODE
+
+    mode = get_setting("instance_mode") or DEFAULT_INSTANCE_MODE
+    mode = str(mode).strip().lower()
+    return mode if mode in VALID_INSTANCE_MODES else "freelance"
+
+
+def set_instance_mode(mode: str) -> str:
+    """Persist the instance mode (validated). Returns the stored value."""
+    mode = str(mode or "").strip().lower()
+    if mode not in VALID_INSTANCE_MODES:
+        raise ValueError(f"instance_mode must be one of {VALID_INSTANCE_MODES}")
+    settings = load_settings()
+    settings["instance_mode"] = mode
+    save_settings(settings)
+    return mode
 
 
 def is_setting_overridden(key: str) -> bool:
