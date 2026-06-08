@@ -26,6 +26,34 @@ class TimestampMixin:
 # Get database URL from environment, default to SQLite
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./data/app.db")
 
+
+def _apply_staged_db_restore(database_url: str) -> None:
+    """Swap in a DB restored via /api/backup/restore.
+
+    A live SQLite file can't be overwritten while the process holds it open
+    (Windows especially), so the restore endpoint writes the snapshot to
+    `<db>.restore` and asks for a restart. This runs at import — BEFORE the
+    engine opens any connection — and atomically moves the staged file into
+    place, clearing stale WAL/SHM sidecars so the restored DB is authoritative.
+    """
+    if not database_url.startswith("sqlite:///"):
+        return
+    db_path = database_url[len("sqlite:///"):]
+    staged = db_path + ".restore"
+    if not os.path.exists(staged):
+        return
+    try:
+        for sidecar in (db_path + "-wal", db_path + "-shm"):
+            if os.path.exists(sidecar):
+                os.remove(sidecar)
+        os.replace(staged, db_path)
+        logger.info("Applied staged database restore from %s", staged)
+    except OSError as e:
+        logger.error("Failed to apply staged DB restore (%s): %s", staged, e)
+
+
+_apply_staged_db_restore(DATABASE_URL)
+
 # Create engine
 engine = create_engine(
     DATABASE_URL,

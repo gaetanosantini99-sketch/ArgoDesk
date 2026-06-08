@@ -1,12 +1,22 @@
-"""Backup routes — export/import user data (memories, presets, settings, skills, preferences)."""
+"""Backup routes — export/import user data.
+
+Two layers:
+  - `/api/export` + `/api/import`: lightweight JSON of memories/presets/settings/
+    skills/preferences (mergeable, human-readable).
+  - `/api/backup/archive` + `/api/backup/restore`: full-instance ZIP snapshot
+    (SQLite DB + config JSON + skills/personal docs, media optional) for
+    turnkey disaster recovery / instance migration. Admin-only.
+"""
 
 import json
 import logging
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException, Request, Response
+from fastapi import APIRouter, HTTPException, Request, Response, UploadFile, File
 from core.middleware import require_admin
+from core.backup_archive import create_archive, restore_archive, BadArchive, UnsafeMemberPath
 from src.auth_helpers import get_current_user
+from src.constants import DATA_DIR
 from src.settings import load_settings, save_settings, load_features, save_features
 
 logger = logging.getLogger(__name__)
@@ -158,5 +168,66 @@ def setup_backup_routes(memory_manager, preset_manager, skills_manager) -> APIRo
             return {"ok": False, "message": "No recognized data found in the file"}
 
         return {"ok": True, "imported": imported, "message": f"Imported: {', '.join(imported)}"}
+
+    # ── Full-instance archive (turnkey disaster recovery / migration) ──
+
+    @router.get("/api/backup/archive")
+    async def backup_archive(request: Request, include_media: bool = False):
+        """Download a full-instance ZIP snapshot: SQLite DB (consistent snapshot)
+        + config JSON + skills + personal docs. Media (uploads/generated) only
+        when include_media=true. Vector stores are excluded (they rebuild)."""
+        require_admin(request)
+        user = get_current_user(request)
+        try:
+            from src.settings import get_instance_mode
+            instance_mode = get_instance_mode()
+        except Exception:
+            instance_mode = None
+
+        try:
+            blob = create_archive(
+                DATA_DIR,
+                include_media=include_media,
+                manifest_fields={"created_by": user, "instance_mode": instance_mode},
+            )
+        except Exception as e:
+            logger.error("Backup archive failed: %s", e)
+            raise HTTPException(500, "Backup failed")
+
+        filename = f"argodesk_archive_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip"
+        return Response(
+            content=blob,
+            media_type="application/zip",
+            headers={"Content-Disposition": f"attachment; filename={filename}"},
+        )
+
+    @router.post("/api/backup/restore")
+    async def backup_restore(request: Request, file: UploadFile = File(...)):
+        """Restore a full-instance ZIP produced by /api/backup/archive.
+
+        Config/skills/docs are written live; the SQLite DB is STAGED to
+        `app.db.restore` and applied on the next restart (a live DB file can't
+        be safely overwritten). Returns `restart_required` accordingly."""
+        require_admin(request)
+        raw = await file.read()
+        try:
+            result = restore_archive(DATA_DIR, raw)
+        except UnsafeMemberPath as e:
+            raise HTTPException(400, f"Path traversal blocked: {e}")
+        except BadArchive as e:
+            raise HTTPException(400, f"Invalid archive: {e}")
+
+        restart_required = result["restart_required"]
+        logger.info("Backup restore applied: %d members, restart_required=%s",
+                    len(result["restored"]), restart_required)
+        return {
+            "ok": True,
+            "restart_required": restart_required,
+            "restored_count": len(result["restored"]),
+            "message": (
+                "Restore staged. Restart ArgoDesk to apply the database."
+                if restart_required else "Restore applied."
+            ),
+        }
 
     return router
