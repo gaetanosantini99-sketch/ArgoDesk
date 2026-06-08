@@ -40,3 +40,8 @@ timetree*.png
 *_signin_page.png
 *_calendar_view.png
 .gitignore
+
+# Shipped skill bundles (SKILL.md) must ride into the image despite the broad
+# *.md exclude above — they are seeded into data/skills/ at setup/first boot.
+!bundles/
+!bundles/**

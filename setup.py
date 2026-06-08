@@ -123,6 +123,28 @@ def create_default_admin():
         return "skipped"
 
 
+def seed_skills():
+    """Copy shipped skill bundles (legal/tax/notarial verticals) into the live
+    skills store as org-owned skills. Idempotent: never clobbers existing files,
+    so re-running setup or a client's edits are preserved."""
+    try:
+        sys.path.insert(0, BASE_DIR)
+        from services.memory.skill_seed import seed_skill_bundles
+
+        summary = seed_skill_bundles(DATA_DIR)
+        seeded, skipped = summary["seeded"], summary["skipped"]
+        if seeded:
+            print(f"  [ok] Seeded {len(seeded)} skill bundle(s)")
+        if skipped:
+            print(f"  [skip] {len(skipped)} skill bundle(s) already present")
+        if not seeded and not skipped:
+            print("  [skip] no skill bundles found")
+        for w in summary["warnings"]:
+            print(f"  [warn] skill bundle {w}")
+    except Exception as e:
+        print(f"  [warn] Skill bundle seeding failed: {e}")
+
+
 def create_env():
     """Copy .env.example to .env if it doesn't exist."""
     env_path = os.path.join(BASE_DIR, ".env")
@@ -195,6 +217,9 @@ def main():
     except Exception as e:
         print(f"  [warn] Admin creation failed: {e}")
         admin_status = "failed"
+
+    print("\n6. Seeding skill bundles...")
+    seed_skills()
 
     print("\n=== Setup complete ===")
     # start-macos.sh launches the server itself (on its own port) right after
