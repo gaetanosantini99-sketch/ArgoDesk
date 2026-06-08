@@ -56,10 +56,18 @@
     return _dicts[locale];
   }
 
+  // Runtime phrase-dictionary + global MutationObserver are DISABLED: applying
+  // the dict across the whole DOM and re-walking every mutation froze the
+  // browser on the Email view (heavy, frequently-mutating subtree). Keyed
+  // (data-i18n*) translations are unaffected and still localize the UI chrome.
+  // Re-enable only once the observer is reworked to be safe (scoped, debounced,
+  // re-entrancy-guarded, Email subtree skipped). One-line switch:
+  var RUNTIME_DICT_ENABLED = false;
+
   async function init(locale) {
     _locale = locale || getLocale();
     await _loadCatalog(_locale);
-    if (_locale !== 'en') { await _loadCatalog('en'); await _loadDict(_locale); }
+    if (_locale !== 'en') { await _loadCatalog('en'); if (RUNTIME_DICT_ENABLED) await _loadDict(_locale); }
     try { document.documentElement.setAttribute('lang', _locale); } catch (_) {}
     return _locale;
   }
