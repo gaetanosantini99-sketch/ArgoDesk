@@ -17,7 +17,7 @@ from typing import AsyncGenerator, List, Dict, Optional, Set
 from src.llm_core import stream_llm, stream_llm_with_fallback, _is_ollama_native_url
 from src.model_context import estimate_tokens
 from src.settings import get_setting
-from src.prompt_security import untrusted_context_message
+from src.prompt_security import untrusted_context_message, wrap_untrusted_tool_output
 from src.tool_security import blocked_tools_for_owner
 from src.agent_tools import (
     parse_tool_blocks,
@@ -35,6 +35,47 @@ from src.agent_tools import (
 )
 
 logger = logging.getLogger(__name__)
+
+# Tools whose OUTPUT can carry external / attacker-controllable content (shell
+# output, fetched pages, file contents, API/email bodies). Their results are
+# fenced as untrusted DATA via ``wrap_untrusted_tool_output`` before being fed
+# back to the model, so a payload like "ignore previous instructions" inside the
+# output is treated as data, not a command. MCP tools (``server__tool``) are
+# also wrapped via the ``"__"`` namespace check at the call site. Tools that only
+# emit our own status messages (document/memory/settings writes, ui_control,
+# generate_image, list_models, manage_* admin ops) are intentionally excluded to
+# avoid bloating every round with the header.
+UNTRUSTED_OUTPUT_TOOLS = frozenset({
+    "bash", "python", "web_search", "web_fetch", "read_file",
+    "api_call", "app_api", "read_email", "list_emails", "reply_to_email",
+    "search_chats", "trigger_research", "manage_research",
+})
+
+
+def _is_untrusted_output_tool(tool_type: str) -> bool:
+    """True if a tool's output must be fenced as untrusted before the model reads it."""
+    if not isinstance(tool_type, str):
+        return True  # fail closed: unknown/malformed -> treat as untrusted
+    return tool_type in UNTRUSTED_OUTPUT_TOOLS or "__" in tool_type
+
+
+def _tool_budget_for_context(context_length: int) -> int:
+    """Scale the RAG tool-retrieval K to the model's context window.
+
+    Small local models (4k-8k) drown when 8 tool schemas plus skills, memory,
+    and documents eat the window before the user's request even starts, so they
+    get a tighter budget; large-context models can afford more tools. An unknown
+    window (0) keeps the historical default of 8.
+    """
+    if not isinstance(context_length, int) or context_length <= 0:
+        return 8
+    if context_length <= 8192:
+        return 3
+    if context_length <= 32768:
+        return 6
+    if context_length <= 65536:
+        return 8
+    return 12
 
 
 def _load_mcp_disabled_map() -> Dict[str, set]:
@@ -1412,11 +1453,12 @@ async def stream_agent_loop(
                         )
                 if _retrieval_query:
                     try:
+                        _tool_k = _tool_budget_for_context(context_length)
                         _relevant_tools = await asyncio.wait_for(
-                            asyncio.to_thread(tool_idx.get_tools_for_query, _retrieval_query, 8),
+                            asyncio.to_thread(tool_idx.get_tools_for_query, _retrieval_query, _tool_k),
                             timeout=_TOOL_SELECTION_TIMEOUT_SECONDS,
                         )
-                        logger.info(f"[tool-rag] Retrieved tools for query: {sorted(_relevant_tools - ALWAYS_AVAILABLE)}")
+                        logger.info(f"[tool-rag] Retrieved tools (k={_tool_k}, ctx={context_length}) for query: {sorted(_relevant_tools - ALWAYS_AVAILABLE)}")
                     except asyncio.TimeoutError:
                         logger.warning(
                             "[tool-rag] Retrieval exceeded %.1fs; falling back to always-available tools",
@@ -2237,6 +2279,13 @@ async def stream_agent_loop(
                 _effectful_used = True
 
             formatted = format_tool_result(desc, result)
+            # Fence external/attacker-controllable output as untrusted DATA before
+            # it goes back to the model. Wrapping at creation covers BOTH the
+            # fenced-block path (joined into a role:user message) and the native
+            # path (role:tool message content) consistently. The user-facing
+            # history copy (`output_text` in tool_event above) stays raw.
+            if _is_untrusted_output_tool(block.tool_type):
+                formatted = wrap_untrusted_tool_output(formatted, block.tool_type)
             tool_results.append(formatted)
             tool_result_texts.append(formatted)
 
