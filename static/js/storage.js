@@ -1,10 +1,10 @@
-// static/js/storage.js
+﻿// static/js/storage.js
 // Centralized localStorage access with key constants and JSON parse safety
 
 // ── Key constants ──
 export const KEYS = {
-  THEME: 'odysseus-theme',
-  TOGGLES: 'odysseus-toggles',
+  THEME: 'argodesk-theme',
+  TOGGLES: 'argodesk-toggles',
   SIDEBAR_COLLAPSED: 'sidebar-collapsed',
   SIDEBAR_WIDTH: 'sidebar-width',
   SIDEBAR_SIDE: 'sidebar-side',
@@ -13,17 +13,17 @@ export const KEYS = {
   COMPARE_CHAT: 'compare-continue-chat',
   COMPARE_BLIND: 'compare-blind',
   COMPARE_RANDOM: 'compare-randomize',
-  MODELS_EXPANDED: 'odysseus-model-expanded',
-  MODEL_ENDPOINTS: 'odysseus-model-endpoints',
-  MODEL_SELECTED: 'odysseus-selected-model',
-  SORT_ORDER: 'odysseus-sessions-sort',
-  CHAT_SEARCH_SCOPE: 'odysseus-search-scope',
-  INCOGNITO: 'odysseus-incognito',
-  RAG_ACTIVE: 'odysseus-rag-active',
-  MCP_ACTIVE: 'odysseus-mcp-active',
+  MODELS_EXPANDED: 'argodesk-model-expanded',
+  MODEL_ENDPOINTS: 'argodesk-model-endpoints',
+  MODEL_SELECTED: 'argodesk-selected-model',
+  SORT_ORDER: 'argodesk-sessions-sort',
+  CHAT_SEARCH_SCOPE: 'argodesk-search-scope',
+  INCOGNITO: 'argodesk-incognito',
+  RAG_ACTIVE: 'argodesk-rag-active',
+  MCP_ACTIVE: 'argodesk-mcp-active',
   SECTION_ORDER: 'sidebar-section-order',
   ADMIN_LAST_TAB: 'admin-last-tab',
-  DENSITY: 'odysseus-density'
+  DENSITY: 'argodesk-density'
 };
 
 /**

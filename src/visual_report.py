@@ -1050,7 +1050,7 @@ body::after {{
         var url = '/#' + data.session_id;
         var opened = false;
         // The report typically opens in a new tab — if we have access to the
-        // original Odysseus tab, navigate it and close this report tab so the
+        // original ArgoDesk tab, navigate it and close this report tab so the
         // user lands directly in the new chat.
         try {{
           if (window.opener && !window.opener.closed) {{

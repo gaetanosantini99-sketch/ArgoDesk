@@ -1,4 +1,4 @@
-{
+﻿{
   "Save": "Salva",
   "Cancel": "Annulla",
   "Delete": "Elimina",
@@ -258,6 +258,6 @@
   "Delete this webhook?": "Eliminare questo webhook?",
   "Delete this session?": "Eliminare questa sessione?",
   "Delete this memory?": "Eliminare questa memoria?",
-  "Permanently delete all Odysseus reminder emails?": "Eliminare definitivamente tutte le email promemoria di ArgoDesk?",
+  "Permanently delete all ArgoDesk reminder emails?": "Eliminare definitivamente tutte le email promemoria di ArgoDesk?",
   "Name this config so you can recall it later.": "Dai un nome a questa configurazione per richiamarla in seguito."
 }

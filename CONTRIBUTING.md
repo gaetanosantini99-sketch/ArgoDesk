@@ -1,21 +1,23 @@
-# Contributing to Odysseus
+# Developing ArgoDesk
 
-Thanks for helping. The project is moving quickly, so the best contributions are focused, easy to review, and easy to test.
+ArgoDesk is a closed-source commercial product maintained by an internal team.
+This document covers local setup, testing, and the conventions used for internal
+changes. The project moves quickly, so the best changes are focused, easy to
+review, and easy to test.
 
 ## Before You Start
 
-- Search existing issues and pull requests before opening a new one.
-- Prefer one bug fix or feature per pull request.
-- Avoid broad rewrites, formatting-only changes, or moving many files unless the issue is specifically about structure.
-- If you want to work on a large feature, open an issue first and describe the approach.
+- Check existing internal tickets before starting new work.
+- Prefer one bug fix or feature per change.
+- Avoid broad rewrites, formatting-only changes, or moving many files unless the
+  task is specifically about structure.
+- For a large feature, write up the approach first and align with the team.
 
 ## Setup
 
 Docker is the recommended path for normal testing:
 
 ```bash
-git clone https://github.com/pewdiepie-archdaemon/odysseus.git
-cd odysseus
 cp .env.example .env
 docker compose up -d --build
 ```
@@ -29,7 +31,8 @@ pip install -r requirements.txt
 python -m uvicorn app:app --host 0.0.0.0 --port 7000
 ```
 
-Windows is not actively tested. Docker on Linux or a Linux/macOS manual install is the safer path for now.
+Windows is not actively tested. Docker on Linux or a Linux/macOS manual install
+is the safer path for now.
 
 ## Running Checks
 
@@ -46,44 +49,61 @@ For Docker-related changes:
 ```bash
 docker compose config
 docker compose up -d --build
-docker compose logs --tail=120 odysseus
+docker compose logs --tail=120 argodesk
 ```
 
-Mention what you ran in the pull request description. If you could not run a check, say so.
+Note what you ran in your change description. If you could not run a check, say so.
 
-## Pull Requests
+## Change Reviews
 
-Good pull requests usually include:
+Good changes usually include:
 
 - A short explanation of the bug or feature.
 - The files or areas changed.
-- Manual test steps or automated test results from running the actual app, not just the test suite.
+- Manual test steps or automated test results from running the actual app, not
+  just the test suite.
 - Screenshots or short recordings for UI changes.
-- Links to related issues, for example `Fixes #123`.
+- Links to the related internal ticket.
 
-Please keep PRs small. Large PRs that mix unrelated cleanup, formatting, refactors, and behavior changes are much harder to review.
+Please keep changes small. Large changes that mix unrelated cleanup, formatting,
+refactors, and behavior changes are much harder to review.
 
-> **Auto-generated PRs.** If you are running an LLM agent (Devin, Cursor, OpenHands, Claude Code, etc.) against this repo: please open an issue describing the problem first instead of opening a PR directly. Bulk agent-generated PRs that don't match the project's visual style or contribution format will be closed without review, even when the underlying fix is correct.
+> **Auto-generated changes.** If you are running an LLM agent (Devin, Cursor,
+> OpenHands, Claude Code, etc.) against this codebase: describe the problem and
+> approach first. Bulk agent-generated changes that don't match the project's
+> visual style or conventions will be sent back for rework, even when the
+> underlying fix is correct.
 
 ## Style and visual changes
 
-Odysseus has an intentional visual style. PRs that ignore it will be closed without merge, no matter how correct the underlying code is.
+ArgoDesk has an intentional visual style. Changes that ignore it will be sent
+back, no matter how correct the underlying code is.
 
-Before submitting any change that affects what the app looks like — buttons, icons, fonts, colors, spacing, layout, CSS, HTML, SVG, or any `static/js/` module that draws to the DOM — please:
+Before submitting any change that affects what the app looks like — buttons,
+icons, fonts, colors, spacing, layout, CSS, HTML, SVG, or any `static/js/`
+module that draws to the DOM — please:
 
-1. **Run the app locally** and view the change in a browser. Type-checks and unit tests are not enough.
-2. **Attach a screenshot or short clip** of the change in the running app. Add a mobile screenshot too if the change affects mobile.
+1. **Run the app locally** and view the change in a browser. Type-checks and
+   unit tests are not enough.
+2. **Attach a screenshot or short clip** of the change in the running app. Add a
+   mobile screenshot too if the change affects mobile.
 3. **Match the existing visual language.** Specifically:
-   - Reuse existing CSS variables (`--red`, `--fg`, `--bg`, `--card`, `--border`, …). Do not introduce new color values, font sizes, or spacing units.
-   - Reuse existing button, input, card, and border classes. Don't invent parallel styling for similar widgets.
-   - **No Unicode emoji in UI or code.** Use inline SVG (matching the monochrome icon style already in `static/index.html`) or plain text.
+   - Reuse existing CSS variables (`--red`, `--fg`, `--bg`, `--card`, `--border`, …).
+     Do not introduce new color values, font sizes, or spacing units.
+   - Reuse existing button, input, card, and border classes. Don't invent
+     parallel styling for similar widgets.
+   - **No Unicode emoji in UI or code.** Use inline SVG (matching the monochrome
+     icon style already in `static/index.html`) or plain text.
    - Monospaced font (`Fira Code`) for primary UI text. Don't override.
-   - Dark theme is the default; any light-mode work goes through the existing theme system, not hard-coded.
-4. **Don't add parallel components.** If a similar widget already exists in the app, extend it instead of writing a new one.
+   - Dark theme is the default; any light-mode work goes through the existing
+     theme system, not hard-coded.
+4. **Don't add parallel components.** If a similar widget already exists in the
+   app, extend it instead of writing a new one.
 
-If you are unsure whether a change is "visual," it is. Default to attaching a screenshot.
+If you are unsure whether a change is "visual," it is. Default to attaching a
+screenshot.
 
-## Issue Reports
+## Bug Reports
 
 For bugs, include:
 
@@ -100,11 +120,9 @@ For model-serving issues, include:
 - GPU/CPU and operating system.
 - Cookbook task logs or server logs.
 
-Issues with only "help", "does not work", or a screenshot without context may be closed as not actionable.
-
 ## Security
 
-Do not post secrets, API keys, private logs, personal documents, or public IPs in issues or pull requests.
+Do not post secrets, API keys, private logs, personal documents, or public IPs
+in tickets or change descriptions.
 
 For security reports, follow [SECURITY.md](SECURITY.md).
-

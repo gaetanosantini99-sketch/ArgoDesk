@@ -196,9 +196,9 @@ def _normalize_ollama_url(url: str) -> str:
 
 
 def _ollama_normalize_tool_messages(messages: List[Dict]) -> List[Dict]:
-    """Adapt Odysseus' canonical OpenAI-style messages to native Ollama /api/chat.
+    """Adapt ArgoDesk' canonical OpenAI-style messages to native Ollama /api/chat.
 
-    Odysseus carries assistant tool calls in the OpenAI shape, where
+    ArgoDesk carries assistant tool calls in the OpenAI shape, where
     `function.arguments` is a JSON *string*. Native Ollama expects it to be a
     JSON *object*; given the string it fails the whole request with HTTP 400
     "Value looks like object, but can't find closing '}' symbol", which aborts
@@ -322,7 +322,7 @@ def _provider_headers(provider: str, headers: Optional[Dict] = None) -> Dict[str
     if isinstance(headers, dict):
         h.update(headers)
     if provider == "openrouter":
-        h.setdefault("HTTP-Referer", "https://github.com/pewdiepie-archdaemon/odysseus")
+        h.setdefault("HTTP-Referer", "https://argodesk.local")
         h.setdefault("X-OpenRouter-Title", "ArgoDesk")
     return h
 
@@ -597,7 +597,7 @@ def _as_content_blocks(content) -> List[Dict]:
 
 
 def _sanitize_llm_messages(messages: List[Dict]) -> List[Dict]:
-    """Strip Odysseus-only metadata before sending messages to providers.
+    """Strip ArgoDesk-only metadata before sending messages to providers.
 
     Per the OpenAI chat format: user/system messages must have content; a tool
     message needs content + tool_call_id; an assistant message may carry content,

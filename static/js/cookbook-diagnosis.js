@@ -1,4 +1,4 @@
-// ============================================
+﻿// ============================================
 // COOKBOOK DIAGNOSIS SUB-MODULE
 // Error pattern matching and diagnosis UI
 // ============================================
@@ -515,7 +515,7 @@ export function _diagnose(text) {
 }
 
 function _diagnosisCopyBundle(task, diagnosis, sourceText, suggestionText) {
-  const lines = ['## Odysseus Cookbook troubleshooting'];
+  const lines = ['## ArgoDesk Cookbook troubleshooting'];
   if (task) {
     lines.push(
       '',
