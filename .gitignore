@@ -21,6 +21,9 @@ venv/
 
 # Data — all user data stays local
 data/
+# Parallel/test instances use their own data + logs dirs (runtime data, never commit).
+data-test/
+logs-test/
 !services/hwfit/data/
 !services/hwfit/data/hf_models.json
 logs/
