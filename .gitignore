@@ -13,7 +13,11 @@ venv/
 # Environment
 .env
 .env.bak.*
+# Local/test env overlays may contain real keys — ignore them, keep the templates.
+.env.local
+.env.test7001
 !.env.example
+!.env.test7001.example
 
 # Data — all user data stays local
 data/
