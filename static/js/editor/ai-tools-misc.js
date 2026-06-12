@@ -146,10 +146,10 @@ export function wireAIToolsMisc({
         };
         img.src = 'data:image/png;base64,' + data.image;
       } else {
-        throw new Error(data.error || 'No image returned');
+        throw new Error(data.error || 'Nessuna immagine restituita');
       }
     } catch (e) {
-      uiModule.showToast('AI upscale failed: ' + e.message);
+      uiModule.showToast('Upscaling AI non riuscito: ' + e.message);
     }
     try { upWp?.destroy(); } catch (_) {}
     btn.disabled = false;
@@ -163,7 +163,7 @@ export function wireAIToolsMisc({
   document.getElementById('ge-style-run')?.addEventListener('click', async () => {
     const btn = document.getElementById('ge-style-run');
     const prompt = document.getElementById('ge-style-prompt').value.trim();
-    if (!prompt) { uiModule.showToast('Enter a style prompt'); return; }
+    if (!prompt) { uiModule.showToast('Inserisci un prompt di stile'); return; }
     const strength = parseInt(document.getElementById('ge-style-strength').value) / 100;
     btn.disabled = true; btn.textContent = 'Applying...';
     try {
@@ -191,10 +191,10 @@ export function wireAIToolsMisc({
         };
         img.src = 'data:image/png;base64,' + data.image;
       } else {
-        throw new Error(data.error || 'No image returned');
+        throw new Error(data.error || 'Nessuna immagine restituita');
       }
     } catch (e) {
-      uiModule.showToast('Style transfer failed: ' + e.message);
+      uiModule.showToast('Trasferimento di stile non riuscito: ' + e.message);
     }
     btn.disabled = false; btn.textContent = 'Apply Style';
   });

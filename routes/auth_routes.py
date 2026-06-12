@@ -634,4 +634,38 @@ def setup_auth_routes(auth_manager: AuthManager) -> APIRouter:
             return {"ok": True, "message": "Connection successful"}
         return {"ok": False, "message": (result.get("error") or "Connection failed")[:300]}
 
+    # ---- Unified API keys facade (admin only) ----
+    # Read-aggregate / write-dispatch over the provider, HuggingFace and
+    # integration secret stores. Crypto stays in each owning store; this
+    # only ever exposes masked values. See src/api_keys_facade.py.
+
+    @router.get("/keys")
+    async def list_api_keys_route(request: Request):
+        """List all configurable keys across stores (admin only, masked)."""
+        user = _get_current_user(request)
+        if not user or not auth_manager.is_admin(user):
+            raise HTTPException(403, "Admin only")
+        from src.api_keys_facade import list_keys
+        return {"keys": list_keys()}
+
+    @router.post("/keys")
+    async def set_api_key_route(request: Request):
+        """Set a single key by {group, id, value} (admin only)."""
+        user = _get_current_user(request)
+        if not user or not auth_manager.is_admin(user):
+            raise HTTPException(403, "Admin only")
+        body = await request.json()
+        group = (body.get("group") or "").strip()
+        key_id = (body.get("id") or "").strip()
+        value = body.get("value")
+        if value is None:
+            value = ""
+        if not group or not key_id:
+            raise HTTPException(400, "group and id are required")
+        from src.api_keys_facade import set_key
+        try:
+            return set_key(group, key_id, str(value))
+        except ValueError as e:
+            raise HTTPException(404, str(e))
+
     return router

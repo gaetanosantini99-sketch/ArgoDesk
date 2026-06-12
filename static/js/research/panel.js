@@ -29,7 +29,7 @@ function _toggleSynapseMinimized() {
     .forEach(h => h.classList.toggle('synapse-collapsed', _synapseMinimized));
   document.querySelectorAll('.research-synapse-toggle').forEach(b => {
     b.classList.toggle('active', _synapseMinimized);
-    b.title = _synapseMinimized ? 'Show visualization' : 'Minimize visualization';
+    b.title = _synapseMinimized ? 'Mostra visualizzazione' : 'Riduci visualizzazione';
     b.innerHTML = _synapseMinimized ? _vizExpandIcon : _vizCollapseIcon;
   });
 }
@@ -325,7 +325,7 @@ export function closePanel() {
 function _buildPanelHTML() {
   const searchProviders = ['', 'searxng', 'duckduckgo', 'tavily', 'brave', 'google', 'serper'];
   const providerOpts = searchProviders.map(p =>
-    `<option value="${p}">${p || 'Default'}</option>`
+    `<option value="${p}">${p || 'Predefinito'}</option>`
   ).join('');
 
   let roundOpts = '<option value="0" selected>Auto</option>';
@@ -338,54 +338,54 @@ function _buildPanelHTML() {
 
   return `
     <div class="modal-header research-pane-header">
-      <h4><span style="position:relative;top:-1px;left:6px;display:inline-flex;vertical-align:middle;">${_searchIcon}</span><span style="margin-left:6px;">Deep Research</span></h4>
+      <h4><span style="position:relative;top:-1px;left:6px;display:inline-flex;vertical-align:middle;">${_searchIcon}</span><span style="margin-left:6px;">Ricerca approfondita</span></h4>
       <div class="research-pane-header-actions">
-        <button id="research-panel-minimize" class="modal-minimize-btn" type="button" title="Minimize"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="18" x2="19" y2="18"/></svg></button>
-        <button id="research-panel-close" class="close-btn" title="Close">&#x2716;</button>
+        <button id="research-panel-minimize" class="modal-minimize-btn" type="button" title="Riduci a icona"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="18" x2="19" y2="18"/></svg></button>
+        <button id="research-panel-close" class="close-btn" title="Chiudi">&#x2716;</button>
       </div>
     </div>
     <div class="modal-body research-pane-body" data-no-swipe-dismiss>
       <div class="research-new-job">
         <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:2px;">
-          <h2 style="margin:0;padding:0;line-height:1;">Research <span id="research-stats" class="memory-count" style="font-size:0.6em;opacity:0.6;font-weight:normal"></span></h2>
+          <h2 style="margin:0;padding:0;line-height:1;">Ricerca <span id="research-stats" class="memory-count" style="font-size:0.6em;opacity:0.6;font-weight:normal"></span></h2>
         </div>
         <p class="memory-desc doclib-desc" style="margin-top:6px;display:flex;align-items:center;gap:6px;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:0.8;"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h4v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/></svg>
-          <span>Multi-step web research with an LLM-in-the-loop agent</span>
+          <span>Ricerca web a più fasi con un agente AI nel ciclo</span>
         </p>
-        <div id="research-no-past-hint" class="memory-desc doclib-desc" style="display:none;margin-top:-2px;font-size:11px;opacity:0.7;">All past research found in <button type="button" class="research-library-link">Library, Research</button></div>
-        <textarea id="research-query" class="research-query" placeholder="e.g. Trace ArgoDesk's ten-year journey home from Troy — every island, monster, and detour, and why each one cost him" rows="4"></textarea>
+        <div id="research-no-past-hint" class="memory-desc doclib-desc" style="display:none;margin-top:-2px;font-size:11px;opacity:0.7;">Tutte le ricerche passate si trovano in <button type="button" class="research-library-link">Libreria › Ricerca</button></div>
+        <textarea id="research-query" class="research-query" placeholder="es. Confronta i principali gestionali per piccole imprese in Italia: prezzi, funzionalità, integrazioni e assistenza" rows="4"></textarea>
         <div class="research-category-row" id="research-category-row">
-          <button class="research-cat active" data-cat="" title="LLM auto-detects the best format">Auto</button>
-          <button class="research-cat" data-cat="product">Product</button>
-          <button class="research-cat" data-cat="comparison">Compare</button>
-          <button class="research-cat" data-cat="howto">How-to</button>
-          <button class="research-cat" data-cat="factcheck">Fact-check</button>
+          <button class="research-cat active" data-cat="" title="L’AI rileva automaticamente il formato migliore">Auto</button>
+          <button class="research-cat" data-cat="product">Prodotto</button>
+          <button class="research-cat" data-cat="comparison">Confronto</button>
+          <button class="research-cat" data-cat="howto">Guida pratica</button>
+          <button class="research-cat" data-cat="factcheck">Verifica fatti</button>
         </div>
         <button id="research-settings-toggle" class="research-settings-toggle${chevronCls}">
-          Settings<span class="research-settings-chevron">${_chevronIcon}</span>
+          Impostazioni<span class="research-settings-chevron">${_chevronIcon}</span>
         </button>
         <div id="research-settings-body" class="research-settings-row"${settingsHidden}>
           <label class="research-setting">
-            <span class="research-setting-label">Rounds</span>
+            <span class="research-setting-label">Cicli</span>
             <select id="research-rounds">${roundOpts}</select>
           </label>
           <label class="research-setting">
-            <span class="research-setting-label">Search engine</span>
+            <span class="research-setting-label">Motore di ricerca</span>
             <select id="research-search-provider">${providerOpts}</select>
           </label>
           <label class="research-setting">
             <span class="research-setting-label">Endpoint</span>
-            <select id="research-endpoint"><option value="">Default</option></select>
+            <select id="research-endpoint"><option value="">Predefinito</option></select>
           </label>
           <label class="research-setting">
-            <span class="research-setting-label">Model</span>
-            <select id="research-model"><option value="">Default</option></select>
+            <span class="research-setting-label">Modello</span>
+            <select id="research-model"><option value="">Predefinito</option></select>
           </label>
         </div>
         <div class="research-controls-row">
-          <button id="research-add-btn" class="research-add-btn"><span class="research-add-plus">+</span> Queue</button>
-          <button id="research-start-btn" class="research-start-btn">${_playIcon} Start</button>
+          <button id="research-add-btn" class="research-add-btn"><span class="research-add-plus">+</span> Accoda</button>
+          <button id="research-start-btn" class="research-start-btn">${_playIcon} Avvia</button>
         </div>
       </div>
       <div id="research-jobs-list" class="research-jobs-list" data-no-swipe-dismiss></div>
@@ -585,7 +585,7 @@ async function _handleStart() {
   if (_mobile) _dismissKeyboard(queryEl); else queryEl.focus();
   _resetCategoryToAuto();
   jobs.startJob(query, settings).catch((e) => {
-    if (typeof uiModule !== 'undefined' && uiModule?.showError) uiModule.showError('Failed to start research');
+    if (typeof uiModule !== 'undefined' && uiModule?.showError) uiModule.showError('Avvio della ricerca non riuscito');
     queryEl.value = query; // restore so user can retry
   });
 }
@@ -634,7 +634,7 @@ async function _loadEndpoints() {
 function _populateModels(endpointId) {
   const sel = document.getElementById('research-model');
   if (!sel) return;
-  sel.innerHTML = '<option value="">Default</option>';
+  sel.innerHTML = '<option value="">Predefinito</option>';
   if (!endpointId) return;
   const ep = _endpoints.find(e => e.id === endpointId);
   if (!ep || !ep.models) return;
@@ -701,7 +701,7 @@ function _renderJobs() {
   const startBtn = document.getElementById('research-start-btn');
   if (startBtn && !startBtn.classList.contains('research-start-busy')) {
     startBtn.innerHTML = queued.length > 1
-      ? `${_playIcon} Start All (${queued.length})`
+      ? `${_playIcon} Avvia tutto (${queued.length})`
       : `${_playIcon} Start`;
     startBtn.dataset._origHTML = startBtn.innerHTML;
   }
@@ -760,7 +760,7 @@ function _renderJobs() {
     }
     // Both sections carry a "Clear all" button in the header (cookbook-running
     // section style); it clears all research and must not toggle the fold.
-    const clearAllHtml = '<button class="research-section-clear" title="Clear all research">' + _cancelIcon + ' Clear all</button>';
+    const clearAllHtml = '<button class="research-section-clear" title="Cancella tutte le ricerche">' + _cancelIcon + ' Cancella tutto</button>';
     header.innerHTML =
       '<span class="research-section-title">' + title + '</span>'
       + '<span class="research-section-count memory-count">' + arr.length + ' research</span>'
@@ -790,7 +790,7 @@ function _renderJobs() {
     if (key === 'past') {
       const hint = document.createElement('div');
       hint.className = 'memory-desc doclib-desc research-library-hint';
-      hint.innerHTML = 'All past research found in <button type="button" class="research-library-link">Library, Research</button>';
+      hint.innerHTML = 'Tutte le ricerche passate si trovano in <button type="button" class="research-library-link">Libreria › Ricerca</button>';
       hint.querySelector('.research-library-link').addEventListener('click', (e) => {
         e.stopPropagation();
         // Close the research panel first so the Library opens ABOVE it on mobile
@@ -811,7 +811,7 @@ function _renderJobs() {
   // ("Clear all" lives inside the Past research section header — see _addSection.)
 
   _addSection('active', 'Active', active);
-  _addSection('past', 'Past research', recentDone.concat(past));
+  _addSection('past', 'Ricerche passate', recentDone.concat(past));
 }
 
 /** Pick parallel vs sequential as a small popover anchored to the
@@ -831,8 +831,8 @@ function _promptParallelOrSequential(count, anchorBtn) {
   const ICON_PARALLEL = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>';
   const ICON_SEQUENTIAL = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg>';
   pop.innerHTML =
-    '<button class="research-run-mode-row" data-mode="parallel">' + ICON_PARALLEL + '<span class="rrm-title">Parallel</span></button>'
-    + '<button class="research-run-mode-row" data-mode="sequential">' + ICON_SEQUENTIAL + '<span class="rrm-title">Sequential</span></button>';
+    '<button class="research-run-mode-row" data-mode="parallel">' + ICON_PARALLEL + '<span class="rrm-title">Parallelo</span></button>'
+    + '<button class="research-run-mode-row" data-mode="sequential">' + ICON_SEQUENTIAL + '<span class="rrm-title">Sequenziale</span></button>';
   document.body.appendChild(pop);
 
   // Position: prefer dropping down from the button's bottom-right corner.
@@ -898,9 +898,9 @@ function _buildJobCard(job) {
       </div>
       <div class="research-job-queued-meta">${_esc(meta)}</div>
       <div class="research-job-actions">
-        <button class="research-job-action" data-action="start" title="Start">${_playIcon} Start</button>
-        <button class="research-job-action" data-action="edit" title="Edit query">${_editIcon} Edit</button>
-        <button class="research-job-action research-job-action-dim" data-action="remove" title="Remove">${_cancelIcon}</button>
+        <button class="research-job-action" data-action="start" title="Avvia">${_playIcon} Avvia</button>
+        <button class="research-job-action" data-action="edit" title="Modifica query">${_editIcon} Modifica</button>
+        <button class="research-job-action research-job-action-dim" data-action="remove" title="Rimuovi">${_cancelIcon}</button>
       </div>
     `;
     card.querySelector('[data-action="start"]').addEventListener('click', (e) => {
@@ -927,8 +927,8 @@ function _buildJobCard(job) {
         <span class="research-job-query">${_esc(job.query)}</span>${job.category ? `<span class="research-cat-badge">${_esc(job.category)}</span>` : ""}
         ${modelTag}
         <span class="research-job-time">${elapsed}</span>
-        <button class="research-synapse-toggle${_synapseMinimized ? ' active' : ''}" title="${_synapseMinimized ? 'Show visualization' : 'Minimize visualization'}">${_synapseMinimized ? _vizExpandIcon : _vizCollapseIcon}</button>
-        <button class="research-job-cancel" title="Cancel research">${_cancelIcon}</button>
+        <button class="research-synapse-toggle${_synapseMinimized ? ' active' : ''}" title="${_synapseMinimized ? 'Mostra visualizzazione' : 'Riduci visualizzazione'}">${_synapseMinimized ? _vizExpandIcon : _vizCollapseIcon}</button>
+        <button class="research-job-cancel" title="Annulla ricerca">${_cancelIcon}</button>
       </div>
       <div class="research-job-phase">${phase}</div>
       <div class="research-job-synapse-host${_synapseMinimized ? ' synapse-collapsed' : ''}" data-synapse-host="${job.id}"></div>
@@ -992,11 +992,11 @@ function _buildJobCard(job) {
       </div>
       ${failNote}
       <div class="research-job-actions">
-        <button class="research-job-action" data-action="copy" title="Copy report to clipboard">${_copyIcon}</button>
+        <button class="research-job-action" data-action="copy" title="Copia report negli appunti">${_copyIcon}</button>
         <button class="research-job-action" data-action="chat" title="Open follow-up chat with this research as context">${_chatIcon} Discuss</button>
-        <button class="research-job-action research-job-action-report" data-action="report" title="Visual report">${_externalIcon} Visual Report</button>
-        <button class="research-job-action research-job-action-dim" data-action="dismiss" title="Clear from list">${_cancelIcon}</button>
-        <button class="research-job-action research-job-action-dim" data-action="delete" title="Delete from disk">${_trashIcon} Delete</button>
+        <button class="research-job-action research-job-action-report" data-action="report" title="Report visivo">${_externalIcon} Report visivo</button>
+        <button class="research-job-action research-job-action-dim" data-action="dismiss" title="Rimuovi dalla lista">${_cancelIcon}</button>
+        <button class="research-job-action research-job-action-dim" data-action="delete" title="Elimina dal disco">${_trashIcon} Elimina</button>
       </div>
       ${isExpanded ? `<div class="research-job-result">${_renderResult(job)}</div>` : ''}
     `;
@@ -1043,9 +1043,9 @@ function _buildJobCard(job) {
       </div>
       ${errMsg}
       <div class="research-job-actions">
-        <button class="research-job-action" data-action="retry" title="Retry">${_retryIcon} Retry</button>
-        <button class="research-job-action" data-action="edit" title="Edit and retry">${_editIcon} Edit</button>
-        <button class="research-job-action research-job-action-dim" data-action="dismiss" title="Dismiss">${_cancelIcon}</button>
+        <button class="research-job-action" data-action="retry" title="Riprova">${_retryIcon} Retry</button>
+        <button class="research-job-action" data-action="edit" title="Modifica e riprova">${_editIcon} Modifica</button>
+        <button class="research-job-action research-job-action-dim" data-action="dismiss" title="Ignora">${_cancelIcon}</button>
       </div>
     `;
     card.querySelector('[data-action="retry"]').addEventListener('click', (e) => {
@@ -1073,13 +1073,13 @@ const _CAT_ICONS = {
 const _CAT_LABELS = {
   product: 'Product',
   comparison: 'Comparison',
-  howto: 'How-to Guide',
+  howto: 'Guida pratica',
   landscape: 'Landscape',
   factcheck: 'Fact-check',
 };
 
 function _renderResult(job) {
-  if (!job.result) return '<div class="research-job-loading">Loading result...</div>';
+  if (!job.result) return '<div class="research-job-loading">Caricamento risultato...</div>';
   const cat = job.category || '';
   const catIcon = _CAT_ICONS[cat] || '';
   const catLabel = _CAT_LABELS[cat] || '';
@@ -1218,11 +1218,11 @@ async function _chatAboutResearch(researchId, btn) {
     } else {
       // 200 OK but no session_id — server contract violation. Don't leave
       // the button stuck on 'Creating…'; surface the failure instead.
-      throw new Error('Server returned no session id');
+      throw new Error('Il server non ha restituito alcun id di sessione');
     }
   } catch (e) {
     if (btn) { btn.disabled = false; btn.innerHTML = origLabel; }
-    alert('Could not start follow-up chat: ' + e.message);
+    alert('Impossibile avviare la chat di approfondimento: ' + e.message);
   }
 }
 

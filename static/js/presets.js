@@ -181,7 +181,7 @@ function initEnabledToggle() {
 }
 
 /**
- * Character select dropdown — pick saved characters or "New character..."
+ * Character select dropdown — pick saved characters or "Nuovo personaggio..."
  */
 function initNameDropdown() {
   const select = document.getElementById('char-template-select');
@@ -202,7 +202,7 @@ function initNameDropdown() {
   select.addEventListener('change', () => {
     const val = select.value;
     if (!val || val === '__default__') {
-      // "Default" or "New character..." — reset all fields
+      // "Default" or "Nuovo personaggio..." — reset all fields
       const nameInput = document.getElementById('custom-character-name');
       const promptInput = document.getElementById('custom-system-prompt');
       const tempInput = document.getElementById('custom-temperature');
@@ -319,7 +319,7 @@ function _populateCharSelect() {
   const savedNames = new Set(userTemplates.map(t => t.name));
   if (userTemplates.length) {
     const group = document.createElement('optgroup');
-    group.label = 'Saved';
+    group.label = 'Salvato';
     userTemplates.forEach(t => {
       const opt = document.createElement('option');
       opt.value = t.name;
@@ -387,7 +387,7 @@ async function loadUserTemplates() {
  * Init "Save as Character" button
  */
 /**
- * "Create Persistent Chat" button — creates a favorited session for the current character
+ * "Crea chat persistente" button — creates a favorited session for the current character
  */
 function initPersistentChat() {
   const btn = document.getElementById('create-persistent-chat-btn');
@@ -434,11 +434,11 @@ function initPersistentChat() {
       await sessionModule.selectSession(sessionId);
 
       btn.textContent = 'Created!';
-      setTimeout(() => { btn.textContent = 'Create Persistent Chat'; }, 1500);
+      setTimeout(() => { btn.textContent = 'Crea chat persistente'; }, 1500);
     } catch (e) {
       console.error('Failed to create persistent chat:', e);
-      btn.textContent = 'Error';
-      setTimeout(() => { btn.textContent = 'Create Persistent Chat'; }, 2000);
+      btn.textContent = 'Errore';
+      setTimeout(() => { btn.textContent = 'Crea chat persistente'; }, 2000);
     }
   });
 }
@@ -480,17 +480,17 @@ function initSaveAsTemplate() {
       const data = await res.json();
       if (data.success) {
         await loadUserTemplates();
-        btn.textContent = 'Saved!';
-        setTimeout(() => { btn.textContent = 'Save as Template'; }, 1500);
+        btn.textContent = 'Salvato!';
+        setTimeout(() => { btn.textContent = 'Salva come modello'; }, 1500);
       } else {
-        btn.textContent = 'Error';
-        setTimeout(() => { btn.textContent = 'Save as Template'; }, 2000);
+        btn.textContent = 'Errore';
+        setTimeout(() => { btn.textContent = 'Salva come modello'; }, 2000);
       }
     } catch (e) {
       console.error('Failed to save template:', e);
       btn.textContent = 'Restart server';
       btn.style.color = 'var(--color-error)';
-      setTimeout(() => { btn.textContent = 'Save as Template'; btn.style.color = ''; }, 3000);
+      setTimeout(() => { btn.textContent = 'Salva come modello'; btn.style.color = ''; }, 3000);
     }
   });
 }
@@ -580,7 +580,7 @@ export function openCustomPresetModal() {
     const charName = savedConfig.character_name || '';
     if (charName) {
       charSelect.value = charName;
-      // If current name isn't in the list, fall back to "New character..." with name filled in
+      // If current name isn't in the list, fall back to "Nuovo personaggio..." with name filled in
       if (charSelect.value !== charName) charSelect.value = '';
     } else {
       charSelect.value = '__default__';
@@ -626,7 +626,7 @@ export function openCustomPresetModal() {
     const activeTab = document.querySelector('.preset-tab.active')?.dataset.chartab || 'inject';
     let label;
     if (activeTab === 'group') {
-      label = 'Start Group';
+      label = 'Avvia gruppo';
     } else if (activeTab === 'inject') {
       // Inject tab = a plain tuned "prompt" chat (prefix/suffix + temp/tokens),
       // no persona.
@@ -986,7 +986,7 @@ function _syncCharIndicator() {
       // window identity, no persona name.
       if (iconEl) iconEl.innerHTML = _SYRINGE;
       if (nameSpan) nameSpan.textContent = 'Prompt';
-      btn.title = 'Custom settings active — click to configure';
+      btn.title = 'Impostazioni personalizzate attive — clicca per configurare';
     }
     // Hide X in persistent chats
     const xIcon = btn.querySelector('.tool-indicator-x');

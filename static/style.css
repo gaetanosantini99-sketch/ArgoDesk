@@ -25778,6 +25778,13 @@ button .spinner-whirlpool {
   display: flex;
   flex-direction: column;
 }
+/* Minimal-editor mode (editor-config.js ADVANCED_EDITING=false): hide the
+   layer panel and the effects/filters menu so the editor presents only the
+   basic toolset. Toggle the flag to bring the full editor UI back. */
+.gallery-editor.ge-basic .ge-layers,
+.gallery-editor.ge-basic .ge-filter-wrap {
+  display: none !important;
+}
 /* Vertical drag handle that sits on the LEFT edge of the right panel.
    Drag horizontally to widen / narrow the entire side panel. Slim
    by default; brighter on hover so the user notices it's interactive. */
@@ -28872,7 +28879,7 @@ body.doc-find-active mark.doc-find-mark.current {
   word-wrap: break-word;
 }
 .doc-email-richbody:empty::before {
-  content: "Write your email\2026";
+  content: "Scrivi la tua email\2026";
   opacity: 0.4;
   pointer-events: none;
 }

@@ -154,7 +154,7 @@ export function wireKeyboardShortcuts(deps) {
           tmp.toBlob(blob => {
             if (blob && navigator.clipboard?.write) {
               navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => {
-                uiModule.showToast(isCut ? 'Cut to clipboard' : 'Copied to clipboard');
+                uiModule.showToast(isCut ? 'Cut to clipboard' : 'Copiato negli appunti');
               }).catch(() => uiModule.showToast(isCut ? 'Cut (editor only)' : 'Copied (editor only)'));
             }
           }, 'image/png');
@@ -197,7 +197,7 @@ export function wireKeyboardShortcuts(deps) {
         tmp.toBlob(blob => {
           if (blob && navigator.clipboard?.write) {
             navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]).then(() => {
-              uiModule.showToast(isCut ? 'Cut to clipboard' : 'Copied to clipboard');
+              uiModule.showToast(isCut ? 'Cut to clipboard' : 'Copiato negli appunti');
             }).catch(() => uiModule.showToast(isCut ? 'Cut (editor only)' : 'Copied (editor only)'));
           }
         }, 'image/png');
@@ -222,8 +222,8 @@ export function wireKeyboardShortcuts(deps) {
           layer.canvas.toBlob(blob => {
             if (blob && navigator.clipboard?.write) {
               navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-                .then(() => uiModule.showToast('Layer copied to clipboard'))
-                .catch(() => uiModule.showToast('Copy failed (clipboard permission denied?)'));
+                .then(() => uiModule.showToast('Livello copiato negli appunti'))
+                .catch(() => uiModule.showToast('Copia non riuscita (permesso appunti negato?)'));
             }
           }, 'image/png');
           return;

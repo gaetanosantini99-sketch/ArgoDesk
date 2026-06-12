@@ -216,7 +216,7 @@ function _contextCensor(el) {
           const span = document.createElement('span');
           span.className = 'censored-item';
           span.dataset.type = 'credential';
-          span.title = 'Click to reveal credential';
+          span.title = 'Clicca per rivelare la credenziale';
           span.textContent = sibling.textContent;
           sibling.parentNode.replaceChild(span, sibling);
           censored = true;
@@ -261,7 +261,7 @@ function _contextCensor(el) {
             const span = document.createElement('span');
             span.className = 'censored-item';
             span.dataset.type = 'credential';
-            span.title = 'Click to reveal credential';
+            span.title = 'Clicca per rivelare la credenziale';
             span.textContent = child.textContent;
             child.parentNode.replaceChild(span, child);
             break;
@@ -300,7 +300,7 @@ function _censorValueInElement(el, value) {
     const span = document.createElement('span');
     span.className = 'censored-item';
     span.dataset.type = 'credential';
-    span.title = 'Click to reveal credential';
+    span.title = 'Clicca per rivelare la credenziale';
     span.textContent = value;
     frag.appendChild(span);
     if (after) frag.appendChild(document.createTextNode(after));
@@ -324,7 +324,7 @@ function _censorAllText(el) {
     const span = document.createElement('span');
     span.className = 'censored-item';
     span.dataset.type = 'credential';
-    span.title = 'Click to reveal credential';
+    span.title = 'Clicca per rivelare la credenziale';
     span.textContent = tn.textContent;
     tn.parentNode.replaceChild(span, tn);
   }

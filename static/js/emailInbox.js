@@ -320,10 +320,10 @@ export async function loadEmails(append = false) {
     const dot = document.getElementById('email-unread-dot');
     if (dot) dot.style.display = unreadCount > 0 ? '' : 'none';
   } catch (e) {
-    console.error('Failed to load emails:', e);
+    console.error('Caricamento delle email non riuscito:', e);
     if (_listSpinner) { _listSpinner.destroy(); _listSpinner = null; }
     if (!append && list) {
-      const msg = e && e.message ? `Failed to load: ${e.message}` : 'Failed to load';
+      const msg = e && e.message ? `Failed to load: ${e.message}` : 'Caricamento non riuscito';
       list.innerHTML = `<div class="email-loading">${msg.replace(/&/g, '&amp;').replace(/</g, '&lt;')}${_emailSetupHint()}</div>`;
     }
   } finally {
@@ -339,7 +339,7 @@ async function loadFolders() {
     if (!select || !data.folders) return;
     _populateFolderSelect(select, data.folders);
   } catch (e) {
-    console.error('Failed to load folders:', e);
+    console.error('Caricamento delle cartelle non riuscito:', e);
   }
 }
 
@@ -416,7 +416,7 @@ function _renderList() {
   if (_senderFilter) {
     const chip = document.createElement('div');
     chip.className = 'email-filter-chip';
-    chip.innerHTML = `<span class="email-filter-chip-label">From: ${_esc(_senderFilterLabel || _senderFilter)}</span><button class="email-filter-chip-clear" title="Clear filter">&times;</button>`;
+    chip.innerHTML = `<span class="email-filter-chip-label">From: ${_esc(_senderFilterLabel || _senderFilter)}</span><button class="email-filter-chip-clear" title="Cancella filtro">&times;</button>`;
     chip.querySelector('.email-filter-chip-clear').addEventListener('click', () => _clearSenderFilter());
     list.appendChild(chip);
   }
@@ -424,7 +424,7 @@ function _renderList() {
   if (_emails.length === 0) {
     const empty = document.createElement('div');
     empty.className = 'email-loading';
-    empty.textContent = _senderFilter ? `No emails from ${_senderFilterLabel || _senderFilter}` : 'No emails';
+    empty.textContent = _senderFilter ? `No emails from ${_senderFilterLabel || _senderFilter}` : 'Nessuna email';
     list.appendChild(empty);
     return;
   }
@@ -478,7 +478,7 @@ function _createEmailItem(em) {
   const color = _senderColor(senderName);
 
   const attachIcon = em.has_attachments
-    ? '<span title="Has attachments" style="opacity:0.6;display:inline-flex;flex-shrink:0;margin-left:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 17.93 8.8l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></span>'
+    ? '<span title="Con allegati" style="opacity:0.6;display:inline-flex;flex-shrink:0;margin-left:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 17.93 8.8l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></span>'
     : '';
 
   // Per-row dot tint: if the urgency scanner flagged this UID, override the
@@ -486,7 +486,7 @@ function _createEmailItem(em) {
   // ending in `:<uid>` since the per_uid map is keyed `<account_id>:<uid>`
   // and the inbox list doesn't surface the account id per row.
   let _unreadColor = color;
-  let _unreadTitle = 'Unread';
+  let _unreadTitle = 'Non lette';
   try {
     const us = window._emailUrgencyState;
     if (us && us.per_uid && em.uid != null) {
@@ -496,7 +496,7 @@ function _createEmailItem(em) {
           const v = us.per_uid[k] || {};
           const score = v.score || 0;
           if (score >= 3) { _unreadColor = 'var(--color-error, #e06c75)'; _unreadTitle = 'Urgent — ' + (v.reason || 'needs reply now'); }
-          else if (score === 2) { _unreadColor = '#f0ad4e'; _unreadTitle = 'Reply soon — ' + (v.reason || ''); }
+          else if (score === 2) { _unreadColor = '#f0ad4e'; _unreadTitle = 'Da rispondere — ' + (v.reason || ''); }
           break;
         }
       }
@@ -512,7 +512,7 @@ function _createEmailItem(em) {
     : '';
 
   const spamTag = em.is_spam_verdict
-    ? `<span class="email-tag email-tag-spam" title="AI flagged as spam — click ✓ to unflag">spam <button class="email-spam-unflag" data-uid="${em.uid}" title="Not spam">\u2713</button></span>`
+    ? `<span class="email-tag email-tag-spam" title="Contrassegnata come spam dall’AI — clicca ✓ per rimuovere">spam <button class="email-spam-unflag" data-uid="${em.uid}" title="Non è spam">\u2713</button></span>`
     : '';
 
   const senderAddr = (em.from_address || '').toLowerCase();
@@ -526,7 +526,7 @@ function _createEmailItem(em) {
       <div class="email-subject">${_esc(em.subject)}${unreadIcon}${attachIcon}${tagPills}${spamTag}</div>
     </div>
     <div class="email-menu-wrap">
-      <button class="hamburger email-menu-btn" title="Actions">
+      <button class="hamburger email-menu-btn" title="Azioni">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
       </button>
     </div>
@@ -667,7 +667,7 @@ async function _openEmail(em, itemEl, preloadedData = null, mode = 'reply') {
       data = await res.json();
     }
     if (data.error) {
-      console.error('Failed to read email:', data.error);
+      console.error('Lettura dell’email non riuscita:', data.error);
       return;
     }
     if (wantsAiReply) {
@@ -676,7 +676,7 @@ async function _openEmail(em, itemEl, preloadedData = null, mode = 'reply') {
       } else {
         let draftToastTimer = null;
         draftToastTimer = setTimeout(() => {
-          import('./ui.js').then(m => m.showToast && m.showToast('Drafting AI reply', { duration: 3000, leadingIcon: 'spinner' })).catch(() => {});
+          import('./ui.js').then(m => m.showToast && m.showToast('Scrittura della risposta AI', { duration: 3000, leadingIcon: 'spinner' })).catch(() => {});
         }, 450);
         try {
           let currentModel = '';
@@ -705,15 +705,15 @@ async function _openEmail(em, itemEl, preloadedData = null, mode = 'reply') {
           if (result.success && result.reply) {
             aiSuggestedBody = _cleanAiReplyText(result.reply);
           } else {
-            const _msg = result.error || 'AI reply could not be generated';
-            console.error('AI reply generation failed:', _msg);
-            import('./ui.js').then(m => m.showError && m.showError('AI reply failed: ' + _msg)).catch(() => {});
+            const _msg = result.error || 'Impossibile generare la risposta AI';
+            console.error('Generazione della risposta AI non riuscita:', _msg);
+            import('./ui.js').then(m => m.showError && m.showError('Risposta AI non riuscita: ' + _msg)).catch(() => {});
             return;
           }
         } catch (e) {
           if (draftToastTimer) clearTimeout(draftToastTimer);
-          console.error('AI reply generation failed:', e);
-          import('./ui.js').then(m => m.showError && m.showError('AI reply failed: ' + (e.message || e))).catch(() => {});
+          console.error('Generazione della risposta AI non riuscita:', e);
+          import('./ui.js').then(m => m.showError && m.showError('Risposta AI non riuscita: ' + (e.message || e))).catch(() => {});
           return;
         }
       }
@@ -882,7 +882,7 @@ async function _openEmail(em, itemEl, preloadedData = null, mode = 'reply') {
           // import pattern the rest of this file uses. (Previously this
           // referenced a bare `uiModule`, throwing a ReferenceError that
           // the outer catch swallowed → reply silently did nothing.)
-          import('./ui.js').then(m => m.showError && m.showError('Failed to create reply draft (' + docRes.status + ')')).catch(() => {});
+          import('./ui.js').then(m => m.showError && m.showError('Creazione della bozza di risposta non riuscita (' + docRes.status + ')')).catch(() => {});
           return;
         }
         const doc = await docRes.json();
@@ -903,12 +903,12 @@ async function _openEmail(em, itemEl, preloadedData = null, mode = 'reply') {
       }
     }
   } catch (e) {
-    console.error('Failed to open email:', e);
+    console.error('Apertura dell’email non riuscita:', e);
     // Surface the failure so a silent throw in the reply flow doesn't
     // look like "nothing happened". Dynamic import — uiModule isn't a
     // static import in this file.
     const msg = e && e.message ? e.message : String(e);
-    import('./ui.js').then(m => m.showError && m.showError('Reply failed: ' + msg)).catch(() => {});
+    import('./ui.js').then(m => m.showError && m.showError('Risposta non riuscita: ' + msg)).catch(() => {});
   } finally {
     if (spinner) { spinner.destroy(); spinner.element.remove(); }
     if (itemEl) {
@@ -925,10 +925,10 @@ function _showEmailMenu(em, anchor, itemEl) {
   dropdown.className = 'dropdown email-dropdown show';
 
   const actions = [
-    { label: 'Open', icon: _replyIcon, action: () => _openEmail(em, itemEl) },
-    { label: 'Remind to reply', icon: _bellIcon, submenu: 'remind' },
+    { label: 'Apri', icon: _replyIcon, action: () => _openEmail(em, itemEl) },
+    { label: 'Ricorda di rispondere', icon: _bellIcon, submenu: 'remind' },
     { label: 'Archive', icon: _archiveIcon, action: () => _archiveEmail(em) },
-    { label: 'Delete', icon: _deleteIcon, danger: true, action: () => _deleteEmail(em) },
+    { label: 'Elimina', icon: _deleteIcon, danger: true, action: () => _deleteEmail(em) },
   ];
 
   for (const a of actions) {
@@ -967,7 +967,7 @@ function _showRemindSubmenu(em, parentDropdown) {
   const header = document.createElement('div');
   header.className = 'dropdown-item-compact';
   header.style.cssText = 'opacity:0.5;font-size:10px;pointer-events:none;text-transform:uppercase;letter-spacing:0.5px;padding-top:6px;';
-  header.innerHTML = '<span>Remind me</span>';
+  header.innerHTML = '<span>Ricordamelo</span>';
   parentDropdown.appendChild(header);
 
   const now = new Date();
@@ -981,9 +981,9 @@ function _showRemindSubmenu(em, parentDropdown) {
   const nextWeek = new Date(now); nextWeek.setDate(now.getDate() + daysUntilMon); nextWeek.setHours(8, 0, 0, 0);
 
   const presets = [
-    { label: 'Later today', sub: laterToday.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), date: laterToday },
+    { label: 'Più tardi oggi', sub: laterToday.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), date: laterToday },
     { label: 'Tomorrow', sub: tomorrow.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), date: tomorrow },
-    { label: 'Next week', sub: nextWeek.toLocaleDateString([], { weekday: 'short' }) + ' ' + nextWeek.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), date: nextWeek },
+    { label: 'Prossima settimana', sub: nextWeek.toLocaleDateString([], { weekday: 'short' }) + ' ' + nextWeek.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }), date: nextWeek },
   ];
   for (const p of presets) {
     const item = document.createElement('div');
@@ -998,7 +998,7 @@ function _showRemindSubmenu(em, parentDropdown) {
   }
   const customItem = document.createElement('div');
   customItem.className = 'dropdown-item-compact';
-  customItem.innerHTML = '<span>Pick date and time…</span>';
+  customItem.innerHTML = '<span>Scegli data e ora…</span>';
   customItem.addEventListener('click', async (e) => {
     e.stopPropagation();
     parentDropdown.remove();
@@ -1069,7 +1069,7 @@ async function _createReplyReminder(em, dueDate) {
     }
   } catch (e) {
     const { showError } = await import('./ui.js');
-    showError('Failed to create reminder');
+    showError('Creazione del promemoria non riuscita');
   }
 }
 
@@ -1079,21 +1079,21 @@ async function _archiveEmail(em) {
     _emails = _emails.filter(e => e.uid !== em.uid);
     _renderList();
   } catch (e) {
-    console.error('Failed to archive:', e);
+    console.error('Archiviazione non riuscita:', e);
   }
 }
 
 async function _deleteEmail(em) {
   const subject = em.subject || '(no subject)';
   const { styledConfirm } = await import('./ui.js');
-  const ok = await styledConfirm(`Delete "${subject}"?`, { confirmText: 'Delete', cancelText: 'Cancel', danger: true });
+  const ok = await styledConfirm(`Eliminare "${subject}"?`, { confirmText: 'Elimina', cancelText: 'Annulla', danger: true });
   if (!ok) return;
   try {
     await fetch(`${API_BASE}/api/email/delete/${em.uid}?folder=${encodeURIComponent(_currentFolder)}${_acct()}`, { method: 'DELETE' });
     _emails = _emails.filter(e => e.uid !== em.uid);
     _renderList();
   } catch (e) {
-    console.error('Failed to delete:', e);
+    console.error('Eliminazione non riuscita:', e);
   }
 }
 
@@ -1118,7 +1118,7 @@ async function _toggleDone(em, itemEl) {
       await fetch(`${API_BASE}/api/email/clear-answered/${em.uid}?folder=${encodeURIComponent(_currentFolder)}${_acct()}`, { method: 'POST' });
     }
   } catch (e) {
-    console.error('Failed to toggle done:', e);
+    console.error('Impossibile cambiare lo stato:', e);
   }
 }
 
@@ -1147,7 +1147,7 @@ async function _createEmailChat(emailData) {
       if (meta) meta.textContent = `Email: ${(emailData.subject || '').slice(0, 60)}`;
     }
   } catch (e) {
-    console.error('Failed to create email chat:', e);
+    console.error('Creazione della chat email non riuscita:', e);
   }
 }
 
@@ -1165,7 +1165,7 @@ async function _composeNew() {
     let sid = '';
     try { sid = sessionModule?.getCurrentSessionId?.() || ''; } catch (_) {}
     if (!sid) {
-      await _createEmailChat({ subject: 'New Email' });
+      await _createEmailChat({ subject: 'Nuova email' });
       try { sid = sessionModule?.getCurrentSessionId?.() || ''; } catch (_) {}
     }
     // Guarantee a session — _createEmailChat can't make one when there's no
@@ -1175,7 +1175,7 @@ async function _composeNew() {
     if (!sid) {
       try {
         const _fd = new FormData();
-        _fd.append('name', 'New Email');
+        _fd.append('name', 'Nuova email');
         _fd.append('skip_validation', 'true');
         const _sres = await fetch(`${API_BASE}/api/session`, { method: 'POST', body: _fd, credentials: 'same-origin' });
         if (_sres.ok) {
@@ -1201,14 +1201,14 @@ async function _composeNew() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         session_id: sid,
-        title: 'New Email',
+        title: 'Nuova email',
         content: 'To: \nSubject: \n---\n',
         language: 'email',
       }),
     });
     if (!res.ok) {
       console.error('compose POST failed', res.status, await res.text().catch(() => ''));
-      import('./ui.js').then(m => m.showError && m.showError('Failed to create new email (' + res.status + ')')).catch(() => {});
+      import('./ui.js').then(m => m.showError && m.showError('Creazione della nuova email non riuscita (' + res.status + ')')).catch(() => {});
       return;
     }
     const doc = await res.json();
@@ -1223,7 +1223,7 @@ async function _composeNew() {
       }
     }
   } catch (e) {
-    console.error('Failed to create email:', e);
+    console.error('Creazione dell’email non riuscita:', e);
   }
 }
 

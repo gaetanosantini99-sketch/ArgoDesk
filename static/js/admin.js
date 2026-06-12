@@ -23,9 +23,9 @@ const PRIV_LABELS = {
   can_use_agent: 'Agent mode',
   can_use_browser: 'Browser automation',
   can_use_bash: 'Shell / Python / Files',
-  can_use_documents: 'Document editor',
+  can_use_documents: 'Editor documenti',
   can_use_research: 'Deep research',
-  can_generate_images: 'Image generation',
+  can_generate_images: 'Generazione immagini',
   can_manage_memory: 'Memory & skills',
 };
 
@@ -33,7 +33,7 @@ async function loadUsers() {
   const list = el('adm-userList');
   try {
     const res = await fetch('/api/auth/users', { credentials: 'same-origin' });
-    if (res.status === 401 || res.status === 403) { list.innerHTML = '<div class="admin-empty">Access denied</div>'; return; }
+    if (res.status === 401 || res.status === 403) { list.innerHTML = '<div class="admin-empty">Accesso negato</div>'; return; }
     const data = await res.json();
     if (!data.users || data.users.length === 0) { list.innerHTML = '<div class="admin-empty">No users found</div>'; return; }
     list.innerHTML = '';
@@ -50,17 +50,17 @@ async function loadUsers() {
           <div style="width:28px;height:28px;border-radius:50%;background:color-mix(in srgb, var(--accent) 20%, var(--panel));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;color:var(--accent);">${esc(initial)}</div>
           <div>
             <span class="admin-user-name">${esc(u.username)}</span>
-            ${u.is_admin ? '<span class="admin-badge" style="margin-left:6px;">ADMIN</span>' : '<span style="font-size:10px;opacity:0.4;display:block;">Click to manage privileges</span>'}
+            ${u.is_admin ? '<span class="admin-badge" style="margin-left:6px;">ADMIN</span>' : '<span style="font-size:10px;opacity:0.4;display:block;">Clicca per gestire i privilegi</span>'}
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:center;">
           <select class="admin-select azienda-only" data-adm-role-user="${esc(u.username)}" title="Ruolo" style="font-size:11px;padding:3px 6px;">
             <option value="utente" ${u.role === 'utente' ? 'selected' : ''}>Utente</option>
-            <option value="guest" ${u.role === 'guest' ? 'selected' : ''}>Guest</option>
+            <option value="guest" ${u.role === 'guest' ? 'selected' : ''}>Ospite</option>
             <option value="admin_azienda" ${u.role === 'admin_azienda' ? 'selected' : ''}>Admin</option>
           </select>
-          <button class="admin-btn-sm" data-adm-rename-user="${esc(u.username)}" style="font-size:11px;">Rename</button>
-          ${u.is_admin ? '' : `<button class="admin-btn-delete" data-adm-del-user="${esc(u.username)}" style="font-size:11px;">Remove</button>`}
+          <button class="admin-btn-sm" data-adm-rename-user="${esc(u.username)}" style="font-size:11px;">Rinomina</button>
+          ${u.is_admin ? '' : `<button class="admin-btn-delete" data-adm-del-user="${esc(u.username)}" style="font-size:11px;">Rimuovi</button>`}
           ${u.is_admin ? '' : '<svg class="admin-user-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3;transition:transform 0.2s,opacity 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>'}
         </div>
       `;
@@ -98,7 +98,7 @@ async function loadUsers() {
         privPanel.style.cssText = 'padding:8px 0 4px;border-top:1px solid var(--border);margin-top:8px;';
 
         // Boolean toggles
-        let html = '<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;opacity:0.35;font-weight:600;margin-bottom:4px;">Features</div>';
+        let html = '<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;opacity:0.35;font-weight:600;margin-bottom:4px;">Funzionalità</div>';
         for (const [key, label] of Object.entries(PRIV_LABELS)) {
           const checked = u.privileges && u.privileges[key] ? 'checked' : '';
           html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;">
@@ -107,11 +107,11 @@ async function loadUsers() {
           </div>`;
         }
         // Rate limit
-        html += '<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;opacity:0.35;font-weight:600;margin:10px 0 4px;">Limits</div>';
+        html += '<div style="font-size:10px;text-transform:uppercase;letter-spacing:0.5px;opacity:0.35;font-weight:600;margin:10px 0 4px;">Limiti</div>';
         const maxMsg = (u.privileges && u.privileges.max_messages_per_day) || 0;
         html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;">
           <div>
-            <span style="font-size:12px;">Daily message limit</span>
+            <span style="font-size:12px;">Limite giornaliero di messaggi</span>
             <div style="font-size:10px;opacity:0.4;">0 = no limit</div>
           </div>
           <input type="number" min="0" value="${maxMsg}" data-priv="max_messages_per_day" data-user="${esc(u.username)}" style="width:70px;padding:4px 6px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--fg);font-size:12px;text-align:center;">
@@ -121,15 +121,15 @@ async function loadUsers() {
         const allEmpty = allowedSet.size === 0;
         html += `<div style="padding:4px 0;">
           <div style="display:flex;align-items:center;justify-content:space-between;">
-            <span style="font-size:12px;">Allowed models</span>
+            <span style="font-size:12px;">Modelli consentiti</span>
             <div style="display:flex;gap:8px;">
-              <a href="#" class="priv-models-all" data-user="${esc(u.username)}" style="font-size:10px;opacity:0.5;">All</a>
-              <a href="#" class="priv-models-none" data-user="${esc(u.username)}" style="font-size:10px;opacity:0.5;">None</a>
+              <a href="#" class="priv-models-all" data-user="${esc(u.username)}" style="font-size:10px;opacity:0.5;">Tutti</a>
+              <a href="#" class="priv-models-none" data-user="${esc(u.username)}" style="font-size:10px;opacity:0.5;">Nessuno</a>
             </div>
           </div>
           <div style="font-size:10px;opacity:0.4;margin-bottom:4px;">${allEmpty ? 'All models allowed (no restrictions)' : allowedSet.size + ' model(s) allowed'}</div>
           <div class="priv-models-list" data-user="${esc(u.username)}">
-            <span style="opacity:0.4;font-size:11px;">Loading models...</span>
+            <span style="opacity:0.4;font-size:11px;">Caricamento modelli...</span>
           </div>
         </div>`;
         privPanel.innerHTML = html;
@@ -168,7 +168,7 @@ async function loadUsers() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ [key]: value }),
               });
-            } catch (e) { uiModule.showError('Failed to update privilege'); }
+            } catch (e) { uiModule.showError('Aggiornamento del privilegio non riuscito'); }
           };
           if (input.type === 'checkbox') input.addEventListener('change', handler);
           else input.addEventListener('change', handler);
@@ -183,7 +183,7 @@ async function loadUsers() {
           const oldUsername = renameBtn.dataset.admRenameUser;
           const next = await uiModule.styledPrompt(`Rename "${oldUsername}"`, {
             defaultValue: oldUsername,
-            placeholder: 'New username',
+            placeholder: 'Nuovo nome utente',
             confirmText: 'Rename',
           });
           const username = (next || '').trim();
@@ -197,7 +197,7 @@ async function loadUsers() {
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) {
-              uiModule.showError(data.detail || 'Failed to rename user');
+              uiModule.showError(data.detail || 'Rinomina utente non riuscita');
               return;
             }
             if (data.renamed_self) {
@@ -206,7 +206,7 @@ async function loadUsers() {
             }
             loadUsers();
           } catch (err) {
-            uiModule.showError('Failed to rename user');
+            uiModule.showError('Rinomina utente non riuscita');
           }
         });
       }
@@ -220,13 +220,13 @@ async function loadUsers() {
           if (!await uiModule.styledConfirm(`Remove user "${username}"?`, { confirmText: 'Remove', danger: true })) return;
           const res = await fetch('/api/auth/users', { method: 'DELETE', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username }) });
           if (res.ok) loadUsers();
-          else uiModule.showError('Failed to delete user');
+          else uiModule.showError('Eliminazione utente non riuscita');
         });
       }
 
       list.appendChild(row);
     });
-  } catch (e) { list.innerHTML = '<div class="admin-error">Failed to load users</div>'; }
+  } catch (e) { list.innerHTML = '<div class="admin-error">Caricamento degli utenti non riuscito</div>'; }
 }
 
 async function _loadModelsForUser(username, allowedSet, privPanel) {
@@ -286,7 +286,7 @@ async function _loadModelsForUser(username, allowedSet, privPanel) {
       _saveModels();
     });
   } catch (e) {
-    listEl.innerHTML = '<span style="opacity:0.4;font-size:11px;">Failed to load models</span>';
+    listEl.innerHTML = '<span style="opacity:0.4;font-size:11px;">Caricamento dei modelli non riuscito</span>';
   }
 }
 
@@ -629,15 +629,15 @@ function initAddUser() {
     const username = el('adm-newUsername').value.trim();
     const password = el('adm-newPassword').value;
     const is_admin = el('adm-newIsAdmin').checked;
-    if (!username) { msg.textContent = 'Username required'; msg.className = 'admin-error'; return; }
-    if (password.length < 8) { msg.textContent = 'Password must be at least 8 characters'; msg.className = 'admin-error'; return; }
+    if (!username) { msg.textContent = 'Nome utente obbligatorio'; msg.className = 'admin-error'; return; }
+    if (password.length < 8) { msg.textContent = 'La password deve avere almeno 8 caratteri'; msg.className = 'admin-error'; return; }
     el('adm-addBtn').disabled = true;
     try {
       const res = await fetch('/api/auth/users', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, password, is_admin }) });
       const data = await res.json();
-      if (res.ok) { msg.textContent = 'User created'; msg.className = 'admin-success'; el('adm-newUsername').value = ''; el('adm-newPassword').value = ''; el('adm-newIsAdmin').checked = false; loadUsers(); }
+      if (res.ok) { msg.textContent = 'Utente creato'; msg.className = 'admin-success'; el('adm-newUsername').value = ''; el('adm-newPassword').value = ''; el('adm-newIsAdmin').checked = false; loadUsers(); }
       else { msg.textContent = data.detail || 'Failed'; msg.className = 'admin-error'; }
-    } catch (e) { msg.textContent = 'Request failed'; msg.className = 'admin-error'; }
+    } catch (e) { msg.textContent = 'Richiesta non riuscita'; msg.className = 'admin-error'; }
     el('adm-addBtn').disabled = false;
   });
 }
@@ -656,7 +656,7 @@ function _isLocalEndpoint(url) {
     if (/^192\.168\./.test(h)) return true;
     if (/^172\.(1[6-9]|2[0-9]|3[01])\./.test(h)) return true;
     // Tailscale CGNAT range (100.64.0.0/10 → 100.64.x–100.127.x). Servers
-    // found via "Scan for Servers" come back as tailnet IPs, which are still
+    // found via "Cerca server" come back as tailnet IPs, which are still
     // your own machines, so group them under Local rather than API.
     if (/^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./.test(h)) return true;
     // Single-label hostnames are LAN by convention.
@@ -732,16 +732,16 @@ async function loadEndpoints() {
     const res = await fetch('/api/model-endpoints', { credentials: 'same-origin' });
     // Treat a non-OK response (e.g. 401/403 for non-admins, or backend
     // returning an error envelope) the same as "no endpoints yet": show the
-    // empty state, not "Failed to load". The user just installed the app —
+    // empty state, not "Caricamento non riuscito". The user just installed the app —
     // there's literally nothing to load, so the error read as broken UI.
     let data = [];
     if (res.ok) {
       try { data = await res.json(); } catch { data = []; }
     }
     if (!Array.isArray(data) || data.length === 0) {
-      const empty = '<div class="admin-empty">None</div>';
+      const empty = '<div class="admin-empty">Nessuno</div>';
       if (listLocal) listLocal.innerHTML = empty;
-      if (listApi) listApi.innerHTML = '<div class="admin-empty">None</div>';
+      if (listApi) listApi.innerHTML = '<div class="admin-empty">Nessuno</div>';
       if (listLegacy) listLegacy.innerHTML = empty;
       return;
     }
@@ -763,18 +763,18 @@ async function loadEndpoints() {
           <div style="display:flex;align-items:center;justify-content:space-between;${hasModels ? 'cursor:pointer;' : ''}padding:4px 0;" data-adm-ep-header="${ep.id}">
             <div class="admin-user-info" style="flex:1;flex-wrap:wrap;gap:0.3rem;">
               <span class="admin-user-name">${esc(ep.name)}</span>
-              ${ep.model_type === 'image' ? '<span class="admin-badge" style="background:color-mix(in srgb, var(--accent) 20%, transparent);color:var(--accent);">Image</span>' : ''}
+              ${ep.model_type === 'image' ? '<span class="admin-badge" style="background:color-mix(in srgb, var(--accent) 20%, transparent);color:var(--accent);">Immagine</span>' : ''}
               ${statusBadge}
-              ${ep.is_enabled ? '' : '<span class="admin-badge admin-badge-off">disabled</span>'}
-              ${hasModels ? '<span style="font-size:10px;opacity:0.4;">Click to manage models</span>' : ''}
+              ${ep.is_enabled ? '' : '<span class="admin-badge admin-badge-off">disattivato</span>'}
+              ${hasModels ? '<span style="font-size:10px;opacity:0.4;">Clicca per gestire i modelli</span>' : ''}
             </div>
             <div style="display:flex;gap:4px;align-items:center;">
               <button class="admin-btn-sm" data-adm-toggle-ep="${ep.id}">${ep.is_enabled ? 'Disable' : 'Enable'}</button>
-              <button class="admin-btn-delete" data-adm-del-ep="${ep.id}" data-adm-ep-online="${ep.online ? '1' : '0'}">Delete</button>
+              <button class="admin-btn-delete" data-adm-del-ep="${ep.id}" data-adm-ep-online="${ep.online ? '1' : '0'}">Elimina</button>
               ${hasModels ? '<svg class="admin-user-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3;transition:transform 0.2s,opacity 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>' : ''}
             </div>
           </div>
-          <div class="admin-ep-detail">${esc(ep.base_url)}${_isLocalEndpoint(ep.base_url) ? `<button type="button" class="admin-ep-copy-btn" data-adm-copy-url="${esc(ep.base_url)}" title="Copy URL" aria-label="Copy URL" style="background:none;border:none;padding:0 2px;margin-left:6px;cursor:pointer;color:inherit;opacity:0.45;vertical-align:-2px;line-height:1;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>` : ''}${ep.has_key ? ' (key set)' : ''}</div>
+          <div class="admin-ep-detail">${esc(ep.base_url)}${_isLocalEndpoint(ep.base_url) ? `<button type="button" class="admin-ep-copy-btn" data-adm-copy-url="${esc(ep.base_url)}" title="Copia URL" aria-label="Copia URL" style="background:none;border:none;padding:0 2px;margin-left:6px;cursor:pointer;color:inherit;opacity:0.45;vertical-align:-2px;line-height:1;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>` : ''}${ep.has_key ? ' (key set)' : ''}</div>
           ${hasModels ? `<div class="mcp-tools-panel hidden" data-adm-ep-models-panel="${ep.id}"></div>` : ''}
         </div>`;
     });
@@ -908,11 +908,11 @@ async function loadEndpoints() {
             const hiddenSet = new Set(sortedModels.filter(m => m.is_hidden).map(m => m.id));
             const showSearch = sortedModels.length >= 8;
             panel.innerHTML = `<div class="mcp-tools-header">
-              <span>Models</span>
+              <span>Modelli</span>
               <span style="display:flex;gap:8px;align-items:center;">
                 <span class="mcp-tools-count">${sortedModels.length - hiddenSet.size}/${sortedModels.length} enabled</span>
-                <a href="#" data-ep-select-all="${epId}">All</a>
-                <a href="#" data-ep-select-none="${epId}">None</a>
+                <a href="#" data-ep-select-all="${epId}">Tutti</a>
+                <a href="#" data-ep-select-none="${epId}">Nessuno</a>
               </span>
             </div>${showSearch ? `<input type="search" class="mcp-tools-search" placeholder="Search ${sortedModels.length} models..." data-ep-search="${epId}">` : ''}<div class="mcp-tools-list">` + sortedModels.map(m =>
               `<label title="${esc(m.id)}" data-ep-model-row data-search="${esc((m.display + ' ' + m.id).toLowerCase())}" class="adm-model-row">
@@ -945,12 +945,12 @@ async function loadEndpoints() {
             panel.querySelectorAll('input[type=checkbox]').forEach(cb => {
               cb.addEventListener('change', () => _saveEpModelState(epId, panel));
             });
-          } catch (e) { _stopSpin(); panel.innerHTML = '<span class="admin-error" style="font-size:11px;">Failed to load models</span>'; }
+          } catch (e) { _stopSpin(); panel.innerHTML = '<span class="admin-error" style="font-size:11px;">Caricamento dei modelli non riuscito</span>'; }
         }
       });
     });
   } catch (e) {
-    const err = '<div class="admin-error">Failed to load</div>';
+    const err = '<div class="admin-error">Caricamento non riuscito</div>';
     [listLocal, listApi, listLegacy].forEach(c => { if (c) c.innerHTML = err; });
   }
 }
@@ -1121,8 +1121,8 @@ function initEndpointForm() {
       msg.textContent = ''; msg.className = '';
       const rawUrl = (urlInput.value || provider.value).trim();
       const apiKey = el('adm-epApiKey').value.trim();
-      if (!rawUrl) { msg.textContent = 'Select a provider or enter a base URL'; msg.className = 'admin-error'; return; }
-      if (provider.value && !apiKey) { msg.textContent = 'API key is required for cloud providers'; msg.className = 'admin-error'; return; }
+      if (!rawUrl) { msg.textContent = 'Seleziona un provider o inserisci un URL di base'; msg.className = 'admin-error'; return; }
+      if (provider.value && !apiKey) { msg.textContent = 'La chiave API è obbligatoria per i provider cloud'; msg.className = 'admin-error'; return; }
       const url = provider.value && rawUrl === provider.value ? rawUrl : _normalizeBaseUrl(rawUrl);
       apiTestController = new AbortController();
       apiTestBtn.disabled = true;
@@ -1142,16 +1142,16 @@ function initEndpointForm() {
         _renderEndpointTestResult(msg, res, d);
       } catch (e) {
         if (e && e.name === 'AbortError') {
-          msg.textContent = 'Test canceled';
+          msg.textContent = 'Prova annullata';
           msg.className = '';
         } else {
-          msg.textContent = 'Test failed: ' + (e && e.message ? e.message : 'request failed');
+          msg.textContent = 'Prova non riuscita: ' + (e && e.message ? e.message : 'request failed');
           msg.className = 'admin-error';
         }
       }
       apiTestController = null;
       apiTestBtn.disabled = false;
-      apiTestBtn.textContent = 'Test';
+      apiTestBtn.textContent = 'Prova';
       if (apiCancelTestBtn) apiCancelTestBtn.classList.add('hidden');
     });
   }
@@ -1166,8 +1166,8 @@ function initEndpointForm() {
     msg.textContent = ''; msg.className = '';
     const rawUrl = (urlInput.value || provider.value).trim();
     const apiKey = el('adm-epApiKey').value.trim();
-    if (!rawUrl) { msg.textContent = 'Select a provider or enter a base URL'; msg.className = 'admin-error'; return; }
-    if (provider.value && !apiKey) { msg.textContent = 'API key is required for cloud providers'; msg.className = 'admin-error'; return; }
+    if (!rawUrl) { msg.textContent = 'Seleziona un provider o inserisci un URL di base'; msg.className = 'admin-error'; return; }
+    if (provider.value && !apiKey) { msg.textContent = 'La chiave API è obbligatoria per i provider cloud'; msg.className = 'admin-error'; return; }
     // Normalize URL (fix typos, add /v1, strip wrong paths)
     const url = provider.value && rawUrl === provider.value ? rawUrl : _normalizeBaseUrl(rawUrl);
     const btn = el('adm-epAddBtn');
@@ -1194,18 +1194,18 @@ function initEndpointForm() {
         await loadEndpoints();
         await _selectAddedModelInChat(d);
         if (!d.online) {
-          msg.textContent = 'Added (endpoint offline — will retry on next load)';
+          msg.textContent = 'Aggiunto (endpoint offline — riproverà al prossimo caricamento)';
           msg.className = 'admin-error';
         } else if (d.status === 'empty') {
-          msg.textContent = 'Added — endpoint reachable, no models found';
+          msg.textContent = 'Aggiunto — endpoint raggiungibile, nessun modello trovato';
           msg.className = 'admin-success';
         } else {
           msg.textContent = `Added — found ${count} model${count !== 1 ? 's' : ''}`;
           msg.className = 'admin-success';
         }
       } else { msg.textContent = d.detail || 'Failed'; msg.className = 'admin-error'; }
-    } catch (e) { msg.textContent = 'Request failed'; msg.className = 'admin-error'; }
-    btn.disabled = false; btn.textContent = 'Add';
+    } catch (e) { msg.textContent = 'Richiesta non riuscita'; msg.className = 'admin-error'; }
+    btn.disabled = false; btn.textContent = 'Aggiungi';
   });
 
   // Local "Add" button — sibling form for self-hosted base URLs.
@@ -1216,7 +1216,7 @@ function initEndpointForm() {
       const msg = _endpointMsg('local');
       msg.textContent = ''; msg.className = '';
       const raw = (el('adm-epLocalUrl').value || '').trim();
-      if (!raw) { msg.textContent = 'Enter a base URL to test'; msg.className = 'admin-error'; return; }
+      if (!raw) { msg.textContent = 'Inserisci un URL di base da provare'; msg.className = 'admin-error'; return; }
       const url = _normalizeBaseUrl(raw);
       const keyEl = el('adm-epLocalApiKey');
       const apiKey = keyEl ? keyEl.value.trim() : '';
@@ -1230,11 +1230,11 @@ function initEndpointForm() {
         const d = await res.json();
         _renderEndpointTestResult(msg, res, d);
       } catch (e) {
-        msg.textContent = 'Test failed: ' + (e && e.message ? e.message : 'request failed');
+        msg.textContent = 'Prova non riuscita: ' + (e && e.message ? e.message : 'request failed');
         msg.className = 'admin-error';
       }
       localTestBtn.disabled = false;
-      localTestBtn.textContent = 'Test';
+      localTestBtn.textContent = 'Prova';
     });
   }
   if (localAddBtn) {
@@ -1271,8 +1271,8 @@ function initEndpointForm() {
             : 'Added (offline — will retry on next load)';
           msg.className = d.online ? 'admin-success' : 'admin-error';
         } else { msg.textContent = d.detail || 'Failed'; msg.className = 'admin-error'; }
-      } catch (e) { msg.textContent = 'Request failed'; msg.className = 'admin-error'; }
-      localAddBtn.disabled = false; localAddBtn.textContent = 'Add';
+      } catch (e) { msg.textContent = 'Richiesta non riuscita'; msg.className = 'admin-error'; }
+      localAddBtn.disabled = false; localAddBtn.textContent = 'Aggiungi';
     });
   }
 
@@ -1286,7 +1286,7 @@ function initEndpointForm() {
       }
       const msg = _endpointMsg('local');
       if (msg) {
-        msg.innerHTML = '<span style="font-size:11px;opacity:0.55;">Ollama ready to test.</span>';
+        msg.innerHTML = '<span style="font-size:11px;opacity:0.55;">Ollama pronto per la prova.</span>';
         msg.className = '';
       }
     });
@@ -1311,7 +1311,7 @@ function initEndpointForm() {
         wrap.style.cssText = 'display:flex;align-items:center;padding:8px 0;';
         wrap.appendChild(wp.element);
         const txt = document.createElement('span');
-        txt.textContent = 'Scanning ports 8000-8020 and 11434 for model servers...';
+        txt.textContent = 'Scansione delle porte 8000-8020 e 11434 per i server di modelli...';
         txt.style.cssText = 'font-size:12px;opacity:0.7;';
         wrap.appendChild(txt);
         msg.appendChild(wrap);
@@ -1352,7 +1352,7 @@ function initEndpointForm() {
           loadEndpoints();
         }
       } catch (e) {
-        msg.textContent = 'Scan failed: ' + e.message;
+        msg.textContent = 'Scansione non riuscita: ' + e.message;
         msg.className = 'admin-error';
       }
       if (discoverBtn._wp) { discoverBtn._wp.destroy(); discoverBtn._wp = null; }
@@ -1469,7 +1469,7 @@ const MCP_PRESETS = [
 5. Click "Download JSON" on the credential you just created
 6. Set Google Oauth Credentials to the full path of the downloaded JSON file` },
   { name: "Google Drive",    command: "npx", args: ["-y", "@modelcontextprotocol/server-gdrive"],        env: {},
-    help: "Google Drive uses browser-based OAuth on first run. No env vars needed — just click Add and authorize when prompted." },
+    help: "Google Drive usa OAuth via browser al primo avvio. Nessuna variabile d’ambiente necessaria — basta cliccare Aggiungi e autorizzare quando richiesto." },
   { name: "GitHub",          command: "npx", args: ["-y", "@modelcontextprotocol/server-github"],        env: { GITHUB_PERSONAL_ACCESS_TOKEN: "" },
     help: "1. Go to github.com > Settings > Developer Settings > Personal Access Tokens > Fine-grained tokens\n2. Generate a new token with the repo permissions you need\n3. Paste it as Github Personal Access Token" },
   { name: "Slack",           command: "npx", args: ["-y", "@modelcontextprotocol/server-slack"],         env: { SLACK_BOT_TOKEN: "", SLACK_TEAM_ID: "" },
@@ -1483,39 +1483,39 @@ const MCP_PRESETS = [
   { name: "Browser (Playwright)", command: "npx", args: ["-y", "@playwright/mcp@latest", "--headless"],  env: {},
     help: "Browser automation via Playwright. The AI can navigate pages, click, fill forms, and read content.\nRuns headless by default. Remove --headless from Args to see the browser window.\nFirst run installs Chromium automatically." },
   { name: "Filesystem",      command: "npx", args: ["-y", "@modelcontextprotocol/server-filesystem", "/home"], env: {},
-    help: "Edit the Args field to change which directory the server has access to." },
+    help: "Modifica il campo Argomenti per cambiare a quale cartella il server può accedere." },
   { name: "Memory",          command: "npx", args: ["-y", "@modelcontextprotocol/server-memory"],        env: {} },
   { name: "Postgres",        command: "npx", args: ["-y", "@modelcontextprotocol/server-postgres", "postgresql://user:pass@localhost/db"], env: {},
-    help: "Replace the connection string in the Args field with your actual Postgres connection URL." },
+    help: "Sostituisci la stringa di connessione nel campo Argomenti con il tuo vero URL di connessione Postgres." },
   { name: "Todoist",         command: "npx", args: ["-y", "todoist-mcp-server"],                         env: { TODOIST_API_TOKEN: "" },
     help: "1. Go to todoist.com > Settings > Integrations > Developer\n2. Copy your API token" },
 ];
 // ── Built-in tools management ──
 const TOOL_META = {
   bash:              { name: 'Shell',            desc: 'Execute bash commands',           cat: 'Code',       ctx: '~200' },
-  python:            { name: 'Python',           desc: 'Run Python scripts',              cat: 'Code',       ctx: '~200' },
-  read_file:         { name: 'Read File',        desc: 'Read files from disk',            cat: 'Code',       ctx: '~150' },
-  write_file:        { name: 'Write File',       desc: 'Write/create files',              cat: 'Code',       ctx: '~150' },
-  web_search:        { name: 'Web Search',       desc: 'Search the web via SearXNG',      cat: 'Search',     ctx: '~300' },
-  search_chats:      { name: 'Search Chats',     desc: 'Search conversation history',     cat: 'Search',     ctx: '~150' },
-  create_document:   { name: 'Create Document',  desc: 'Create new documents',            cat: 'Documents',  ctx: '~200' },
-  update_document:   { name: 'Update Document',  desc: 'Modify existing documents',       cat: 'Documents',  ctx: '~200' },
-  edit_document:     { name: 'Edit Document',    desc: 'Find & replace in documents',     cat: 'Documents',  ctx: '~200' },
-  suggest_document:  { name: 'Suggest Changes',  desc: 'Propose document edits',          cat: 'Documents',  ctx: '~200' },
-  manage_documents:  { name: 'Manage Documents', desc: 'List, delete, organize docs',     cat: 'Documents',  ctx: '~150' },
-  generate_image:    { name: 'Generate Image',   desc: 'Create images via AI',            cat: 'Media',      ctx: '~150' },
-  manage_memory:     { name: 'Memory',           desc: 'Save and recall memories',        cat: 'Knowledge',  ctx: '~200' },
-  manage_skills:     { name: 'Skills',           desc: 'Learn and use procedures',        cat: 'Knowledge',  ctx: '~200' },
+  python:            { name: 'Python',           desc: 'Esegui script Python',              cat: 'Code',       ctx: '~200' },
+  read_file:         { name: 'Leggi file',        desc: 'Leggi file dal disco',            cat: 'Code',       ctx: '~150' },
+  write_file:        { name: 'Scrivi file',       desc: 'Write/create files',              cat: 'Code',       ctx: '~150' },
+  web_search:        { name: 'Ricerca web',       desc: 'Cerca sul web tramite SearXNG',      cat: 'Search',     ctx: '~300' },
+  search_chats:      { name: 'Cerca nelle chat',     desc: 'Cerca nella cronologia delle conversazioni',     cat: 'Search',     ctx: '~150' },
+  create_document:   { name: 'Crea documento',  desc: 'Crea nuovi documenti',            cat: 'Documents',  ctx: '~200' },
+  update_document:   { name: 'Aggiorna documento',  desc: 'Modify existing documents',       cat: 'Documents',  ctx: '~200' },
+  edit_document:     { name: 'Modifica documento',    desc: 'Trova e sostituisci nei documenti',     cat: 'Documents',  ctx: '~200' },
+  suggest_document:  { name: 'Suggest Changes',  desc: 'Proponi modifiche al documento',          cat: 'Documents',  ctx: '~200' },
+  manage_documents:  { name: 'Manage Documents', desc: 'Elenca, elimina, organizza i documenti',     cat: 'Documents',  ctx: '~150' },
+  generate_image:    { name: 'Genera immagine',   desc: 'Crea immagini con l’AI',            cat: 'Media',      ctx: '~150' },
+  manage_memory:     { name: 'Memory',           desc: 'Salva e richiama i ricordi',        cat: 'Knowledge',  ctx: '~200' },
+  manage_skills:     { name: 'Skills',           desc: 'Impara e usa le procedure',        cat: 'Knowledge',  ctx: '~200' },
   manage_rag:        { name: 'RAG / Docs',       desc: 'Query indexed documents',         cat: 'Knowledge',  ctx: '~150' },
-  chat_with_model:   { name: 'Chat with Model',  desc: 'Talk to another AI model',        cat: 'Multi-Agent', ctx: '~200' },
+  chat_with_model:   { name: 'Chatta con il modello',  desc: 'Parla con un altro modello AI',        cat: 'Multi-Agent', ctx: '~200' },
   second_opinion:    { name: 'Second Opinion',   desc: 'Get another model\'s take',       cat: 'Multi-Agent', ctx: '~150' },
   pipeline:          { name: 'Pipeline',         desc: 'Multi-step AI workflows',         cat: 'Multi-Agent', ctx: '~200' },
-  ask_teacher:       { name: 'Ask Teacher',      desc: 'Query a more capable model',      cat: 'Multi-Agent', ctx: '~150' },
-  send_to_session:   { name: 'Send to Session',  desc: 'Send message to another chat',    cat: 'Sessions',   ctx: '~100' },
-  create_session:    { name: 'Create Session',   desc: 'Start a new chat session',        cat: 'Sessions',   ctx: '~100' },
+  ask_teacher:       { name: 'Ask Teacher',      desc: 'Interroga un modello più capace',      cat: 'Multi-Agent', ctx: '~150' },
+  send_to_session:   { name: 'Invia alla sessione',  desc: 'Invia un messaggio a un’altra chat',    cat: 'Sessions',   ctx: '~100' },
+  create_session:    { name: 'Crea sessione',   desc: 'Avvia una nuova sessione di chat',        cat: 'Sessions',   ctx: '~100' },
   list_sessions:     { name: 'List Sessions',    desc: 'Browse existing sessions',        cat: 'Sessions',   ctx: '~100' },
-  manage_session:    { name: 'Manage Session',   desc: 'Rename, archive, configure',      cat: 'Sessions',   ctx: '~100' },
-  list_models:       { name: 'List Models',      desc: 'Show available models',           cat: 'System',     ctx: '~100' },
+  manage_session:    { name: 'Gestisci sessione',   desc: 'Rinomina, archivia, configura',      cat: 'Sessions',   ctx: '~100' },
+  list_models:       { name: 'List Models',      desc: 'Mostra i modelli disponibili',           cat: 'System',     ctx: '~100' },
   ui_control:        { name: 'UI Control',       desc: 'Change theme, layout, settings',  cat: 'System',     ctx: '~150' },
   manage_tasks:      { name: 'Tasks',            desc: 'Schedule automated tasks',        cat: 'System',     ctx: '~150' },
   api_call:          { name: 'API Call',         desc: 'Make HTTP requests',              cat: 'System',     ctx: '~200' },
@@ -1574,7 +1574,7 @@ async function loadBuiltinTools() {
             <span class="admin-tool-name">${esc(t.name)}</span>
             <span class="admin-tool-desc">${esc(t.desc)}</span>
           </div>
-          <span class="admin-tool-ctx" title="Approximate context tokens used">${esc(t.ctx)}</span>
+          <span class="admin-tool-ctx" title="Token di contesto approssimativi usati">${esc(t.ctx)}</span>
           <label class="admin-switch" style="flex-shrink:0;">
             <input type="checkbox" data-tool-id="${esc(t.id)}" ${t.enabled ? 'checked' : ''}>
             <span class="admin-slider"></span>
@@ -1648,7 +1648,7 @@ async function loadBuiltinTools() {
     });
   } catch (e) {
     console.error('Failed to load tools:', e);
-    list.innerHTML = '<div class="admin-empty">Failed to load tools</div>';
+    list.innerHTML = '<div class="admin-empty">Caricamento degli strumenti non riuscito</div>';
   }
 }
 
@@ -1669,13 +1669,13 @@ async function loadMcpServers() {
           <div class="admin-user-info" style="flex:1;flex-wrap:wrap;gap:0.3rem;">
             <span class="admin-user-name">${esc(s.name)}</span>
             <span class="admin-badge" style="background:${statusColor}33;color:${statusColor}">${statusText}</span>
-            ${hasTools ? `<span style="font-size:10px;opacity:0.4;">Click to manage tools</span>` : ''}
+            ${hasTools ? `<span style="font-size:10px;opacity:0.4;">Clicca per gestire gli strumenti</span>` : ''}
           </div>
           <div style="display:flex;gap:4px;align-items:center;">
-            ${s.needs_oauth ? `<a href="/api/mcp/oauth/authorize/${s.id}" target="_blank" class="admin-btn-sm" style="background:var(--red);color:#fff;text-decoration:none;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;">Authorize</a>` : ''}
-            <button class="admin-btn-sm" data-adm-mcp-reconnect="${s.id}">Reconnect</button>
+            ${s.needs_oauth ? `<a href="/api/mcp/oauth/authorize/${s.id}" target="_blank" class="admin-btn-sm" style="background:var(--red);color:#fff;text-decoration:none;padding:3px 10px;border-radius:4px;font-size:11px;font-weight:600;">Autorizza</a>` : ''}
+            <button class="admin-btn-sm" data-adm-mcp-reconnect="${s.id}">Riconnetti</button>
             <button class="admin-btn-delete" style="border-color:${s.is_enabled ? 'color-mix(in srgb, var(--red) 30%, transparent)' : 'color-mix(in srgb, var(--fg) 30%, transparent)'};color:${s.is_enabled ? 'var(--red)' : 'var(--fg)'};" data-adm-mcp-toggle="${s.id}" data-adm-mcp-enable="${!s.is_enabled}">${s.is_enabled ? 'Disable' : 'Enable'}</button>
-            <button class="admin-btn-delete" data-adm-mcp-delete="${s.id}">Delete</button>
+            <button class="admin-btn-delete" data-adm-mcp-delete="${s.id}">Elimina</button>
             ${hasTools ? '<svg class="admin-user-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.3;transition:transform 0.2s,opacity 0.2s;"><polyline points="6 9 12 15 18 9"/></svg>' : ''}
           </div>
         </div>
@@ -1691,7 +1691,7 @@ async function loadMcpServers() {
           msg.textContent = data.connected ? `Reconnected (${data.tool_count} tools)` : `Failed: ${data.error || 'unknown'}`;
           msg.className = data.connected ? 'admin-success' : 'admin-error';
           loadMcpServers();
-        } catch (e) { msg.textContent = 'Failed: ' + e.message; msg.className = 'admin-error'; }
+        } catch (e) { msg.textContent = 'Non riuscito: ' + e.message; msg.className = 'admin-error'; }
       });
     });
     list.querySelectorAll('[data-adm-mcp-toggle]').forEach(btn => {
@@ -1728,18 +1728,18 @@ async function loadMcpServers() {
         }
         if (!_toolsLoaded && isOpen) {
           _toolsLoaded = true;
-          panel.innerHTML = '<span style="opacity:0.5;font-size:11px;">Loading tools...</span>';
+          panel.innerHTML = '<span style="opacity:0.5;font-size:11px;">Caricamento strumenti...</span>';
           try {
             const res = await fetch(`/api/mcp/servers/${sid}/tools`, { credentials: 'same-origin' });
             const tools = await res.json();
             if (!tools.length) { panel.innerHTML = '<span style="opacity:0.5;font-size:11px;">No tools</span>'; return; }
             const disabled = new Set(tools.filter(t => t.is_disabled).map(t => t.name));
             panel.innerHTML = `<div class="mcp-tools-header">
-              <span>Tools</span>
+              <span>Strumenti</span>
               <span style="display:flex;gap:8px;align-items:center;">
                 <span class="mcp-tools-count">${tools.length - disabled.size}/${tools.length} enabled</span>
-                <a href="#" data-mcp-select-all="${sid}">All</a>
-                <a href="#" data-mcp-select-none="${sid}">None</a>
+                <a href="#" data-mcp-select-all="${sid}">Tutti</a>
+                <a href="#" data-mcp-select-none="${sid}">Nessuno</a>
               </span>
             </div><div class="mcp-tools-list">` + tools.map(t =>
               `<label title="${esc(t.description)}">
@@ -1760,11 +1760,11 @@ async function loadMcpServers() {
             panel.querySelectorAll('input[type=checkbox]').forEach(cb => {
               cb.addEventListener('change', () => _saveMcpToolState(sid, panel));
             });
-          } catch (e) { panel.innerHTML = '<span class="admin-error" style="font-size:11px;">Failed to load tools</span>'; }
+          } catch (e) { panel.innerHTML = '<span class="admin-error" style="font-size:11px;">Caricamento degli strumenti non riuscito</span>'; }
         }
       });
     });
-  } catch (e) { if (list) list.innerHTML = '<div class="admin-error">Failed to load MCP servers</div>'; }
+  } catch (e) { if (list) list.innerHTML = '<div class="admin-error">Caricamento dei server MCP non riuscito</div>'; }
 }
 
 async function _saveMcpToolState(serverId, panel) {
@@ -1951,9 +1951,9 @@ function initMcpForm() {
     const env = _collectEnv();
     const url = el('adm-mcpUrl').value.trim();
     const msg = el('adm-mcpMsg');
-    if (!name) { msg.textContent = 'Name is required'; msg.className = 'admin-error'; return; }
-    if (transport === 'stdio' && !command) { msg.textContent = 'Command is required for stdio'; msg.className = 'admin-error'; return; }
-    if (transport === 'sse' && !url) { msg.textContent = 'URL is required for SSE'; msg.className = 'admin-error'; return; }
+    if (!name) { msg.textContent = 'Il nome è obbligatorio'; msg.className = 'admin-error'; return; }
+    if (transport === 'stdio' && !command) { msg.textContent = 'Il comando è obbligatorio per stdio'; msg.className = 'admin-error'; return; }
+    if (transport === 'sse' && !url) { msg.textContent = 'L’URL è obbligatorio per SSE'; msg.className = 'admin-error'; return; }
     try { JSON.parse(env); } catch { msg.textContent = 'Env must be valid JSON'; msg.className = 'admin-error'; return; }
     const fd = new FormData();
     fd.append('name', name); fd.append('transport', transport); fd.append('command', command); fd.append('args', args); fd.append('env', env); fd.append('url', url);
@@ -1976,7 +1976,7 @@ function initMcpForm() {
       const res = await fetch('/api/mcp/servers', { method: 'POST', body: fd, credentials: 'same-origin' });
       const data = await res.json();
       if (data.needs_oauth) {
-        msg.innerHTML = `Added ${esc(name)} — <a href="/api/mcp/oauth/authorize/${data.id}" target="_blank" style="color:var(--red);font-weight:600;">Authorize with Google</a> to connect`;
+        msg.innerHTML = `Added ${esc(name)} — <a href="/api/mcp/oauth/authorize/${data.id}" target="_blank" style="color:var(--red);font-weight:600;">Autorizza con Google</a> to connect`;
         msg.className = 'admin-success';
       } else if (data.connected) {
         msg.textContent = `Added ${name} (${data.tool_count} tools discovered)`; msg.className = 'admin-success';
@@ -1984,7 +1984,7 @@ function initMcpForm() {
       el('adm-mcpName').value = ''; el('adm-mcpCommand').value = ''; el('adm-mcpArgs').value = ''; el('adm-mcpUrl').value = '';
       _clearEnvFields(); helpBox.style.display = 'none'; _activeHelp = null; _activeOauthFile = null; _activeOauth = null;
       loadMcpServers();
-    } catch (e) { msg.textContent = 'Failed: ' + e.message; msg.className = 'admin-error'; }
+    } catch (e) { msg.textContent = 'Non riuscito: ' + e.message; msg.className = 'admin-error'; }
   });
 }
 
@@ -2003,7 +2003,7 @@ async function loadRag() {
     const dirs = data.directories || [];
     if (dirs.length === 0) { dirList.innerHTML = '<div class="admin-empty">No directories indexed</div>'; }
     else {
-      dirList.innerHTML = dirs.map(d => `<div class="admin-rag-item"><span class="admin-rag-item-name" title="${esc(d)}">${esc(d)}</span><button class="admin-btn-delete" data-adm-rag-dir="${esc(d)}">Remove</button></div>`).join('');
+      dirList.innerHTML = dirs.map(d => `<div class="admin-rag-item"><span class="admin-rag-item-name" title="${esc(d)}">${esc(d)}</span><button class="admin-btn-delete" data-adm-rag-dir="${esc(d)}">Rimuovi</button></div>`).join('');
       dirList.querySelectorAll('[data-adm-rag-dir]').forEach(btn => {
         btn.addEventListener('click', async () => {
           if (!await uiModule.styledConfirm(`Remove directory "${btn.dataset.admRagDir}" from RAG?`, { confirmText: 'Remove', danger: true })) return;
@@ -2022,7 +2022,7 @@ async function loadRag() {
     else {
       fileList.innerHTML = files.map(f => {
         const size = f.size ? (f.size > 1024 ? (f.size / 1024).toFixed(1) + ' KB' : f.size + ' B') : '';
-        return `<div class="admin-rag-item"><span class="admin-rag-item-name" title="${esc(f.path || f.name)}">${esc(f.name)}</span><span class="admin-rag-item-meta">${size}</span><button class="admin-btn-delete" data-adm-rag-file="${esc(f.path || f.name)}">Delete</button></div>`;
+        return `<div class="admin-rag-item"><span class="admin-rag-item-name" title="${esc(f.path || f.name)}">${esc(f.name)}</span><span class="admin-rag-item-meta">${size}</span><button class="admin-btn-delete" data-adm-rag-file="${esc(f.path || f.name)}">Elimina</button></div>`;
       }).join('');
       fileList.querySelectorAll('[data-adm-rag-file]').forEach(btn => {
         btn.addEventListener('click', async () => {
@@ -2037,7 +2037,7 @@ async function loadRag() {
       });
     }
   } catch (e) {
-    el('adm-ragDirList').innerHTML = '<div class="admin-error">Failed to load</div>';
+    el('adm-ragDirList').innerHTML = '<div class="admin-error">Caricamento non riuscito</div>';
     el('adm-ragFileList').innerHTML = '';
   }
 }
@@ -2059,7 +2059,7 @@ async function ragUpload(files) {
     const res = await fetch('/api/personal/upload', { method: 'POST', body: fd });
     const data = await res.json();
     if (data.success) { ragMsg(`Uploaded ${data.uploaded.length} file(s), ${data.indexed_count} chunks indexed`); loadRag(); }
-    else ragMsg(data.detail || 'Upload failed', true);
+    else ragMsg(data.detail || 'Caricamento non riuscito', true);
   } catch (e) { ragMsg('Upload error: ' + e.message, true); }
 }
 
@@ -2082,7 +2082,7 @@ function initRag() {
       if (data.success) { ragMsg(`Indexed ${data.indexed_count} chunks from directory`); el('adm-ragDirInput').value = ''; loadRag(); }
       else ragMsg(data.detail || data.message || 'Failed', true);
     } catch (e) { ragMsg('Error: ' + e.message, true); }
-    btn.disabled = false; btn.textContent = 'Add Directory';
+    btn.disabled = false; btn.textContent = 'Aggiungi cartella';
   });
   el('adm-ragReloadBtn').addEventListener('click', async () => {
     const btn = el('adm-ragReloadBtn');
@@ -2111,11 +2111,11 @@ async function loadTokens() {
         <div class="admin-user-info" style="flex:1;flex-wrap:wrap;gap:0.3rem;">
           <span class="admin-user-name">${esc(t.name)}</span>
           <span class="admin-badge">${esc(t.token_prefix)}...</span>
-          <span class="admin-badge" title="Allowed API scopes">${esc((t.scopes || ['chat']).join(', '))}</span>
+          <span class="admin-badge" title="Ambiti API consentiti">${esc((t.scopes || ['chat']).join(', '))}</span>
           ${t.owner ? `<span style="font-size:0.75rem;opacity:0.5;">Owner: ${esc(t.owner)}</span>` : ''}
-          ${t.last_used_at ? `<span style="font-size:0.75rem;opacity:0.5;">Last used: ${new Date(t.last_used_at).toLocaleDateString()}</span>` : '<span style="font-size:0.75rem;opacity:0.4;">Never used</span>'}
+          ${t.last_used_at ? `<span style="font-size:0.75rem;opacity:0.5;">Last used: ${new Date(t.last_used_at).toLocaleDateString()}</span>` : '<span style="font-size:0.75rem;opacity:0.4;">Mai usato</span>'}
         </div>
-        <button class="admin-btn-delete" data-adm-del-token="${t.id}">Revoke</button>
+        <button class="admin-btn-delete" data-adm-del-token="${t.id}">Revoca</button>
       </div>`).join('');
     list.querySelectorAll('[data-adm-del-token]').forEach(btn => {
       btn.addEventListener('click', async () => {
@@ -2124,7 +2124,7 @@ async function loadTokens() {
         loadTokens();
       });
     });
-  } catch (e) { list.innerHTML = '<div class="admin-error">Failed to load tokens</div>'; }
+  } catch (e) { list.innerHTML = '<div class="admin-error">Caricamento dei token non riuscito</div>'; }
 }
 
 function initTokenForm() {
@@ -2133,20 +2133,20 @@ function initTokenForm() {
     const reveal = el('adm-tokenReveal');
     msg.textContent = ''; msg.className = ''; reveal.style.display = 'none';
     const name = el('adm-tokenName').value.trim();
-    if (!name) { msg.textContent = 'Token name is required'; msg.className = 'admin-error'; return; }
+    if (!name) { msg.textContent = 'Il nome del token è obbligatorio'; msg.className = 'admin-error'; return; }
     const fd = new FormData(); fd.append('name', name);
     try {
       const res = await fetch('/api/tokens', { method: 'POST', body: fd, credentials: 'same-origin' });
       const data = await res.json();
       if (res.ok) { el('adm-tokenValue').textContent = data.token; reveal.style.display = ''; el('adm-tokenName').value = ''; loadTokens(); }
       else { msg.textContent = data.detail || 'Failed'; msg.className = 'admin-error'; }
-    } catch (e) { msg.textContent = 'Request failed'; msg.className = 'admin-error'; }
+    } catch (e) { msg.textContent = 'Richiesta non riuscita'; msg.className = 'admin-error'; }
   });
   el('adm-tokenCopyBtn').addEventListener('click', () => {
     const val = el('adm-tokenValue').textContent;
     navigator.clipboard.writeText(val).then(() => {
-      el('adm-tokenCopyBtn').textContent = 'Copied!';
-      setTimeout(() => { el('adm-tokenCopyBtn').textContent = 'Copy'; }, 2000);
+      el('adm-tokenCopyBtn').textContent = 'Copiato!';
+      setTimeout(() => { el('adm-tokenCopyBtn').textContent = 'Copia'; }, 2000);
     });
   });
 }
@@ -2168,27 +2168,27 @@ async function loadWebhooks() {
       return `
         <div class="admin-ep-item" style="flex-wrap:wrap;">
           <div class="admin-ep-info" style="flex:1;min-width:200px;">
-            <div class="admin-ep-name">${esc(w.name)} ${w.is_active ? '' : '<span class="admin-badge admin-badge-off">disabled</span>'} ${w.has_secret ? '<span class="admin-badge">signed</span>' : ''}</div>
+            <div class="admin-ep-name">${esc(w.name)} ${w.is_active ? '' : '<span class="admin-badge admin-badge-off">disattivato</span>'} ${w.has_secret ? '<span class="admin-badge">signed</span>' : ''}</div>
             <div class="admin-ep-detail">${esc(w.url)}</div>
             <div style="margin-top:0.3rem;">${events}</div>
             <div class="admin-ep-detail">Last: ${lastTriggered} ${statusBadge}</div>
             ${errorText}
           </div>
           <div class="admin-ep-actions">
-            <button class="admin-btn-sm" data-adm-wh-test="${w.id}">Test</button>
+            <button class="admin-btn-sm" data-adm-wh-test="${w.id}">Prova</button>
             <button class="admin-btn-sm" data-adm-wh-toggle="${w.id}">${w.is_active ? 'Disable' : 'Enable'}</button>
-            <button class="admin-btn-delete" data-adm-wh-delete="${w.id}">Delete</button>
+            <button class="admin-btn-delete" data-adm-wh-delete="${w.id}">Elimina</button>
           </div>
         </div>`;
     }).join('');
     list.querySelectorAll('[data-adm-wh-test]').forEach(btn => {
       btn.addEventListener('click', async () => {
-        const msg = el('adm-whMsg'); msg.textContent = 'Sending test...'; msg.className = '';
+        const msg = el('adm-whMsg'); msg.textContent = 'Invio prova...'; msg.className = '';
         try {
           const res = await fetch(`/api/webhooks/${btn.dataset.admWhTest}/test`, { method: 'POST', credentials: 'same-origin' });
           msg.textContent = res.ok ? 'Test sent!' : 'Test failed'; msg.className = res.ok ? 'admin-success' : 'admin-error';
           setTimeout(() => loadWebhooks(), 1000);
-        } catch (e) { msg.textContent = 'Failed: ' + e.message; msg.className = 'admin-error'; }
+        } catch (e) { msg.textContent = 'Non riuscito: ' + e.message; msg.className = 'admin-error'; }
       });
     });
     list.querySelectorAll('[data-adm-wh-toggle]').forEach(btn => {
@@ -2200,7 +2200,7 @@ async function loadWebhooks() {
         await fetch(`/api/webhooks/${btn.dataset.admWhDelete}`, { method: 'DELETE', credentials: 'same-origin' }); loadWebhooks();
       });
     });
-  } catch (e) { list.innerHTML = '<div class="admin-error">Failed to load webhooks</div>'; }
+  } catch (e) { list.innerHTML = '<div class="admin-error">Caricamento dei webhook non riuscito</div>'; }
 }
 
 function initWebhookForm() {
@@ -2211,22 +2211,22 @@ function initWebhookForm() {
     const url = el('adm-whUrl').value.trim();
     const secret = el('adm-whSecret').value.trim();
     const events = Array.from(modalEl.querySelectorAll('.adm-wh-event:checked')).map(e => e.value).join(',');
-    if (!name) { msg.textContent = 'Name is required'; msg.className = 'admin-error'; return; }
-    if (!url) { msg.textContent = 'URL is required'; msg.className = 'admin-error'; return; }
-    if (!events) { msg.textContent = 'Select at least one event'; msg.className = 'admin-error'; return; }
+    if (!name) { msg.textContent = 'Il nome è obbligatorio'; msg.className = 'admin-error'; return; }
+    if (!url) { msg.textContent = 'L’URL è obbligatorio'; msg.className = 'admin-error'; return; }
+    if (!events) { msg.textContent = 'Seleziona almeno un evento'; msg.className = 'admin-error'; return; }
     const fd = new FormData();
     fd.append('name', name); fd.append('url', url); fd.append('secret', secret); fd.append('events', events);
     try {
       const res = await fetch('/api/webhooks', { method: 'POST', body: fd, credentials: 'same-origin' });
-      if (res.ok) { msg.textContent = 'Webhook added'; msg.className = 'admin-success'; el('adm-whName').value = ''; el('adm-whUrl').value = ''; el('adm-whSecret').value = ''; loadWebhooks(); }
+      if (res.ok) { msg.textContent = 'Webhook aggiunto'; msg.className = 'admin-success'; el('adm-whName').value = ''; el('adm-whUrl').value = ''; el('adm-whSecret').value = ''; loadWebhooks(); }
       else { const d = await res.json(); msg.textContent = d.detail || 'Failed'; msg.className = 'admin-error'; }
-    } catch (e) { msg.textContent = 'Failed: ' + e.message; msg.className = 'admin-error'; }
+    } catch (e) { msg.textContent = 'Non riuscito: ' + e.message; msg.className = 'admin-error'; }
   });
 }
 
 /* ── Features ── */
 const featureLabels = {
-  web_search: 'Web Search', deep_research: 'Deep Research',
+  web_search: 'Ricerca web', deep_research: 'Deep Research',
   memory: 'Memory', document_editor: 'Document Editor', rag: 'RAG Knowledge Base', sensitive_filter: 'Sensitive Info Filter',
   gallery: 'Gallery'
 };
@@ -2247,7 +2247,7 @@ async function loadFeatures() {
         await fetch('/api/auth/features', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       });
     });
-  } catch (e) { container.innerHTML = '<div class="admin-error">Failed to load features</div>'; }
+  } catch (e) { container.innerHTML = '<div class="admin-error">Caricamento delle funzionalità non riuscito</div>'; }
 }
 
 /* ── CalDAV Config ── */
@@ -2269,7 +2269,7 @@ function initCalDAV() {
     }).catch(() => {});
 
   saveBtn.addEventListener('click', async () => {
-    status.textContent = 'Saving...';
+    status.textContent = 'Salvataggio...';
     try {
       const res = await fetch(`${API_BASE}/api/calendar/config`, {
         method: 'POST', credentials: 'same-origin',
@@ -2279,7 +2279,7 @@ function initCalDAV() {
       const d = await res.json();
       status.textContent = d.ok ? 'Saved' : 'Error';
       status.style.color = d.ok ? 'var(--green)' : 'var(--red)';
-    } catch (e) { status.textContent = 'Error'; status.style.color = 'var(--red)'; }
+    } catch (e) { status.textContent = 'Errore'; status.style.color = 'var(--red)'; }
     setTimeout(() => { status.textContent = ''; status.style.color = ''; }, 3000);
   });
 
@@ -2296,7 +2296,7 @@ function initCalDAV() {
       const d = await res.json();
       status.textContent = d.ok ? `Connected (${d.calendars} calendars)` : `Failed: ${d.error}`;
       status.style.color = d.ok ? 'var(--green)' : 'var(--red)';
-    } catch (e) { status.textContent = 'Error'; status.style.color = 'var(--red)'; }
+    } catch (e) { status.textContent = 'Errore'; status.style.color = 'var(--red)'; }
     setTimeout(() => { status.textContent = ''; status.style.color = ''; }, 5000);
   });
 }
@@ -2309,7 +2309,7 @@ function initBackup() {
     btn.disabled = true; btn.textContent = 'Exporting...'; msg.textContent = '';
     try {
       const res = await fetch('/api/export', { credentials: 'same-origin' });
-      if (!res.ok) throw new Error('Export failed');
+      if (!res.ok) throw new Error('Esportazione non riuscita');
       const blob = await res.blob();
       const disposition = res.headers.get('Content-Disposition') || '';
       const match = disposition.match(/filename=(.+)/);
@@ -2319,9 +2319,9 @@ function initBackup() {
       a.download = filename;
       a.click();
       URL.revokeObjectURL(a.href);
-      msg.textContent = 'Export downloaded.'; msg.className = 'admin-success';
-    } catch (e) { msg.textContent = 'Export failed: ' + e.message; msg.className = 'admin-error'; }
-    btn.disabled = false; btn.textContent = 'Export Data';
+      msg.textContent = 'Esportazione scaricata.'; msg.className = 'admin-success';
+    } catch (e) { msg.textContent = 'Esportazione non riuscita: ' + e.message; msg.className = 'admin-error'; }
+    btn.disabled = false; btn.textContent = 'Esporta dati';
   });
 
   const fileInput = el('adm-importFile');
@@ -2342,12 +2342,12 @@ function initBackup() {
       });
       const result = await res.json();
       if (res.ok && result.ok) {
-        msg.textContent = result.message || 'Import successful.'; msg.className = 'admin-success';
+        msg.textContent = result.message || 'Importazione completata.'; msg.className = 'admin-success';
       } else {
-        msg.textContent = result.message || result.detail || 'Import failed'; msg.className = 'admin-error';
+        msg.textContent = result.message || result.detail || 'Importazione non riuscita'; msg.className = 'admin-error';
       }
-    } catch (e) { msg.textContent = 'Import failed: ' + e.message; msg.className = 'admin-error'; }
-    btn.disabled = false; btn.textContent = 'Import Data';
+    } catch (e) { msg.textContent = 'Importazione non riuscita: ' + e.message; msg.className = 'admin-error'; }
+    btn.disabled = false; btn.textContent = 'Importa dati';
   });
 }
 
@@ -2379,7 +2379,7 @@ function initDangerZone() {
           if (_wipeMsg) { _wipeMsg.textContent = data.detail || 'Failed'; _wipeMsg.className = 'admin-error'; }
         }
       } catch (e) {
-        if (_wipeMsg) { _wipeMsg.textContent = 'Request failed: ' + e.message; _wipeMsg.className = 'admin-error'; }
+        if (_wipeMsg) { _wipeMsg.textContent = 'Richiesta non riuscita: ' + e.message; _wipeMsg.className = 'admin-error'; }
       }
       btn.disabled = false; btn.textContent = prev;
     });

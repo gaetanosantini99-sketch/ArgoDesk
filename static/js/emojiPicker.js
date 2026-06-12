@@ -214,7 +214,7 @@ function _buildPicker() {
 
   const search = document.createElement('input');
   search.type = 'text';
-  search.placeholder = 'Search…';
+  search.placeholder = 'Cerca…';
   search.className = 'emoji-picker-search';
   el.appendChild(search);
 

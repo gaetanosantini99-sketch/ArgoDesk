@@ -73,7 +73,7 @@ function _initGroupTab() {
           <span style="font-size:12px;font-weight:500;">${uiModule.esc(label)}</span>
           ${sublabel && sublabel !== label ? '<span style="font-size:10px;opacity:0.35;margin-left:4px;">' + uiModule.esc(sublabel) + '</span>' : ''}
         </span>
-        <button style="background:none;border:none;color:var(--fg);opacity:0.5;cursor:pointer;font-size:16px;padding:0 4px;line-height:1;position:relative;top:-4px;" data-idx="${idx}" title="Remove">&times;</button>
+        <button style="background:none;border:none;color:var(--fg);opacity:0.5;cursor:pointer;font-size:16px;padding:0 4px;line-height:1;position:relative;top:-4px;" data-idx="${idx}" title="Rimuovi">&times;</button>
       `;
       row.querySelector('button').addEventListener('click', () => { _groupParticipants.splice(idx, 1); _render(); });
       participantsEl.appendChild(row);
@@ -149,7 +149,7 @@ function _initGroupTab() {
       return m;
     }).filter(Boolean);
 
-    if (picked.length < 2) { uiModule.showToast('Need at least 2 participants — add models or characters'); return; }
+    if (picked.length < 2) { uiModule.showToast('Servono almeno 2 partecipanti — aggiungi modelli o personaggi'); return; }
 
     const modal = document.getElementById('custom-preset-modal');
     if (modal) modal.classList.add('hidden');
@@ -198,7 +198,7 @@ function _initGroupTab() {
   const groupTab = document.querySelector('.preset-tab[data-chartab="group"]');
   if (groupTab) groupTab.addEventListener('click', () => {
     _modelsCache = null;
-    if (startBtn) startBtn.textContent = 'Start Group';
+    if (startBtn) startBtn.textContent = 'Avvia gruppo';
     _loadGroupPresets();
     if (_groupParticipants.length === 0) {
       setTimeout(() => addBtn.click(), 100);
@@ -277,7 +277,7 @@ function _initGroupTab() {
   document.querySelectorAll('.preset-tab[data-chartab]').forEach(tab => {
     if (tab.dataset.chartab !== 'group') {
       tab.addEventListener('click', () => {
-        if (startBtn) startBtn.textContent = 'Start';
+        if (startBtn) startBtn.textContent = 'Avvia';
       });
     }
   });
@@ -508,7 +508,7 @@ export async function showModelPicker() {
       const goBtn = document.createElement('button');
       goBtn.className = 'btn-primary';
       goBtn.style.cssText = 'margin-top:10px;padding:6px 16px;font-size:12px;width:100%;';
-      goBtn.textContent = 'Start Group Chat';
+      goBtn.textContent = 'Avvia chat di gruppo';
       goBtn.addEventListener('click', () => {
         // Attach character info to picked models
         picked.forEach(m => {

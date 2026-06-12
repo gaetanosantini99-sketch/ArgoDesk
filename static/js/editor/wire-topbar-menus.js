@@ -50,7 +50,7 @@ export function wireTopbarMenus({
   // can call it.
   function applyResize(newW, newH) {
     if (!newW || !newH || newW < 1 || newH < 1) {
-      uiModule.showToast('Invalid size');
+      uiModule.showToast('Dimensione non valida');
       return;
     }
     saveState('Resize canvas');

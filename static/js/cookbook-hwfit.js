@@ -160,7 +160,7 @@ export function _renderGpuToggles(system) {
   if (container._activeCount === undefined && validCounts.length) {
     container._activeCount = maxGpu;
   }
-  html += '<button class="hwfit-gpu-btn" data-count="0" title="CPU / RAM only">RAM</button>';
+  html += '<button class="hwfit-gpu-btn" data-count="0" title="Solo CPU / RAM">RAM</button>';
   const hasExplicitCount = typeof container._activeCount === 'number';
   for (const n of validCounts) {
     const text = n === 1 ? 'GPU' : n + ' GPU';
@@ -452,10 +452,10 @@ export async function _hwfitFetch(fresh = false) {
     loadingDiv.style.flexDirection = 'column';
     loadingDiv.style.gap = '6px';
     loadingDiv.appendChild(wp.element);
-    // Text label like the other cookbook tabs: "Loading…", then if the scan runs
+    // Text label like the other cookbook tabs: "Caricamento…", then if the scan runs
     // long (remote SSH hardware probe), switch to "Scanning hardware…".
     const loadingLbl = document.createElement('div');
-    loadingLbl.textContent = 'Loading…';
+    loadingLbl.textContent = 'Caricamento…';
     loadingLbl.style.cssText = 'text-align:center;opacity:0.5;font-size:11px;';
     loadingDiv.appendChild(loadingLbl);
     setTimeout(() => { if (loadingLbl.isConnected) loadingLbl.textContent = 'Scanning hardware…'; }, 2000);
@@ -481,7 +481,7 @@ export async function _hwfitFetch(fresh = false) {
           if (_cachedModelIds.has(name) || [..._cachedModelIds].some(id => id.endsWith('/' + name?.split('/').pop()))) {
             const nameEl = row.querySelector('.hwfit-name');
             if (nameEl && !nameEl.querySelector('.hwfit-dl-dot')) {
-              nameEl.insertAdjacentHTML('beforeend', '<span class="hwfit-dl-dot" title="Downloaded">\u25CF</span>');
+              nameEl.insertAdjacentHTML('beforeend', '<span class="hwfit-dl-dot" title="Scaricato">\u25CF</span>');
             }
           }
         });
@@ -644,7 +644,7 @@ export function _hwfitRenderHw(el, sys) {
     return (
       `<span class="hwfit-hw-chip hwfit-hw-chip-row${dim}" data-hw-chip="${esc(key)}">`
       + `<button type="button" class="hwfit-hw-chip-toggle" data-hw-chip="${esc(key)}" title="${esc(title)}">${label}</button>`
-      + `<button type="button" class="hwfit-hw-chip-x" data-hw-chip="${esc(key)}" title="Remove this chip" aria-label="Remove">×</button>`
+      + `<button type="button" class="hwfit-hw-chip-x" data-hw-chip="${esc(key)}" title="Rimuovi" aria-label="Rimuovi">×</button>`
       + `</span>`
     );
   };
@@ -687,8 +687,8 @@ export function _hwfitRenderHw(el, sys) {
           const dim = _dismissedHwChips.has('gpu') ? ' hwfit-hw-chip-off' : '';
           return (
             `<span class="hwfit-hw-chip hwfit-hw-chip-row hwfit-hw-chip-error${dim}" data-hw-chip="gpu">`
-            + `<button type="button" class="hwfit-hw-chip-toggle" data-hw-chip="gpu" title="${esc(sys.gpu_error)}">GPU driver error</button>`
-            + `<button type="button" class="hwfit-hw-chip-x" data-hw-chip="gpu" title="Remove this chip" aria-label="Remove">×</button>`
+            + `<button type="button" class="hwfit-hw-chip-toggle" data-hw-chip="gpu" title="${esc(sys.gpu_error)}">Errore del driver GPU</button>`
+            + `<button type="button" class="hwfit-hw-chip-x" data-hw-chip="gpu" title="Rimuovi" aria-label="Rimuovi">×</button>`
             + `</span>`
           );
         })();
@@ -702,7 +702,7 @@ export function _hwfitRenderHw(el, sys) {
   const manualChip = (sys.manual_hardware || manual)
     ? `<span class="hwfit-hw-chip hwfit-hw-chip-row hwfit-hw-chip-manual" data-hw-chip="manual">`
       + `<button type="button" class="hwfit-hw-chip-toggle" data-hw-chip="manual" title="Using manual hardware">${esc(_manualHwLabel(manual) || 'Manual hardware')}</button>`
-      + `<button type="button" class="hwfit-hw-chip-x" data-hw-chip="manual" title="Clear manual hardware" aria-label="Clear">×</button>`
+      + `<button type="button" class="hwfit-hw-chip-x" data-hw-chip="manual" title="Clear manual hardware" aria-label="Cancella">×</button>`
       + `</span>`
     : '';
   el.innerHTML = gpuChip
@@ -778,7 +778,7 @@ function _wireManualHardwareControls(el) {
     _hwfitFetch(true);
   };
   const manual = _manualHwState();
-  btn.textContent = 'EDIT';
+  btn.textContent = 'MODIFICA';
   if (manual) {
     panel.querySelector('.hwfit-manual-mode').value = manual.mode || 'gpu';
     panel.querySelector('.hwfit-manual-backend').value = manual.backend || 'cuda';
@@ -841,7 +841,7 @@ function _modeLabel(model) {
 
 export const _hwfitColumns = [
   { key: 'fit', label: 'Fit',    cls: 'hwfit-fit' },
-  { key: null,    label: 'Model',  cls: 'hwfit-name' },
+  { key: null,    label: 'Modello',  cls: 'hwfit-name' },
   { key: 'params',label: 'Param', cls: 'hwfit-c-params' },
   { key: null,    label: 'Quant',  cls: 'hwfit-c-quant' },
   { key: 'vram',  label: 'VRAM',   cls: 'hwfit-c-vram' },
@@ -864,9 +864,9 @@ export function _hwfitRenderList(el, models) {
       || document.getElementById('hwfit-quant')?.value
       || document.getElementById('hwfit-engine')?.value);
     let msg;
-    if (hasFilters) msg = 'No models match these filters — try clearing the search, use-case, quant, or engine.';
-    else if (hasHw) msg = 'No models fit — the hardware probe may have under-reported. Try Rescan.';
-    else msg = 'No models fit your hardware';
+    if (hasFilters) msg = 'Nessun modello corrisponde a questi filtri — prova a cancellare la ricerca, il caso d’uso, la quantizzazione o il motore.';
+    else if (hasHw) msg = 'Nessun modello compatibile — il rilevamento hardware potrebbe aver sottostimato. Prova a Ripetere la scansione.';
+    else msg = 'Nessun modello adatto al tuo hardware';
     el.innerHTML = `<div class="hwfit-loading">${msg}</div>`;
     return;
   }
@@ -896,7 +896,7 @@ export function _hwfitRenderList(el, models) {
     let label = col.label;
     if (col.cls === 'hwfit-fit') {
       const _fitOnly = (() => { try { return localStorage.getItem('hwfit_fit_only_v1') === '1'; } catch { return false; } })();
-      label = `<span class="hwfit-fit-dot${_fitOnly ? ' active' : ''}" title="${_fitOnly ? 'Showing only models that fit. Click to also show too-tight rows.' : 'Click to show only models that fit your hardware.'}" data-fit-dot>●</span>${col.label}`;
+      label = `<span class="hwfit-fit-dot${_fitOnly ? ' active' : ''}" title="${_fitOnly ? 'Showing only models that fit. Click to also show too-tight rows.' : 'Clicca per mostrare solo i modelli adatti al tuo hardware.'}" data-fit-dot>●</span>${col.label}`;
       // (Budget tag removed — the GPU/RAM/N-GPU suffix next to "Fit" was noise;
       // the toggle row already shows which budget is active.)
     }
@@ -916,7 +916,7 @@ export function _hwfitRenderList(el, models) {
     const vramLabel = m.required_gb ? m.required_gb.toFixed(1) + 'G' : '?';
     const moeBadge = m.is_moe ? '<span class="hwfit-badge hwfit-moe">MoE</span>' : '';
     const imgBadge = m.is_image_gen ? '<span class="hwfit-badge" style="background:color-mix(in srgb, var(--red) 20%, transparent);color:var(--red);font-size:8px;padding:1px 4px;border-radius:3px;margin-left:4px;">IMG</span>' : '';
-    const dlDot = (_cachedModelIds && (_cachedModelIds.has(m.name) || [..._cachedModelIds].some(id => id === m.name?.split('/').pop()))) ? '<span class="hwfit-dl-dot" title="Downloaded">\u25CF</span>' : '';
+    const dlDot = (_cachedModelIds && (_cachedModelIds.has(m.name) || [..._cachedModelIds].some(id => id === m.name?.split('/').pop()))) ? '<span class="hwfit-dl-dot" title="Scaricato">\u25CF</span>' : '';
     html += `<div class="hwfit-row" data-model="${esc(m.name)}">`;
     html += `<span class="hwfit-col hwfit-fit" style="color:${fitColor}">${esc(fitLabel)}</span>`;
     // Append quant to the title when it's not already in the repo name. The
@@ -1056,13 +1056,13 @@ export function _expandModelRow(row, modelData) {
   html += `<div class="hwfit-panel-header">`;
   html += `<span class="hwfit-panel-model">${esc(modelData.name)}${dlSource.kind ? ` <span style="opacity:0.5;font-size:10px;">(${esc(dlSource.kind)} ${esc(modelData.quant || '')})</span>` : (modelData.quant_repo ? ` <span style="opacity:0.5;font-size:10px;">(${esc(modelData.quant)})</span>` : '')}</span>`;
   html += `<span class="hwfit-panel-badge">${esc(label)}</span>`;
-  html += `<a href="${esc(hfUrl)}" target="_blank" rel="noopener" class="hwfit-panel-hf-link" title="View download source on HuggingFace">HF \u2197</a>`;
+  html += `<a href="${esc(hfUrl)}" target="_blank" rel="noopener" class="hwfit-panel-hf-link" title="Mostra la fonte di download su HuggingFace">HF \u2197</a>`;
   html += `</div>`;
   html += `<div class="hwfit-panel-actions">`;
-  html += `<button class="cookbook-btn hwfit-dl-btn">Download</button>`;
+  html += `<button class="cookbook-btn hwfit-dl-btn">Scarica</button>`;
   if (!modelData.is_image_gen) {
-    html += `<button class="cookbook-btn cookbook-run-btn hwfit-quickrun-btn" title="Download + launch with smart defaults">Run</button>`;
-    html += `<button class="cookbook-btn hwfit-serve-expand-btn" title="Configure & serve">Configure</button>`;
+    html += `<button class="cookbook-btn cookbook-run-btn hwfit-quickrun-btn" title="Download + launch with smart defaults">Esegui</button>`;
+    html += `<button class="cookbook-btn hwfit-serve-expand-btn" title="Configure & serve">Configura</button>`;
   }
   html += `</div>`;
   if (modelData.is_image_gen) {
@@ -1235,7 +1235,7 @@ export function _expandModelRow(row, modelData) {
         uiModule.showError('Launch failed: ' + e.message);
       }
       quickRunBtn.disabled = false;
-      quickRunBtn.textContent = 'Run';
+      quickRunBtn.textContent = 'Esegui';
     });
   }
 
@@ -1254,7 +1254,7 @@ export function _expandModelRow(row, modelData) {
         || [..._cachedModelIds].some(id => id === repo || id.endsWith('/' + short))
       );
       if (_cachedModelIds && !downloaded) {
-        uiModule.showToast('Download the model first, then configure from Serve tab');
+        uiModule.showToast('Scarica prima il modello, poi configura dalla scheda Serve');
         return;
       }
       // Downloaded (or cache state unknown) — open the Serve panel, which switches
@@ -1263,7 +1263,7 @@ export function _expandModelRow(row, modelData) {
         const { openServePanelForRepo } = await import('./cookbookServe.js');
         await openServePanelForRepo(repo);
       } catch (e) {
-        uiModule.showToast('Could not open Serve: ' + (e && e.message ? e.message : e));
+        uiModule.showToast('Impossibile aprire Serve: ' + (e && e.message ? e.message : e));
       }
     });
   }
@@ -1355,12 +1355,8 @@ export function _hwfitInit() {
     clearTimeout(_hwfitDebounce);
     _hwfitDebounce = setTimeout(() => _hwfitFetch(), 400);
   });
-  // HF Token
-  const hfToken = document.getElementById('hwfit-hftoken');
-  if (hfToken) {
-    hfToken.addEventListener('change', () => { _envState.hfToken = hfToken.value.trim(); _persistEnvState(); });
-    hfToken.addEventListener('input', () => { _envState.hfToken = hfToken.value.trim(); });
-  }
+  // HF Token is now managed in Impostazioni → Chiavi API (see cookbook.js
+  // pointer + src/api_keys_facade.py). No input lives in this panel anymore.
 
   // Rebuild all server select dropdowns with current servers
   function _rebuildServerSelect() {
@@ -1371,7 +1367,7 @@ export function _hwfitInit() {
     for (const sel of selectors) {
       if (!sel) continue;
       const currentVal = sel.value;
-      let html = `<option value="local">Local</option>`;
+      let html = `<option value="local">Locale</option>`;
       _envState.servers.forEach((s, i) => {
         if (!s.host) return;
         const label = s.name || s.host || `Server ${i + 1}`;
@@ -1440,7 +1436,7 @@ export function _hwfitInit() {
     if (!dot) return;
     if (!host) {
       dot.className = 'cookbook-srv-status';
-      dot.title = 'Enter user@host to test';
+      dot.title = 'Inserisci user@host da provare';
       setMsg('');
       return;
     }
@@ -1512,12 +1508,12 @@ export function _hwfitInit() {
     const host = entry.querySelector('.cookbook-srv-host')?.value?.trim() || '';
     const port = entry.querySelector('.cookbook-srv-port')?.value?.trim() || '';
     if (!host || !host.includes('@')) {
-      cmdBox.value = 'Enter the server as user@host first.';
+      cmdBox.value = 'Inserisci prima il server come user@host.';
       if (copyBtn) copyBtn.disabled = true;
       return;
     }
     if (!/^[A-Za-z0-9._~-]+@[A-Za-z0-9._:-]+$/.test(host) || (port && !/^\d{1,5}$/.test(port))) {
-      cmdBox.value = 'Use a plain SSH target like user@host and an optional numeric port.';
+      cmdBox.value = 'Usa un target SSH semplice come user@host e una porta numerica opzionale.';
       if (copyBtn) copyBtn.disabled = true;
       return;
     }
@@ -1554,7 +1550,7 @@ export function _hwfitInit() {
     if (!entry.querySelector('.cookbook-srv-status')) {
       const dot = document.createElement('span');
       dot.className = 'cookbook-srv-status';
-      dot.title = 'Click to test SSH';
+      dot.title = 'Clicca per provare SSH';
       dot.addEventListener('click', (e) => { e.stopPropagation(); _testServerConnection(entry); });
       if (titleEl) titleEl.insertBefore(dot, titleEl.firstChild);
       else if (row) row.insertBefore(dot, row.firstChild);
@@ -1563,7 +1559,7 @@ export function _hwfitInit() {
       const _hostEl = entry.querySelector('.cookbook-srv-host');
       if (_hostEl && (_hostEl.readOnly || _hostEl.disabled)) {
         dot.className = 'cookbook-srv-status ok';
-        dot.title = 'Local (this machine)';
+        dot.title = 'Locale (questa macchina)';
       }
     }
     const checkBtn = entry.querySelector('.cookbook-server-check-btn');
@@ -1589,8 +1585,8 @@ export function _hwfitInit() {
           const on = !!_envState.defaultServer && b.dataset.srvKey === _envState.defaultServer;
           b.classList.toggle('active', on);
           // Keep the "default" label after the icon (don't overwrite it).
-          b.innerHTML = (on ? _MODELDIR_CHECK_ON : _MODELDIR_CHECK_OFF) + '<span class="cookbook-srv-default-label">default</span>';
-          b.title = on ? 'Default server — Cookbook opens here' : 'Make this the default server';
+          b.innerHTML = (on ? _MODELDIR_CHECK_ON : _MODELDIR_CHECK_OFF) + '<span class="cookbook-srv-default-label">predefinito</span>';
+          b.title = on ? 'Default server — Cookbook opens here' : 'Imposta come server predefinito';
         });
         // Apply immediately so the dropdowns reflect it without reopening
         // (inline — _applyServerSelection lives in cookbook.js and isn't imported here).
@@ -1632,7 +1628,7 @@ export function _hwfitInit() {
         const cmd = entry.querySelector('.cookbook-server-key-command')?.value?.trim() || '';
         if (!cmd || cmd.startsWith('Enter ')) return;
         await _copyText(cmd);
-        uiModule.showToast('SSH setup command copied');
+        uiModule.showToast('Comando di configurazione SSH copiato');
       });
     }
     entry.querySelectorAll('input, select').forEach(el => {
@@ -1747,7 +1743,7 @@ export function _hwfitInit() {
                   const tag = document.createElement('span');
                   tag.className = 'cookbook-modeldir-tag';
                   tag.dataset.dirIdx = existing.length;
-                  tag.innerHTML = `${uiModule.esc(termuxDir)} <span class="cookbook-modeldir-rm" title="Remove">\u2715</span>`;
+                  tag.innerHTML = `${uiModule.esc(termuxDir)} <span class="cookbook-modeldir-rm" title="Rimuovi">\u2715</span>`;
                   tag.querySelector('.cookbook-modeldir-rm').addEventListener('click', () => { tag.remove(); _syncServers(); });
                   const addBtn = container.querySelector('.cookbook-modeldir-add');
                   if (addBtn) container.insertBefore(tag, addBtn);
@@ -1757,12 +1753,12 @@ export function _hwfitInit() {
               }
             }
           } else {
-            setupBtn.textContent = 'Failed';
+            setupBtn.textContent = 'Non riuscito';
             setupBtn.style.color = 'var(--red)';
-            uiModule.showError(data.error || data.output || 'Setup failed');
+            uiModule.showError(data.error || data.output || 'Configurazione non riuscita');
           }
         } catch (e) {
-          setupBtn.textContent = 'Error';
+          setupBtn.textContent = 'Errore';
           setupBtn.style.color = 'var(--red)';
           uiModule.showError(e.message);
         }
@@ -1784,7 +1780,7 @@ export function _hwfitInit() {
       tag.className = 'cookbook-modeldir-tag';
       tag.dataset.dirIdx = container.querySelectorAll('.cookbook-modeldir-tag').length;
       tag.dataset.dir = dir;
-      tag.innerHTML = `<span class="cookbook-modeldir-dl" title="Send downloads here" data-dl-dir="${uiModule.esc(dir)}">${_MODELDIR_CHECK_OFF}</span> ${uiModule.esc(dir)} <span class="cookbook-modeldir-rm" title="Remove">\u2716</span>`;
+      tag.innerHTML = `<span class="cookbook-modeldir-dl" title="Send downloads here" data-dl-dir="${uiModule.esc(dir)}">${_MODELDIR_CHECK_OFF}</span> ${uiModule.esc(dir)} <span class="cookbook-modeldir-rm" title="Rimuovi">\u2716</span>`;
       tag.querySelector('.cookbook-modeldir-rm').addEventListener('click', () => { tag.remove(); _syncServers(); });
       _wireModelDirTarget(entry, tag.querySelector('.cookbook-modeldir-dl'));
       container.insertBefore(tag, addDirBtn);

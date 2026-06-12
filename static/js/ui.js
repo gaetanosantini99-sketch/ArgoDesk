@@ -219,7 +219,7 @@ _initHoverCardSpaceToggle();
 export async function copyToClipboard(text) {
   try {
     await navigator.clipboard.writeText(text);
-    showToast('Copied');
+    showToast('Copiato');
   }
   catch {
     const ta = document.createElement('textarea');
@@ -229,7 +229,7 @@ export async function copyToClipboard(text) {
     ta.select();
     document.execCommand('copy');
     document.body.removeChild(ta);
-    showToast('Copied');
+    showToast('Copiato');
   }
 }
 

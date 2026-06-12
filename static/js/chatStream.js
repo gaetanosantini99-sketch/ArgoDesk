@@ -203,7 +203,7 @@ export function notifyStreamComplete(sessionId, query) {
   var isOtherSession = sessionModule && sessionModule.getCurrentSessionId() !== sessionId;
   if (!isHidden && !isOtherSession) return;
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  var body = query ? 'Response to "' + query.substring(0, 60) + '" is ready' : 'Your chat response has completed';
+  var body = query ? 'Response to "' + query.substring(0, 60) + '" is ready' : 'La risposta della chat è pronta';
   var notification = new Notification('Response Complete', {
     body: body,
     tag: 'stream-' + sessionId,
@@ -232,7 +232,7 @@ export function insertStreamDoneToast(sessionId, query) {
   div.className = 'msg msg-system stream-done-toast';
   div.innerHTML = '<div class="body">'
     + '<span class="stream-done-indicator">●</span>'
-    + '<span>Response ready in <strong>' + (name || 'session').replace(/</g, '&lt;') + '</strong>'
+    + '<span>Risposta pronta in <strong>' + (name || 'session').replace(/</g, '&lt;') + '</strong>'
     + (preview ? ' &mdash; ' + preview.replace(/</g, '&lt;') : '')
     + '</span>'
     + '</div>';
@@ -251,7 +251,7 @@ export function notifyResearchComplete(sessionId, query) {
   var isOtherSession = sessionModule && sessionModule.getCurrentSessionId() !== sessionId;
   if (!isHidden && !isOtherSession) return;
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  var body = query ? 'Research on "' + query.substring(0, 60) + '" is ready' : 'Your deep research has completed';
+  var body = query ? 'Research on "' + query.substring(0, 60) + '" is ready' : 'La ricerca approfondita è pronta';
   var notification = new Notification('Research Complete', {
     body: body,
     tag: 'research-' + sessionId,

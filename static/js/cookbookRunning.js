@@ -129,8 +129,8 @@ function _terminalServeDiagnosis(task, outputText) {
       message: 'AWQ/GPTQ/FP8 cannot be served through llama.cpp/Ollama unified-memory mode.',
       suggestion: 'Suggested action: use vLLM/SGLang on a compatible CUDA/ROCm GPU server, or download a GGUF version for llama.cpp/Ollama/unified-memory serving.',
       fixes: [
-        { label: 'Find GGUF download', action: () => _openDownloadForGgufTask(task) },
-        { label: 'Edit serve', action: (panel) => _openServeEditForTask(task) },
+        { label: 'Trova download GGUF', action: () => _openDownloadForGgufTask(task) },
+        { label: 'Modifica serve', action: (panel) => _openServeEditForTask(task) },
       ],
     };
   }
@@ -139,19 +139,19 @@ function _terminalServeDiagnosis(task, outputText) {
       message: 'AWQ/GPTQ/FP8 needs a working vLLM/SGLang accelerator path; this server did not expose one.',
       suggestion: 'Suggested action: choose a CUDA/ROCm server where vLLM/SGLang can see the GPU, or download a GGUF version and serve it with llama.cpp/Ollama.',
       fixes: [
-        { label: 'Find GGUF download', action: () => _openDownloadForGgufTask(task) },
-        { label: 'Edit serve', action: (panel) => _openServeEditForTask(task) },
+        { label: 'Trova download GGUF', action: () => _openDownloadForGgufTask(task) },
+        { label: 'Modifica serve', action: (panel) => _openServeEditForTask(task) },
       ],
     };
   }
   return _diagnose(out) || {
     message: /Native llama-server not found|building llama-server|llama\.cpp/i.test(out)
-      ? 'llama.cpp build stopped before the server became reachable.'
-      : 'Serve stopped before the model became reachable.',
+      ? 'La compilazione di llama.cpp si è interrotta prima che il server diventasse raggiungibile.'
+      : 'L’esecuzione si è interrotta prima che il modello diventasse raggiungibile.',
     suggestion: /Native llama-server not found|building llama-server|llama\.cpp/i.test(out)
       ? 'Suggested action: copy the troubleshooting bundle, then edit serve settings. For the quickest local/CPU path, use Ollama or a prebuilt llama-server; source builds can take several minutes and fail if build dependencies are incomplete.'
       : 'Suggested action: copy the troubleshooting bundle, then edit serve settings or relaunch with a CPU/backend fallback.',
-    fixes: [{ label: 'Edit serve', action: (panel) => _openServeEditForTask(task) }],
+    fixes: [{ label: 'Modifica serve', action: (panel) => _openServeEditForTask(task) }],
   };
 }
 
@@ -452,7 +452,7 @@ async function _startQueuedDownload(task) {
     return;
   }
   // Flip to 'running' SYNCHRONOUSLY (before the async POST) so a concurrent
-  // _processQueue — or a second "Start now" — can't see it as still 'queued' and
+  // _processQueue — or a second "Avvia ora" — can't see it as still 'queued' and
   // launch the same download a second time. Without this, finishing another
   // download mid-POST re-queued this one into a duplicate task.
   {
@@ -950,7 +950,7 @@ function _autoSaveWorkingConfig(task) {
   });
   _savePresets(presets);
   task._autoSaved = true;
-  uiModule.showToast('Saved working config');
+  uiModule.showToast('Configurazione funzionante salvata');
 }
 
 // ── Cross-device sync ──
@@ -1104,7 +1104,7 @@ async function _retryDownload(name, payload, replaceSessionId = '') {
     }
     const data = await res.json();
     if (!data.ok) {
-      uiModule.showToast('Download failed: ' + (data.error || ''));
+      uiModule.showToast('Download non riuscito: ' + (data.error || ''));
       if (replaceSessionId) _updateTask(replaceSessionId, { status: 'crashed', _retrying: false });
       return;
     }
@@ -1131,7 +1131,7 @@ async function _retryDownload(name, payload, replaceSessionId = '') {
     }
     uiModule.showToast(`Downloading ${name}...`);
   } catch (e) {
-    uiModule.showToast('Download failed: ' + e.message);
+    uiModule.showToast('Download non riuscito: ' + e.message);
     if (replaceSessionId) _updateTask(replaceSessionId, { status: 'crashed', _retrying: false });
   }
 }
@@ -1195,7 +1195,7 @@ export async function _serveAutoFix(panel, envVar) {
 // adjusted setting, instead of blindly relaunching).
 async function _openServeEditForTask(task, cmdOverride, fieldOverrides = null) {
   const repo = task.payload?.repo_id;
-  if (!repo) { uiModule.showToast('No model info on this task'); return; }
+  if (!repo) { uiModule.showToast('Nessuna informazione sul modello per questa attività'); return; }
   const cmd = cmdOverride || task.payload?._cmd;
   // A modified cmd must be re-parsed; otherwise prefer the exact launch fields.
   let fields = cmdOverride
@@ -1219,7 +1219,7 @@ async function _openServeEditForTask(task, cmdOverride, fieldOverrides = null) {
     await openServePanelForRepo(repo, fields);
   } catch (err) {
     console.error('[cookbook] open serve panel failed', err);
-    uiModule.showToast('Could not open serve panel');
+    uiModule.showToast('Impossibile aprire il pannello Serve');
   }
 }
 
@@ -1339,7 +1339,7 @@ function _promptEditServeCmd(currentCmd) {
         <div class="cookbook-edit-title">Edit serve command</div>
         <textarea class="cookbook-edit-textarea" spellcheck="false"></textarea>
         <div class="cookbook-edit-actions">
-          <button class="cookbook-edit-cancel memory-toolbar-btn">Cancel</button>
+          <button class="cookbook-edit-cancel memory-toolbar-btn">Annulla</button>
           <button class="cookbook-edit-save memory-toolbar-btn">Save &amp; relaunch</button>
         </div>
       </div>`;
@@ -1493,7 +1493,7 @@ export async function _launchServeTask(shortName, repo, cmd, fields, hostOverrid
       // + log full payload so the user can copy the error.
       const err = data.error || data.detail || res.statusText || 'unknown';
       console.error('[cookbook] /api/model/serve failed', { status: res.status, body: data });
-      uiModule.showToast('Failed to start: ' + String(err).slice(0, 200), 9000);
+      uiModule.showToast('Avvio non riuscito: ' + String(err).slice(0, 200), 9000);
       return;
     }
 
@@ -1505,7 +1505,7 @@ export async function _launchServeTask(shortName, repo, cmd, fields, hostOverrid
     _addTask(data.session_id, shortName, 'serve', payload);
     uiModule.showToast(`Serving ${shortName}...`);
   } catch (e) {
-    uiModule.showToast('Failed: ' + e.message);
+    uiModule.showToast('Non riuscito: ' + e.message);
   }
 }
 
@@ -1606,7 +1606,7 @@ export function _renderRunningTab() {
     group.dataset.backendGroup = 'Running';
     group.innerHTML = '<div class="admin-card" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">' +
       '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:2px;">' +
-      '<h2 style="margin:0;padding:0;line-height:1;">Running <span id="running-count" class="memory-count" style="font-size:0.6em;opacity:0.6;font-weight:normal">' + activeCount + '</span></h2>' +
+      '<h2 style="margin:0;padding:0;line-height:1;">In esecuzione <span id="running-count" class="memory-count" style="font-size:0.6em;opacity:0.6;font-weight:normal">' + activeCount + '</span></h2>' +
       '</div>' +
       '<p class="memory-desc doclib-desc" style="margin-top:6px;">Active downloads and serving processes.</p>' +
       '</div>';
@@ -1684,7 +1684,7 @@ export function _renderRunningTab() {
       // Glowy status dot next to the server name (like the Settings server card):
       // green when reachable, red if any serve task on it is crashed/unreachable.
       const _secDot = (key && allTasks.some(_serveTaskFailed)) ? 'fail' : 'ok';
-      const _dotTitle = key ? (_secDot === 'fail' ? 'Server not responding' : 'Reachable') : 'Local (this machine)';
+      const _dotTitle = key ? (_secDot === 'fail' ? 'Server not responding' : 'Reachable') : 'Locale (questa macchina)';
       sec.insertAdjacentHTML('afterbegin', `<div class="cookbook-section-header" data-collapse="${bodyId}"><svg class="cookbook-section-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg><span class="cookbook-srv-status ${_secDot}" title="${_dotTitle}" style="flex-shrink:0;position:relative;top:0px;"></span><span class="cookbook-section-title" style="margin:0;">${esc(sg.name)}</span><button class="cookbook-btn cookbook-stop-all-btn" data-stop-server="${esc(key)}">Stop all</button><button class="cookbook-btn cookbook-clear-btn" data-clear-server="${esc(key)}">Clear finished</button></div><div id="${bodyId}" class="cookbook-section-body"></div>`);
     }
   }
@@ -1830,10 +1830,10 @@ export function _renderRunningTab() {
       <div class="cookbook-task-header">
         <span class="cookbook-task-type${(task.status === 'done' && task.type === 'download') ? ' cookbook-task-type-done' : ''}" data-type="${esc(task.type)}">${esc((task.status === 'done' && task.type === 'download') ? 'finished' : task.type)}</span>
         <span class="cookbook-task-name">${modelLogo(task.name)}${esc(task.name)}</span>
-        <span class="cookbook-task-indicator"><span class="cookbook-task-wave" style="display:${task.status === 'running' ? '' : 'none'}"></span><span class="cookbook-task-check" title="Clear" style="display:${_canClearTask(task) ? '' : 'none'}"><svg class="cookbook-task-check-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#50fa7b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><svg class="cookbook-task-clear-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span class="cookbook-task-done-label">${esc(_clearPillLabel(task))}</span><span class="cookbook-task-clear-label">clear</span></span></span>
+        <span class="cookbook-task-indicator"><span class="cookbook-task-wave" style="display:${task.status === 'running' ? '' : 'none'}"></span><span class="cookbook-task-check" title="Cancella" style="display:${_canClearTask(task) ? '' : 'none'}"><svg class="cookbook-task-check-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#50fa7b" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><svg class="cookbook-task-clear-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg><span class="cookbook-task-done-label">${esc(_clearPillLabel(task))}</span><span class="cookbook-task-clear-label">clear</span></span></span>
         <button type="button" class="cookbook-task-start-now" title="Start this queued download now" style="display:${(task.type === 'download' && task.status === 'queued') ? '' : 'none'}"><svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="8 5 19 12 8 19 8 5"/></svg><span>start now</span></button>
         <span class="cookbook-task-status ${_bdg.cls}"${_bdgTitle}>${esc(_bdg.text)}</span>
-        <button class="cookbook-task-menu-btn" title="Actions">&#8942;</button>
+        <button class="cookbook-task-menu-btn" title="Azioni">&#8942;</button>
       </div>
       <div class="cookbook-task-sub"><span class="cookbook-task-session">${esc(task.sessionId)}</span><span class="cookbook-task-uptime" style="display:${((task.type === 'serve' || task.type === 'download') && task.status === 'running') ? '' : 'none'}"></span>${(task.type === 'download') ? `<span class="cookbook-task-dldir" title="Download destination" style="font-size:9px;color:var(--fg-muted);font-family:'Fira Code',monospace;opacity:0.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40ch;">Dir: ${esc(task.payload?.local_dir || '~/.cache/huggingface/hub')}</span>` : ''}</div>
       <div class="cookbook-output-wrap cookbook-task-collapsible${_mobileCollapseDefault ? ' cookbook-task-collapsed' : ''}"><pre class="cookbook-output-pre">${esc(task.output || '')}</pre><button type="button" class="copy-code cookbook-output-copy"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
@@ -1898,7 +1898,7 @@ export function _renderRunningTab() {
         _serveBtn.addEventListener('click', async (e) => {
           e.stopPropagation();
           const repo = task.payload?.repo_id || task.name;
-          if (!repo) { uiModule.showToast('No model info on this task'); return; }
+          if (!repo) { uiModule.showToast('Nessuna informazione sul modello per questa attività'); return; }
           // Point the active server at the one it downloaded to.
           const _tHost = task.remoteHost || '';
           _envState.remoteHost = _tHost;
@@ -1914,7 +1914,7 @@ export function _renderRunningTab() {
             // Serving it supersedes the finished download — clear the card from
             // the Running tab (smooth exit) now that we've jumped to Serve.
             _animateOutThenRemove(el, task.sessionId);
-          } catch (err) { uiModule.showToast('Could not open Serve: ' + err.message); }
+          } catch (err) { uiModule.showToast('Impossibile aprire Serve: ' + err.message); }
         });
       }
     }
@@ -2023,7 +2023,7 @@ export function _renderRunningTab() {
         // Queued download: let the user jump the queue and start it immediately
         // (downloads otherwise run one-at-a-time per server).
         if (task.type === 'download' && task.status === 'queued') {
-          items.push({ label: 'Start now', action: 'start-now', custom: () => {
+          items.push({ label: 'Avvia ora', action: 'start-now', custom: () => {
             _startQueuedDownload(task);
             _renderRunningTab();
           }});
@@ -2032,26 +2032,26 @@ export function _renderRunningTab() {
           items.push({ label: 'Reconnect', action: 'reconnect' });
         }
         if (task.status === 'running') {
-          items.push({ label: 'Stop', action: 'stop', danger: true });
+          items.push({ label: 'Ferma', action: 'stop', danger: true });
         }
         items.push({ label: 'Restart', action: 'retry' });
         // Edit serve — open the full serve panel (same as the edit icon),
         // switching to this task's server first so the model is found.
         if (task.type === 'serve' && task.payload?.repo_id) {
-          items.push({ label: 'Edit serve', action: 'edit-panel', custom: () => _openEdit() });
+          items.push({ label: 'Modifica serve', action: 'edit-panel', custom: () => _openEdit() });
         }
         // Save serve — save current launch config as a preset.
         if (task.type === 'serve' && task.payload?._cmd) {
-          items.push({ label: 'Save serve', action: 'save', custom: () => {
-            if (!_saveTaskAsPreset(task)) { uiModule.showToast('Already saved'); return; }
-            uiModule.showToast('Saved to presets');
+          items.push({ label: 'Salva configurazione', action: 'save', custom: () => {
+            if (!_saveTaskAsPreset(task)) { uiModule.showToast('Già salvato'); return; }
+            uiModule.showToast('Salvato nei preset');
             _renderRunningTab();
           }});
         }
         // Edit command — only meaningful for serve tasks that aren't running.
         // Lets the user tweak flags after a crash/error and relaunch.
         if (task.type === 'serve' && task.status !== 'running' && task.payload?._cmd) {
-          items.push({ label: 'Edit command', action: 'edit', custom: async () => {
+          items.push({ label: 'Modifica comando', action: 'edit', custom: async () => {
             const newCmd = await _promptEditServeCmd(task.payload._cmd);
             if (newCmd == null) return; // cancelled
             try {
@@ -2118,7 +2118,7 @@ export function _renderRunningTab() {
         if (_isWindows(task)) {
           const sd = '$env:TEMP\\argodesk-sessions';
           const logCmd = `ssh ${_sshPrefix(_getPort(task))}${task.remoteHost} "powershell -Command \\"Get-Content '${sd}\\${task.sessionId}.log' -Wait\\""`;
-          items.push({ label: 'Copy log cmd', action: 'copy-tmux', custom: () => {
+          items.push({ label: 'Copia comando log', action: 'copy-tmux', custom: () => {
             _copyText(logCmd);
           }});
         } else {
@@ -2129,24 +2129,24 @@ export function _renderRunningTab() {
           }});
         }
         if (_shouldOfferCrashReport(task)) {
-          items.push({ label: 'Copy crash report', action: 'copy-crash-report', custom: () => {
+          items.push({ label: 'Copia report di crash', action: 'copy-crash-report', custom: () => {
             const out = (el.querySelector('.cookbook-output-pre')?.textContent || task.output || '');
             _copyText(_buildCrashReport(task, out));
-            uiModule.showToast('Copied crash report');
+            uiModule.showToast('Report di crash copiato');
           }});
         }
         // Copy the last 50 lines of the task's output/log.
-        items.push({ label: 'Copy last 50 lines', action: 'copy-log', custom: () => {
+        items.push({ label: 'Copia le ultime 50 righe', action: 'copy-log', custom: () => {
           const out = (el.querySelector('.cookbook-output-pre')?.textContent || task.output || '');
           const last = out.split('\n').slice(-50).join('\n');
           _copyText(last);
-          uiModule.showToast('Copied last 50 lines');
+          uiModule.showToast('Ultime 50 righe copiate');
         }});
-        items.push({ label: 'Remove', action: 'kill', danger: true });
+        items.push({ label: 'Rimuovi', action: 'kill', danger: true });
         // Cancel = mobile-only dismiss item. Same pattern as the email kebab:
         // the `dropdown-cancel-mobile` class is hidden on desktop and styled
         // as a separated bottom row on mobile (border-top + extra padding).
-        items.push({ label: 'Cancel', action: 'cancel', mobileOnly: true, custom: () => {} });
+        items.push({ label: 'Annulla', action: 'cancel', mobileOnly: true, custom: () => {} });
 
         const _MENU_ICONS = {
           'start-now': '<polygon points="6 4 20 12 6 20 6 4"/>',
@@ -2441,14 +2441,14 @@ async function _reconnectTask(el, task) {
                 message: _serveTaskLooksAwqOnLocalBackend(task, lastOutput)
                   ? 'AWQ/GPTQ/FP8 cannot be served through llama.cpp/Ollama unified-memory mode.'
                   : /Native llama-server not found|building llama-server|llama\.cpp/i.test(lastOutput)
-                  ? 'llama.cpp build stopped before the server became reachable.'
-                  : 'Serve stopped before the model became reachable.',
+                  ? 'La compilazione di llama.cpp si è interrotta prima che il server diventasse raggiungibile.'
+                  : 'L’esecuzione si è interrotta prima che il modello diventasse raggiungibile.',
                 suggestion: _serveTaskLooksAwqOnLocalBackend(task, lastOutput)
                   ? 'Suggested action: use vLLM/SGLang on a compatible CUDA/ROCm GPU server, or download a GGUF version for llama.cpp/Ollama/unified-memory serving.'
                   : /Native llama-server not found|building llama-server|llama\.cpp/i.test(lastOutput)
                   ? 'Suggested action: copy the troubleshooting bundle, then edit serve settings. For the quickest local/CPU path, use Ollama or a prebuilt llama-server; source builds can take several minutes and fail if build dependencies are incomplete.'
                   : 'Suggested action: copy the troubleshooting bundle, then edit serve settings or relaunch with a CPU/backend fallback.',
-                fixes: [{ label: 'Edit serve', action: (panel) => _openServeEditForTask(task) }],
+                fixes: [{ label: 'Modifica serve', action: (panel) => _openServeEditForTask(task) }],
               };
               _showDiagnosis(el, diag, lastOutput);
             } else if (task.type === 'download') {
@@ -2458,20 +2458,20 @@ async function _reconnectTask(el, task) {
               const nearDone = progressMatch && Number(progressMatch[1]) >= 80;
               const diag = {
                 message: isDisk
-                  ? 'Download stopped because this server ran out of disk space.'
+                  ? 'Download interrotto perché il server ha esaurito lo spazio su disco.'
                   : isNetwork
-                  ? 'Download stopped after the HuggingFace connection was interrupted.'
+                  ? 'Download interrotto dopo l’interruzione della connessione a HuggingFace.'
                   : nearDone
-                  ? 'Download stopped near the end before the final completion marker was captured.'
-                  : 'Download stopped before HuggingFace reported completion.',
+                  ? 'Download interrotto verso la fine prima che venisse registrato il marcatore di completamento finale.'
+                  : 'Download interrotto prima che HuggingFace segnalasse il completamento.',
                 suggestion: isDisk
                   ? 'Suggested action: free disk space, then retry the download. HuggingFace resumes incomplete files when possible.'
                   : nearDone
                   ? 'Suggested action: retry the download. It may briefly look like it restarted while cached files are checked, then it should reuse incomplete files.'
                   : 'Suggested action: retry the download. HuggingFace resumes incomplete files when possible.',
                 fixes: [
-                  { label: 'Retry download', action: () => _retryTask(el, task) },
-                  { label: 'Copy last 50 lines', action: () => {
+                  { label: 'Riprova il download', action: () => _retryTask(el, task) },
+                  { label: 'Copia le ultime 50 righe', action: () => {
                     const last = String(lastOutput || '').split('\n').slice(-50).join('\n');
                     _copyText(last || 'No download log available.');
                   } },
@@ -2549,7 +2549,7 @@ async function _reconnectTask(el, task) {
               // user doesn't have to dig into the ⋮ menu.
               badge.textContent = `stalled ${mins}m ↻`;
               badge.className = 'cookbook-task-status cookbook-task-error';
-              badge.title = 'Click to retry — resumes where it stopped';
+              badge.title = 'Clicca per riprovare — riprende da dove si era fermato';
               badge.style.cursor = 'pointer';
               if (!badge._retryBound) {
                 badge._retryBound = true;
@@ -2992,7 +2992,7 @@ function _syncSettingsServerDots(byKey) {
 
     const host = hostEl.value?.trim() || '';
     if (!host || hostEl.readOnly || hostEl.disabled) {
-      _setServerDot(dot, false, 'Local (this machine)');
+      _setServerDot(dot, false, 'Locale (questa macchina)');
       return;
     }
 
@@ -3032,7 +3032,7 @@ function _refreshServerDots() {
     const key = header.querySelector('[data-stop-server]')?.dataset.stopServer || '';
     const list = byKey[key] || [];
     const fail = !!key && list.some(_serveTaskFailed);
-    _setServerDot(dot, fail, key ? (fail ? 'Server not responding' : 'Reachable') : 'Local (this machine)');
+    _setServerDot(dot, fail, key ? (fail ? 'Server not responding' : 'Reachable') : 'Locale (questa macchina)');
   });
   _syncSettingsServerDots(byKey);
 }

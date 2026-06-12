@@ -179,7 +179,7 @@ function deriveSyntaxColors(colors) {
 
 // Advanced picker key → CSS variable mapping
 const ADV_KEYS = [
-  { key: 'userBubbleBg',       css: '--user-bubble-bg',    label: 'User Chat Bubble', group: 'Chat Bubbles' },
+  { key: 'userBubbleBg',       css: '--user-bubble-bg',    label: 'Fumetto utente', group: 'Chat Bubbles' },
   { key: 'aiBubbleBg',         css: '--ai-bubble-bg',      label: 'AI Chat Bubble',   group: 'Chat Bubbles' },
   { key: 'bubbleBorder',       css: '--bubble-border',     label: 'Border Chat Bubble', group: 'Chat Bubbles' },
   { key: 'sidebarBg',          css: '--sidebar-bg',        label: 'Sidebar Bg',       group: 'Sidebar' },
@@ -191,7 +191,7 @@ const ADV_KEYS = [
   { key: 'sendBtnHover',       css: '--send-btn-hover',    label: 'Send Hover',       group: 'Chat Input / Prompt Area' },
   { key: 'codeBg',             css: '--code-bg',           label: 'Code Bg',          group: 'Code Blocks' },
   { key: 'codeFg',             css: '--code-fg',           label: 'Code Text',        group: 'Code Blocks' },
-  { key: 'toggleActive',       css: '--toggle-active',     label: 'Toggle On',        group: 'Controls' },
+  { key: 'toggleActive',       css: '--toggle-active',     label: 'Interruttore attivo',        group: 'Controls' },
 ];
 
 function computeAdvancedDefaults(colors) {
@@ -877,10 +877,10 @@ export function initThemeUI() {
     const doSave = () => {
       saveError.style.display = 'none';
       const name = newNameInput.value.trim();
-      if (!name) { saveError.textContent = 'Enter a name.'; saveError.style.display = 'block'; return; }
+      if (!name) { saveError.textContent = 'Inserisci un nome.'; saveError.style.display = 'block'; return; }
       const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-      if (!slug) { saveError.textContent = 'Invalid name.'; saveError.style.display = 'block'; return; }
-      if (THEMES[slug]) { saveError.textContent = 'Cannot overwrite a built-in theme.'; saveError.style.display = 'block'; return; }
+      if (!slug) { saveError.textContent = 'Nome non valido.'; saveError.style.display = 'block'; return; }
+      if (THEMES[slug]) { saveError.textContent = 'Impossibile sovrascrivere un tema integrato.'; saveError.style.display = 'block'; return; }
       const colors = {};
       const pickerIds2 = { bg: 'clr-bg', fg: 'clr-fg', panel: 'clr-panel', border: 'clr-border', red: 'clr-red' };
       Object.entries(pickerIds2).forEach(([k, pid]) => { colors[k] = document.getElementById(pid).value; });
@@ -1284,7 +1284,7 @@ export function initThemeUI() {
       saveError.style.display = 'none';
       let parsed;
       try { parsed = JSON.parse(importAreaEl.value.trim()); }
-      catch { saveError.textContent = 'Invalid JSON.'; saveError.style.display = 'block'; return; }
+      catch { saveError.textContent = 'JSON non valido.'; saveError.style.display = 'block'; return; }
       let colors = parsed.colors || parsed;
       const name = parsed.name || 'imported';
       const required = ['bg', 'fg', 'panel', 'border', 'red'];

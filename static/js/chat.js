@@ -199,7 +199,7 @@ import createResearchSynapse from './researchSynapse.js';
         submitBtn.classList.add('anim-land');
         submitBtn.addEventListener('animationend', () => submitBtn.classList.remove('anim-land'), { once: true });
       }, 300);
-      submitBtn.title = 'Stop generation';
+      submitBtn.title = 'Ferma la generazione';
       submitBtn.dataset.mode = 'streaming';
       submitBtn.dataset.phase = 'processing';
       isStreaming = true;
@@ -246,12 +246,6 @@ import createResearchSynapse from './researchSynapse.js';
     
     const submitBtn = document.querySelector('.send-btn');
     
-    // If compare is active, stop all compare streams
-    if (window.compareModule && window.compareModule.isActive()) {
-      window.compareModule.handleCompareSubmit();
-      return;
-    }
-
     // If currently streaming, stop it
     if (isStreaming) {
       // Cancel server-side research if in progress
@@ -331,7 +325,7 @@ import createResearchSynapse from './researchSynapse.js';
         stoppedIndicator.appendChild(stoppedLabel);
         const continueBtn = document.createElement('button');
         continueBtn.className = 'continue-btn';
-        continueBtn.title = 'Continue';
+        continueBtn.title = 'Continua';
         continueBtn.textContent = '\u25B8';
         const _stoppedHolder = currentHolder; // capture before it gets cleared
         continueBtn.addEventListener('click', () => {
@@ -672,7 +666,7 @@ import createResearchSynapse from './researchSynapse.js';
         textEl.textContent = label;
         banner.appendChild(textEl);
         const importBtn = document.createElement('button');
-        importBtn.textContent = 'Import';
+        importBtn.textContent = 'Importa';
         importBtn.addEventListener('click', async () => {
           importBtn.disabled = true;
           importBtn.textContent = 'Importing…';
@@ -690,7 +684,7 @@ import createResearchSynapse from './researchSynapse.js';
                 body: JSON.stringify({ title, language: EXT_LANG[ext] || '', content }),
               });
               imported++;
-            } catch (e) { console.error('Import failed:', info.name, e); }
+            } catch (e) { console.error('Importazione non riuscita:', info.name, e); }
           }
           banner.textContent = `Imported ${imported} file${imported !== 1 ? 's' : ''}`;
           setTimeout(() => banner.remove(), 2000);
@@ -1314,7 +1308,7 @@ import createResearchSynapse from './researchSynapse.js';
                   accumulated = accumulated.replace(/<think>/i, '<think time="' + _elapsedDone + '">');
                   roundText = roundText.replace(/<think>/i, '<think time="' + _elapsedDone + '">');
                 }
-                if (_liveThinkHeader) _liveThinkHeader.textContent = 'View thinking process';
+                if (_liveThinkHeader) _liveThinkHeader.textContent = 'Mostra il processo di ragionamento';
                 if (_liveThinkSpinnerSlot) _liveThinkSpinnerSlot.remove();
                 if (_liveThinkTimerEl && _elapsedDone) {
                   _liveThinkTimerEl.textContent = _elapsedDone + 's';
@@ -1461,7 +1455,7 @@ import createResearchSynapse from './researchSynapse.js';
                     hasUnclosedThink = true; // still waiting for real closing tag
                   }
                 }
-                // Detect false close: <think>short</think> where real thinking follows untagged
+                // Detect false close: <think>breve</think> where real thinking follows untagged
                 // Only applies when there's a second </think> later (model leaked thinking outside tags)
                 // Do NOT trigger if the text after </think> contains tool calls (that's real content)
                 if (!hasUnclosedThink && isThinking) {
@@ -1570,7 +1564,7 @@ import createResearchSynapse from './researchSynapse.js';
                     accumulated = accumulated.replace(/<think>/i, '<think time="' + elapsed + '">');
                     roundText = roundText.replace(/<think>/i, '<think time="' + elapsed + '">');
                   }
-                  if (_liveThinkHeader) _liveThinkHeader.textContent = 'View thinking process';
+                  if (_liveThinkHeader) _liveThinkHeader.textContent = 'Mostra il processo di ragionamento';
                   if (_liveThinkSpinnerSlot) _liveThinkSpinnerSlot.remove();
                   // Move timer to right side of header
                   if (_liveThinkTimerEl && elapsed) {
@@ -1905,7 +1899,7 @@ import createResearchSynapse from './researchSynapse.js';
                   isThinking = false;
                   cancelAnimationFrame(_thinkTimerRAF);
                   var _elapsed2 = thinkingStartTime ? ((Date.now() - thinkingStartTime) / 1000).toFixed(1) : null;
-                  if (_liveThinkHeader) _liveThinkHeader.textContent = 'View thinking process';
+                  if (_liveThinkHeader) _liveThinkHeader.textContent = 'Mostra il processo di ragionamento';
                   if (_liveThinkTimerEl) _liveThinkTimerEl.textContent = _elapsed2 ? _elapsed2 + 's' : '';
                   if (_liveThinkSpinnerSlot) _liveThinkSpinnerSlot.remove();
                   // Assign stable IDs
@@ -2079,7 +2073,7 @@ import createResearchSynapse from './researchSynapse.js';
                   if (contentEl) {
                     const details = document.createElement('details');
                     details.className = 'agent-tool-output';
-                    details.innerHTML = `<summary>Screenshot</summary><img src="${json.screenshot}" style="max-width:100%;border-radius:6px;margin-top:6px;border:1px solid var(--border)" />`;
+                    details.innerHTML = `<summary>Schermata</summary><img src="${json.screenshot}" style="max-width:100%;border-radius:6px;margin-top:6px;border:1px solid var(--border)" />`;
                     contentEl.appendChild(details);
                   }
                 }
@@ -2245,7 +2239,7 @@ import createResearchSynapse from './researchSynapse.js';
                 const note = document.createElement('div');
                 note.className = 'escalation-failed-note';
                 note.style.cssText = 'margin:6px 0;padding:6px 10px;border-left:3px solid #8a4a4a;background:rgba(138,74,74,0.07);font-size:12px;color:var(--fg);border-radius:4px;';
-                const label = json.type === 'escalation_failed' ? 'Teacher could not solve it' : 'Skill not saved';
+                const label = json.type === 'escalation_failed' ? 'Teacher could not solve it' : 'Competenza non salvata';
                 note.innerHTML = `<strong>${label}:</strong> <span style="opacity:0.75">${esc(json.reason || '')}</span>`;
                 chatBox.appendChild(note);
                 uiModule.scrollHistory();
@@ -2313,11 +2307,11 @@ import createResearchSynapse from './researchSynapse.js';
             _stall.className = 'stopped-indicator';
             const _lbl = document.createElement('span');
             _lbl.style.cssText = 'font-style:italic;opacity:0.7;';
-            _lbl.textContent = 'Paused mid-task';
+            _lbl.textContent = 'In pausa a metà attività';
             _stall.appendChild(_lbl);
             const _cont = document.createElement('button');
             _cont.className = 'continue-btn agent-continue-btn';
-            _cont.title = 'Continue — pick up where it left off';
+            _cont.title = 'Continua — riprendi da dove si era fermato';
             _cont.textContent = '▸';
             _cont.addEventListener('click', () => {
               _stall.remove();
@@ -2485,7 +2479,7 @@ import createResearchSynapse from './researchSynapse.js';
                 ttsBtn.innerHTML = ICON_STOP_TTS;
                 ttsBtn.classList.add('playing');
                 ttsBtn.style.color = '#ccc';
-                ttsBtn.title = 'Stop';
+                ttsBtn.title = 'Ferma';
               }
             } else {
               // Non-streaming fallback (autoPlay toggled mid-stream, etc.)
@@ -2648,7 +2642,7 @@ import createResearchSynapse from './researchSynapse.js';
             stoppedIndicator.appendChild(stoppedLabel);
             const continueBtn = document.createElement('button');
             continueBtn.className = 'continue-btn';
-            continueBtn.title = 'Continue';
+            continueBtn.title = 'Continua';
             continueBtn.textContent = '\u25B8';
             continueBtn.addEventListener('click', () => {
               stoppedIndicator.remove();
@@ -2905,7 +2899,7 @@ import createResearchSynapse from './researchSynapse.js';
     const cont = document.createElement('button');
     cont.className = 'stall-banner-btn';
     cont.textContent = 'Nudge it';
-    cont.title = 'Stop the stalled stream and ask it to continue';
+    cont.title = 'Ferma lo stream bloccato e chiedi di continuare';
     cont.addEventListener('click', () => {
       _removeStallBanner();
       const mi = uiModule.el('message');
@@ -2917,7 +2911,7 @@ import createResearchSynapse from './researchSynapse.js';
     });
     const stop = document.createElement('button');
     stop.className = 'stall-banner-btn stall-banner-stop';
-    stop.textContent = 'Stop';
+    stop.textContent = 'Ferma';
     stop.addEventListener('click', () => { _removeStallBanner(); abortCurrentRequest(true); });
     bar.appendChild(cont);
     bar.appendChild(stop);
@@ -2950,7 +2944,7 @@ import createResearchSynapse from './researchSynapse.js';
       const label = document.createElement('span');
       label.style.fontStyle = 'italic';
       label.style.opacity = '0.7';
-      label.textContent = '[Cancelled by user]';
+      label.textContent = '[Annullato dall’utente]';
       indicator.appendChild(label);
       body.appendChild(indicator);
     }
@@ -3209,7 +3203,7 @@ import createResearchSynapse from './researchSynapse.js';
         if (runBtn) runBtn.setAttribute('data-code', newCode);
         // Swap icon back to pencil
         btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
-        btn.title = 'Edit';
+        btn.title = 'Modifica';
         btn.classList.remove('active');
       } else {
         // Enter edit mode. Firefox (especially on mobile) historically lacks
@@ -3227,7 +3221,7 @@ import createResearchSynapse from './researchSynapse.js';
         try { codeEl.focus({ preventScroll: true }); } catch (_) { codeEl.focus(); }
         // Swap icon to checkmark
         btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
-        btn.title = 'Done editing';
+        btn.title = 'Modifica completata';
         btn.classList.add('active');
       }
     });
@@ -3378,7 +3372,7 @@ import createResearchSynapse from './researchSynapse.js';
     saveBtn.textContent = 'Send';
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'edit-cancel-btn';
-    cancelBtn.textContent = 'Cancel';
+    cancelBtn.textContent = 'Annulla';
     btnRow.appendChild(saveBtn);
     btnRow.appendChild(cancelBtn);
 
@@ -3445,7 +3439,7 @@ import createResearchSynapse from './researchSynapse.js';
     if (msgIndex < 0) return;
 
     // Prefer dataset.raw (stripped original user text) over .body.textContent
-    // — the latter slurps the rendered "View image description" collapsible
+    // — the latter slurps the rendered "Mostra descrizione immagine" collapsible
     // content too, which would then be sent back as the user's question and
     // the AI would reply to that gibberish instead of the actual prompt.
     const bodyEl = userMsgElement.querySelector('.body');
@@ -3532,7 +3526,7 @@ import createResearchSynapse from './researchSynapse.js';
         userMsgEl = allMsgs[i];
         // Prefer dataset.raw (set by addMessage with the stripped, original
         // user text) over the rendered body's textContent — the latter
-        // pulls in the "View image description" collapsible content too,
+        // pulls in the "Mostra descrizione immagine" collapsible content too,
         // duplicating the OCR text on regen.
         const bodyEl = userMsgEl.querySelector('.body');
         userText = (userMsgEl.dataset.raw || (bodyEl ? bodyEl.textContent : '') || '').trim();
@@ -4126,7 +4120,7 @@ import createResearchSynapse from './researchSynapse.js';
       // error output shown before a model was selected, #1428). Just remove the
       // DOM so the "x" works regardless.
       domToRemove.forEach(el => el.remove());
-      if (uiModule) uiModule.showToast('Message deleted');
+      if (uiModule) uiModule.showToast('Messaggio eliminato');
       return;
     }
 
@@ -4138,7 +4132,7 @@ import createResearchSynapse from './researchSynapse.js';
       });
       if (!res.ok) throw new Error('Server error ' + res.status);
       domToRemove.forEach(el => el.remove());
-      if (uiModule) uiModule.showToast('Message deleted');
+      if (uiModule) uiModule.showToast('Messaggio eliminato');
     } catch (err) {
       console.error('Delete failed:', err);
       if (uiModule) uiModule.showError('Delete failed: ' + err.message);
@@ -4172,10 +4166,10 @@ import createResearchSynapse from './researchSynapse.js';
     bar.className = 'msg-edit-bar';
     const saveBtn = document.createElement('button');
     saveBtn.className = 'msg-edit-save';
-    saveBtn.textContent = 'Save';
+    saveBtn.textContent = 'Salva';
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'msg-edit-cancel';
-    cancelBtn.textContent = 'Cancel';
+    cancelBtn.textContent = 'Annulla';
     bar.appendChild(saveBtn);
     bar.appendChild(cancelBtn);
     textarea.parentNode.insertBefore(bar, textarea.nextSibling);
@@ -4399,7 +4393,7 @@ import createResearchSynapse from './researchSynapse.js';
 
     const messageInput = uiModule.el('message');
     if (messageInput) {
-      messageInput.value = 'Continue from where you left off.';
+      messageInput.value = 'Continua da dove avevi interrotto.';
       const submitBtn = document.querySelector('.send-btn');
       if (submitBtn) submitBtn.click();
     }

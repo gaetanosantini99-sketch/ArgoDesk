@@ -19,7 +19,7 @@ import themeModule from './theme.js';
 import documentModule from './document.js';
 import settingsModule from './settings.js';
 import cookbookModule from './cookbook.js';
-import { EVAL_PROMPTS } from './compare/index.js';
+import { EVAL_PROMPTS } from './promptTemplates.js';
 
 // ── Module state ──────────────────────────────────────────────────────
 
@@ -166,14 +166,14 @@ function _showSetupEndpointChoices() {
       '<div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:color-mix(in srgb,var(--bg) 88%,var(--fg) 12%);">' +
         '<div style="font-weight:700;margin-bottom:6px;">' + SETUP_LOCAL_ICON + 'Local setup</div>' +
         '<div>Paste endpoint URL in chat (example):</div>' +
-        '<pre style="margin:4px 0 0;"><code class="setup-clickable-code" style="cursor:pointer;text-decoration:underline;" title="Click to fill in chat">http://localhost:11434/v1</code></pre>' +
+        '<pre style="margin:4px 0 0;"><code class="setup-clickable-code" style="cursor:pointer;text-decoration:underline;" title="Clicca per inserire nella chat">http://localhost:11434/v1</code></pre>' +
         '<div style="margin-top:4px;">or</div>' +
-        '<pre style="margin:2px 0 0;"><code class="setup-clickable-code" style="cursor:pointer;text-decoration:underline;" title="Click to fill in chat">http://llm-host.local:8000/v1</code></pre>' +
+        '<pre style="margin:2px 0 0;"><code class="setup-clickable-code" style="cursor:pointer;text-decoration:underline;" title="Clicca per inserire nella chat">http://llm-host.local:8000/v1</code></pre>' +
       '</div>' +
       '<div style="border:1px solid var(--border);border-radius:8px;padding:10px 12px;background:color-mix(in srgb,var(--bg) 88%,var(--fg) 12%);">' +
         '<div style="font-weight:700;margin-bottom:6px;">' + SETUP_API_ICON + 'API setup</div>' +
         '<div>Paste provider name then API key (example):</div>' +
-        '<pre style="margin:4px 0 0;"><code class="setup-clickable-code" style="cursor:pointer;text-decoration:underline;" title="Click to fill in chat">deepseek sk-...</code></pre>' +
+        '<pre style="margin:4px 0 0;"><code class="setup-clickable-code" style="cursor:pointer;text-decoration:underline;" title="Clicca per inserire nella chat">deepseek sk-...</code></pre>' +
         '<div style="margin-top:8px;font-size:1em;"><span>Supported providers:</span><br>' + providers + '</div>' +
       '</div>' +
     '</div>'
@@ -293,7 +293,7 @@ function _slashFooter(msgEl) {
   const copyBtn = document.createElement('button');
   copyBtn.className = 'footer-copy-btn';
   copyBtn.type = 'button';
-  copyBtn.title = 'Copy message';
+  copyBtn.title = 'Copia messaggio';
   const _copySvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
   const _checkSvg = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
   copyBtn.innerHTML = _copySvg;
@@ -397,7 +397,7 @@ function typewriterBlocksReply(blocks, options = {}) {
         const useBtn = document.createElement('button');
         useBtn.type = 'button';
         useBtn.className = 'use-code';
-        useBtn.title = 'Use in Chat';
+        useBtn.title = 'Usa nella chat';
         useBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>';
         const copyText = block.copyText || block.text || '';
         const useNow = (e) => {
@@ -425,7 +425,7 @@ function typewriterBlocksReply(blocks, options = {}) {
         btn.type = 'button';
         btn.className = 'copy-code';
         btn.setAttribute('data-code', copyText);
-        btn.title = 'Copy';
+        btn.title = 'Copia';
         btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
         const copyNow = (e) => {
           e.preventDefault();
@@ -943,7 +943,7 @@ async function _cmdSessionDelete(args, ctx) {
     await sessionModule.loadSessions();
   } else if (res.status === 403) {
     slashReply('Cannot delete a starred session — unstar it first, or use <code>/s rm -rf</code>');
-  } else { const err = await res.json().catch(() => null); slashReply('Delete failed' + (err?.detail ? ': ' + ctx.esc(err.detail) : '')); }
+  } else { const err = await res.json().catch(() => null); slashReply('Eliminazione non riuscita' + (err?.detail ? ': ' + ctx.esc(err.detail) : '')); }
   return true;
 }
 
@@ -966,7 +966,7 @@ async function _cmdSessionRename(args, ctx) {
   const fd = new FormData(); fd.append('name', newName);
   const res = await fetch(`${API_BASE}/api/session/${ctx.sid}`, { method: 'PATCH', body: fd, credentials: 'same-origin' });
   if (res.ok) { await typewriterReply(`Renamed to "${ctx.esc(newName)}"`); await sessionModule.loadSessions(); }
-  else { slashReply('Rename failed'); }
+  else { slashReply('Rinomina non riuscita'); }
   return true;
 }
 
@@ -985,7 +985,7 @@ async function _cmdSessionUnimportant(args, ctx) {
 }
 
 async function _cmdSessionFork(args, ctx) {
-  if (!ctx.sid) { slashReply('No active session'); return true; }
+  if (!ctx.sid) { slashReply('Nessuna sessione attiva'); return true; }
   const keepCount = parseInt(args[0]) || 0;
   const res = await fetch(`${API_BASE}/api/session/${ctx.sid}/fork`, {
     method: 'POST', credentials: 'same-origin',
@@ -997,12 +997,12 @@ async function _cmdSessionFork(args, ctx) {
     await sessionModule.loadSessions();
     await sessionModule.selectSession(data.id);
     await typewriterReply(`Forked session (${data.kept || 0} messages)`);
-  } else { slashReply('Fork failed'); }
+  } else { slashReply('Biforcazione non riuscita'); }
   return true;
 }
 
 async function _cmdSessionTruncate(args, ctx) {
-  if (!ctx.sid) { slashReply('No active session'); return true; }
+  if (!ctx.sid) { slashReply('Nessuna sessione attiva'); return true; }
   const keep = parseInt(args[0]);
   if (!keep || keep < 1) { slashReply('Usage: /truncate N — deletes older messages, keeps the last N'); return true; }
   const res = await fetch(`${API_BASE}/api/session/${ctx.sid}/truncate`, {
@@ -1011,7 +1011,7 @@ async function _cmdSessionTruncate(args, ctx) {
     body: JSON.stringify({ keep_count: keep })
   });
   if (res.ok) { await typewriterReply(`Truncated to ${keep} messages`); }
-  else { slashReply('Truncate failed'); }
+  else { slashReply('Troncamento non riuscito'); }
   return true;
 }
 
@@ -1060,7 +1060,7 @@ async function _cmdSessionSort(args, ctx) {
 }
 
 async function _cmdSessionInfo(args, ctx) {
-  if (!ctx.sid) { slashReply('No active session'); return true; }
+  if (!ctx.sid) { slashReply('Nessuna sessione attiva'); return true; }
   const sessions = sessionModule.getSessions();
   const s = sessions.find(ss => ss.id === ctx.sid);
   if (!s) { slashReply('Session not found'); return true; }
@@ -1080,7 +1080,7 @@ async function _cmdSessionClear(args, ctx) {
 }
 
 async function _cmdSessionExport(args, ctx) {
-  if (!ctx.sid) { slashReply('No active session'); return true; }
+  if (!ctx.sid) { slashReply('Nessuna sessione attiva'); return true; }
   // Parse linux-style: cat > file.json, cat > notes.txt, cat > chat.html
   let filename = '';
   let fmt = 'md';
@@ -1199,7 +1199,7 @@ async function _cmdToggleSidebar(args, ctx) {
 async function _cmdOpen(args, ctx) {
   const target = (args[0] || '').trim().toLowerCase();
   if (!target) {
-    slashReply('Open what? Try /open Cookbook, /open Settings, /open Gallery, /open Notes, /open Tasks, /open Library, /open Research, or /open Compare.');
+    slashReply('Open what? Try /open Cookbook, /open Settings, /open Gallery, /open Notes, /open Tasks, /open Library, or /open Research.');
     return true;
   }
   const clickFirst = (...ids) => {
@@ -1232,7 +1232,6 @@ async function _cmdOpen(args, ctx) {
       memory: ['tool-memory-btn', 'rail-memory'],
       memories: ['tool-memory-btn', 'rail-memory'],
       research: ['tool-research-btn', 'rail-research'],
-      compare: ['tool-compare-btn', 'rail-compare'],
       theme: ['tool-theme-btn', 'rail-theme'],
     };
     const ids = targets[target];
@@ -1305,7 +1304,7 @@ async function _cmdSettings(args, ctx) {
     }
   } catch (e) {
     console.warn('/settings open failed', e);
-    slashReply('Could not open Settings.');
+    slashReply('Impossibile aprire le Impostazioni.');
     return true;
   }
   return true;
@@ -1326,7 +1325,7 @@ async function _cmdTheme(args, ctx) {
   }
   if (sub === 'save' && args[1]) {
     const saveName = args[1].toLowerCase().replace(/\s+/g, '-');
-    if (tm.THEMES[saveName]) { slashReply('Cannot overwrite a built-in theme.'); return true; }
+    if (tm.THEMES[saveName]) { slashReply('Impossibile sovrascrivere un tema integrato.'); return true; }
     const s = tm.getSaved();
     const colors = s ? s.colors : tm.THEMES.dark;
     tm.saveCustomTheme(saveName, colors);
@@ -1470,7 +1469,7 @@ async function _cmdNote(args, ctx) {
     body: JSON.stringify({ title: text, content: '', note_type: 'note', source: 'slash' })
   });
   if (res.ok) await typewriterReply(`Note added: ${ctx.esc(text)}`);
-  else slashReply('Failed to save note');
+  else slashReply('Salvataggio della nota non riuscito');
   return true;
 }
 
@@ -1662,7 +1661,7 @@ async function _cmdRagAdd(args, ctx) {
   if (res.ok) {
     const data = await res.json();
     await typewriterReply(`Indexed "${ctx.esc(dir)}" (${data.indexed_count || 0} files)`);
-  } else { slashReply('Failed to add directory'); }
+  } else { slashReply('Aggiunta della cartella non riuscita'); }
   return true;
 }
 
@@ -1775,7 +1774,7 @@ async function _cmdCompact(args, ctx) {
     slashReply(`Conversation compacted. Summarized ${d.summarized || 0} older messages, kept ${d.kept || 0} recent messages.`);
     if (sessionModule?.selectSession) await sessionModule.selectSession(ctx.sid);
   } else {
-    let detail = 'Compaction failed';
+    let detail = 'Compattazione non riuscita';
     try {
       const err = await res.json();
       detail = err.detail || detail;
@@ -2250,289 +2249,6 @@ async function _cmdDemo(args, ctx) {
   return true;
 }
 
-// ── Compare tour ──
-async function _cmdTourCompare(args, ctx) {
-  // The slash dispatcher doesn't auto-clear the input, so explicitly
-  // wipe it — otherwise "/tour-compare" stays parked in the textarea
-  // and visually competes with the tour walkthrough.
-  const _msgEl = document.getElementById('message');
-  if (_msgEl) {
-    _msgEl.value = '';
-    _msgEl.dispatchEvent(new Event('input', { bubbles: true }));
-  }
-  if (!document.getElementById('tour-styles')) {
-    const s = document.createElement('style');
-    s.id = 'tour-styles';
-    s.textContent =
-      '#tour-tooltip{position:fixed;z-index:10001;background:var(--bg);color:var(--fg);' +
-      'border:1px solid var(--border);border-radius:8px;padding:12px 14px;max-width:280px;' +
-      'font-family:inherit;font-size:0.8rem;line-height:1.5;' +
-      'box-shadow:0 2px 12px rgba(0,0,0,0.3);pointer-events:auto;' +
-      'opacity:0;transform:translateY(4px);transition:opacity 0.3s ease-out,transform 0.3s ease-out}' +
-      '#tour-tooltip.tour-fade-in{opacity:1;transform:translateY(0)}' +
-      '#tour-tooltip .tour-text{margin-bottom:8px;opacity:0.8}' +
-      '.tour-nav{display:flex;align-items:center;justify-content:space-between}' +
-      '.tour-nav button{background:none;border:1px solid var(--border);color:var(--fg);' +
-      'cursor:pointer;font-family:inherit;border-radius:4px;transition:all .1s}' +
-      '.tour-nav button:hover{background:color-mix(in srgb,var(--fg) 8%,transparent)}' +
-      '.tour-btn-arrow{font-size:1rem;padding:4px 12px;opacity:0.6}' +
-      '.tour-btn-arrow:hover{opacity:1}' +
-      '.tour-btn-arrow.disabled{opacity:0.15;pointer-events:none}' +
-      '.tour-btn-skip{font-size:0.72rem;padding:3px 10px;opacity:0.35;border-color:transparent!important}' +
-      '.tour-btn-skip:hover{opacity:0.6}';
-    document.head.appendChild(s);
-  }
-
-  let overlay = document.getElementById('compare-model-overlay');
-  if (!overlay) {
-    const opener = document.getElementById('tool-compare-btn') || document.getElementById('rail-compare');
-    if (opener) opener.click();
-    for (let i = 0; i < 20; i++) {
-      await new Promise(r => setTimeout(r, 80));
-      overlay = document.getElementById('compare-model-overlay');
-      if (overlay) break;
-    }
-  }
-  if (!overlay) {
-    slashReply('Could not open Model Comparison. Try clicking the Compare tool first.');
-    return true;
-  }
-
-  document.body.classList.add('tour-active');
-  const tooltip = document.createElement('div');
-  tooltip.id = 'tour-tooltip';
-  document.body.appendChild(tooltip);
-
-  // Track halos so we can destroy them between steps. Halos sit on the
-  // body (above modals) so the outline isn't clipped by modal-content's
-  // overflow:auto — same pattern as _cmdDemo's makeHalo.
-  let _halos = [];
-  function _makeHalo(target) {
-    const halo = document.createElement('div');
-    halo.className = 'tour-halo';
-    document.body.appendChild(halo);
-    const update = () => {
-      const r = target.getBoundingClientRect();
-      halo.style.top    = (r.top - 4) + 'px';
-      halo.style.left   = (r.left - 4) + 'px';
-      halo.style.width  = (r.width + 8) + 'px';
-      halo.style.height = (r.height + 8) + 'px';
-    };
-    update();
-    window.addEventListener('resize', update);
-    window.addEventListener('scroll', update, true);
-    requestAnimationFrame(() => halo.classList.add('tour-fade-in'));
-    return {
-      destroy() {
-        window.removeEventListener('resize', update);
-        window.removeEventListener('scroll', update, true);
-        halo.remove();
-      },
-    };
-  }
-  function _clearHalos() {
-    _halos.forEach(h => h.destroy());
-    _halos = [];
-    document.querySelectorAll('.tour-halo').forEach(e => e.remove());
-  }
-
-  const _clear = () => {
-    document.querySelectorAll('.argodesk-highlight').forEach(e => e.classList.remove('argodesk-highlight'));
-    _clearHalos();
-    tooltip.remove();
-    document.body.classList.remove('tour-active');
-  };
-
-  function _positionTooltip(target) {
-    const r = target.getBoundingClientRect();
-    tooltip.style.visibility = 'hidden';
-    tooltip.style.display = '';
-    const tw = tooltip.offsetWidth || 260;
-    const th = tooltip.offsetHeight || 100;
-    const gap = 12;
-    let top, left;
-    if (r.bottom + gap + th < window.innerHeight - 10) {
-      top = r.bottom + gap;
-      left = r.left + r.width / 2 - tw / 2;
-    } else if (r.top - gap - th > 10) {
-      top = r.top - gap - th;
-      left = r.left + r.width / 2 - tw / 2;
-    } else {
-      top = r.top + r.height / 2 - th / 2;
-      left = r.right + gap;
-      if (left + tw > window.innerWidth - 10) left = r.left - tw - gap;
-    }
-    if (left + tw > window.innerWidth - 10) left = window.innerWidth - tw - 10;
-    if (left < 10) left = 10;
-    if (top < 10) top = 10;
-    tooltip.style.top = top + 'px';
-    tooltip.style.left = left + 'px';
-    tooltip.style.visibility = '';
-  }
-
-  function _showStep(sel, text, opts) {
-    opts = opts || {};
-    const isFirst = !!opts.isFirst;
-    const isLast = !!opts.isLast;
-    const advanceOnClick = !!opts.advanceOnClick;
-    return new Promise(resolve => {
-      _clearHalos();
-      const target = document.querySelector(sel);
-      if (!target) return resolve('skip');
-      _halos.push(_makeHalo(target));
-      target.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-      tooltip.classList.remove('tour-fade-in');
-      const hint = advanceOnClick
-        ? '<div style="font-size:0.72rem;opacity:0.45;margin-bottom:6px;">Click the highlighted element to continue.</div>'
-        : '';
-      tooltip.innerHTML =
-        '<div class="tour-text">' + text + '</div>' + hint +
-        '<div class="tour-nav">' +
-          '<button class="tour-btn-arrow' + (isFirst ? ' disabled' : '') + '" data-act="back">←</button>' +
-          '<button class="tour-btn-skip" data-act="skip">' + (isLast ? 'done' : 'skip tour') + '</button>' +
-          '<button class="tour-btn-arrow" data-act="next">' + (isLast ? '✓' : '→') + '</button>' +
-        '</div>';
-      requestAnimationFrame(() => {
-        _positionTooltip(target);
-        tooltip.classList.add('tour-fade-in');
-      });
-
-      let resolved = false;
-      const onClick = (e) => {
-        const hit = e.target.closest && e.target.closest('[data-act]');
-        const act = hit && hit.dataset.act;
-        if (!act) return;
-        if (resolved) return;
-        resolved = true;
-        tooltip.removeEventListener('click', onClick);
-        if (advanceOnClick) document.removeEventListener('click', onTargetClick, true);
-        resolve(act);
-      };
-      // Capture-phase listener so we hear the target click before any
-      // child handler that might stopPropagation.
-      const onTargetClick = (e) => {
-        if (resolved) return;
-        if (!target.contains(e.target) && e.target !== target) return;
-        resolved = true;
-        tooltip.removeEventListener('click', onClick);
-        document.removeEventListener('click', onTargetClick, true);
-        resolve('next');
-      };
-      tooltip.addEventListener('click', onClick);
-      if (advanceOnClick) {
-        document.addEventListener('click', onTargetClick, true);
-      }
-    });
-  }
-
-  // ── Phase 1: model-selector modal ──
-  // Scope every selector to #compare-model-overlay so we don't accidentally
-  // match the Group Chat panel's .compare-parallel-toggle (line 1053 of
-  // index.html), which has the same class name and is hidden — its zero
-  // bounding-rect was putting the tooltip in the top-left corner.
-  const phase1 = [
-    { sel: '#compare-model-overlay .modal-body',
-      text: 'Pick what type of test you want to run. <b>Chat</b>, <b>Agent</b>, <b>Search</b> or <b>Deep Research</b>.',
-      placement: 'center-above',
-      before: () => {
-        const modalBody = document.querySelector('#compare-model-overlay .modal-body');
-        if (modalBody) modalBody.scrollTop = 0;
-      } },
-    { sel: '#compare-model-overlay .compare-blind-toggle',
-      text: '<b>Blind Mode</b> hides model names so you don’t know which model gives what output.' },
-    { sel: '#compare-model-overlay .compare-parallel-toggle',
-      text: '<b>Parallel</b> runs side by side, toggle to <b>Sequential</b> as well.' },
-    { sel: '#compare-model-overlay .compare-dice-toggle',
-      text: '<b>Shuffle</b> picks the models in your entire list of endpoints. Combine with <b>Blind Mode</b> and you get the cleanest evaluation.' },
-  ];
-
-  for (let i = 0; i < phase1.length; i++) {
-    const step = phase1[i];
-    const res = await _showStep(step.sel, step.text, {
-      isFirst: i === 0,
-      isLast: false,
-    });
-    if (res === 'skip') { _clear(); return true; }
-    if (res === 'back') { if (i > 0) i -= 2; continue; }
-  }
-
-  // ── Wait for the modal to close and the compare panes to come up ──
-  _clearHalos();
-  tooltip.innerHTML =
-    '<div class="tour-text">Click <b>Start</b> when ready — it will probe the models before beginning.</div>' +
-    '<div class="tour-nav">' +
-      '<button class="tour-btn-skip" data-act="skip">skip</button>' +
-    '</div>';
-  // Anchor the tooltip next to the actual "Start" button so
-  // the user's eye is drawn to the next click. Halo on it too so it
-  // glows the same way as the previous steps.
-  const startBtn = document.querySelector('#compare-model-overlay .research-start-btn');
-  if (startBtn) {
-    _halos.push(_makeHalo(startBtn));
-    requestAnimationFrame(() => _positionTooltip(startBtn));
-  } else {
-    // Fallback: park near the top if the start button isn't around (yet).
-    tooltip.style.left = ((window.innerWidth / 2) - 140) + 'px';
-    tooltip.style.top  = '20px';
-  }
-
-  const skipDuringWait = new Promise(resolve => {
-    const onClick = (e) => {
-      const hit = e.target.closest && e.target.closest('[data-act="skip"]');
-      if (!hit) return;
-      tooltip.removeEventListener('click', onClick);
-      resolve('skip');
-    };
-    tooltip.addEventListener('click', onClick);
-  });
-  const modalClosed = new Promise(resolve => {
-    const tick = () => {
-      if (!document.getElementById('compare-model-overlay')
-          && (document.getElementById('compare-check-btn') || document.getElementById('cmp-eval-btn'))) {
-        resolve('ready');
-      } else {
-        setTimeout(tick, 200);
-      }
-    };
-    tick();
-  });
-  const waitRes = await Promise.race([skipDuringWait, modalClosed]);
-  if (waitRes === 'skip') { _clear(); return true; }
-
-  // Small breather so any entry animation finishes before we measure.
-  await new Promise(r => setTimeout(r, 300));
-
-  // ── Phase 2: compare panes (post-modal) ──
-  // Note: the Probe button (`#compare-check-btn`) is dynamic — only
-  // visible when there's at least one unverified model — so we don't
-  // tour it here; the user will discover it naturally when needed.
-  const phase2 = [
-    { sel: '#compare-add-btn',
-      text: 'Add more <b>Models</b> here, keep stacking, who’s stopping ya? (you can also remove btw).' },
-    { sel: '#compare-shuffle-btn',
-      text: 'After adding, <b>Shuffle</b> to randomize the order again.' },
-    { sel: '#cmp-eval-btn',
-      text: 'When you’re ready to test, feel free to use curated <b>evaluation prompts</b>.',
-      advanceOnClick: true },
-  ];
-
-  for (let i = 0; i < phase2.length; i++) {
-    const step = phase2[i];
-    const res = await _showStep(step.sel, step.text, {
-      isFirst: i === 0,
-      isLast: i === phase2.length - 1,
-      advanceOnClick: !!step.advanceOnClick,
-    });
-    if (res === 'skip') { _clear(); return true; }
-    if (res === 'back') { if (i > 0) i -= 2; continue; }
-  }
-
-  _clear();
-  await typewriterReply('That’s it, you’ll figure out the rest! Have fun!');
-  return true;
-}
-
 // ── Cookbook tour ──
 async function _cmdTourCookbook(args, ctx) {
   // Clear the chat input so "/tour-cookbook" doesn't linger.
@@ -2708,15 +2424,15 @@ async function _cmdTourCookbook(args, ctx) {
       text: '<b>Welcome to Cookbook!</b> Download / Cook / Serve models here!',
       placement: 'center-above' },
     { sel: '#cookbook-modal .cookbook-tab[data-backend="Settings"]',
-      text: 'Hosting on another machine? Configure it under <b>Settings</b>.' },
+      text: 'Hosting on another machine? Configure it under <b>Impostazioni</b>.' },
     { sel: '#cookbook-dl-repo',
       text: 'Paste a HuggingFace URL or <code>org/model-name</code> to download. Quantizations like <code>org/model:Q4_K_M</code> work too.',
       before: () => _clickTab('Search') },
     { sel: '#cookbook-modal .admin-card:has(> #hwfit-list)',
-      text: '<b>Scan / Download</b> — reads your hardware and lists every model that\'ll run on it.',
+      text: '<b>Scansiona / Scarica</b> — reads your hardware and lists every model that\'ll run on it.',
       before: () => _clickTab('Search') },
     { sel: '#hwfit-hw-manual-btn',
-      text: 'Your detected hardware appears here. You can also manually edit it to see what would fit on other setups.',
+      text: 'Qui appare l’hardware rilevato. Puoi anche modificarlo manualmente per vedere cosa funzionerebbe su altre configurazioni.',
       before: () => _clickTab('Search') },
     { sel: '#cookbook-hf-latest-toggle',
       text: 'Check <b>latest trending models</b> here.',
@@ -2725,7 +2441,7 @@ async function _cmdTourCookbook(args, ctx) {
       text: '<b>Serve</b> — fire up downloaded models with vLLM, Ollama, llama.cpp, and diffusion models too.',
       before: () => _clickTab('Serve') },
     { sel: '#cookbook-modal .cookbook-tab[data-backend="Dependencies"]',
-      text: '<b>Dependencies</b> — install missing Python packages or check GPU drivers.',
+      text: '<b>Dipendenze</b> — install missing Python packages or check GPU drivers.',
       before: () => _clickTab('Dependencies') },
   ];
 
@@ -2735,7 +2451,7 @@ async function _cmdTourCookbook(args, ctx) {
   if (runTab) {
     steps.push({
       sel: '#cookbook-modal .cookbook-tab[data-backend="Running"]',
-      text: '<b>Running</b> — live status, tail logs, downloads, kill.',
+      text: '<b>In esecuzione</b> — live status, tail logs, downloads, kill.',
       before: () => _clickTab('Running'),
     });
   }
@@ -2807,7 +2523,7 @@ async function _cmdTourTheme(args, ctx) {
     }
   }
   if (!modal || modal.classList.contains('hidden')) {
-    slashReply('Could not open Theme. Try clicking the Theme tool first.');
+    slashReply('Impossibile aprire il Tema. Prova prima a cliccare lo strumento Tema.');
     return true;
   }
 
@@ -3199,13 +2915,13 @@ async function _cmdTourSettings(args, ctx) {
       text: '<b>Utility Model</b> — your hard-working sidekick. Runs background tasks (compaction, cleanup, auto-naming, summarization) so your chat model doesn\'t burn cycles on chores. <b>Recommend a small local model</b> here — it\'s free and always on.',
       before: () => _clickNav('ai') },
     { sel: '#settings-modal .admin-card:has(#set-vlModelSelect)',
-      text: '<b>Vision</b> — powers any image-recognition feature: drop a photo in chat, ask what\'s in it, OCR, etc.',
+      text: '<b>Visione</b> — powers any image-recognition feature: drop a photo in chat, ask what\'s in it, OCR, etc.',
       before: () => _clickNav('ai') },
     { sel: '#settings-modal .settings-nav-item[data-settings-tab="integrations"]',
       text: '<b>Integrations</b> — wire up email, calendar, contacts here (per-account).',
       before: () => _clickNav('integrations') },
     { sel: '#settings-modal .settings-nav-item[data-settings-tab="search"]',
-      text: '<b>Search</b> — plug in your own search provider, or use the bundled <b>SearXNG</b> out of the box.',
+      text: '<b>Cerca</b> — plug in your own search provider, or use the bundled <b>SearXNG</b> out of the box.',
       before: () => _clickNav('search') },
     { sel: '#settings-modal .settings-nav-item[data-settings-tab="appearance"]',
       text: '<b>Appearance</b> — too many tools you don\'t need? Adjust them here! Toggle sidebar buttons, tool icons, and section visibility.',
@@ -3214,7 +2930,7 @@ async function _cmdTourSettings(args, ctx) {
       text: '<b>Email</b> — sync schedule, drafts, snooze defaults — everything email-flow related.',
       before: () => _clickNav('email') },
     { sel: '#settings-modal .settings-nav-item[data-settings-tab="reminders"]',
-      text: '<b>Reminders</b> — quiet hours and how ArgoDesk nudges you about calendar + urgent email.',
+      text: '<b>Promemoria</b> — quiet hours and how ArgoDesk nudges you about calendar + urgent email.',
       before: () => _clickNav('reminders') },
   ];
 
@@ -3420,13 +3136,13 @@ async function _cmdTourGallery(args, ctx) {
       placement: 'center-above',
       before: () => _clickTab('images') },
     { sel: '#gallery-modal .gallery-tab[data-tab="images"]',
-      text: '<b>Photos</b> — every image you\'ve uploaded, in one grid.',
+      text: '<b>Foto</b> — every image you\'ve uploaded, in one grid.',
       before: () => _clickTab('images') },
     { sel: '#gallery-upload-tile',
       text: 'Drop or click this tile to <b>upload</b> photos and videos.',
       before: () => _clickTab('images') },
     { sel: '#gallery-modal .gallery-tab[data-tab="albums"]',
-      text: '<b>Albums</b> — group images into collections.',
+      text: '<b>Album</b> — group images into collections.',
       before: () => _clickTab('albums') },
     { sel: '#gallery-modal .gallery-tab[data-tab="editor"]',
       text: '<b>Editor</b> — honestly still WIP, so explore as you want.',
@@ -3497,7 +3213,7 @@ async function _cmdTourNotes(args, ctx) {
     }
   }
   if (!pane) {
-    slashReply('Could not open Notes. Try clicking the Notes tool first.');
+    slashReply('Impossibile aprire le Note. Prova prima a cliccare lo strumento Note.');
     return true;
   }
 
@@ -3624,18 +3340,18 @@ async function _cmdTourNotes(args, ctx) {
 
   const steps = [
     { sel: '#notes-pane',
-      text: '<b>Notes</b> is your basic todo list, and also where reminders are managed.',
+      text: '<b>Note</b> is your basic todo list, and also where reminders are managed.',
       placement: 'center-above' },
     { sel: '#notes-pane .notes-pane-body',
       text: 'Your notes show up here. You can also <b>ask ArgoDesk in chat</b> to take a note for you.' },
     { sel: '#notes-search',
-      text: '<b>Search</b> across every note — title, body, tags, the works.' },
+      text: '<b>Cerca</b> across every note — title, body, tags, the works.' },
     { sel: '#notes-view-toggle',
       text: 'Switch between <b>grid</b> and <b>list</b> views — pick whichever fits your brain.' },
     { sel: '#notes-archive-toggle',
-      text: '<b>Archive</b> stashes old notes you don\'t want cluttering the active view but still want to keep.' },
+      text: '<b>Archivia</b> stashes old notes you don\'t want cluttering the active view but still want to keep.' },
     { sel: '#notes-select-btn',
-      text: '<b>Select</b> drops you into multi-select mode for bulk archive or delete.' },
+      text: '<b>Seleziona</b> drops you into multi-select mode for bulk archive or delete.' },
   ];
 
   for (let i = 0; i < steps.length; i++) {
@@ -3825,17 +3541,17 @@ async function _cmdTourBrain(args, ctx) {
   const _tab = (name) => document.querySelector(`.memory-tab[data-memory-tab="${name}"]`)?.click();
   const steps = [
     { sel: '#memory-modal .memory-modal-content',
-      text: '<b>Brain</b> is where your memories are. You can edit them, or add new ones under <b>Add</b>. Wow.',
+      text: '<b>Brain</b> is where your memories are. You can edit them, or add new ones under <b>Aggiungi</b>. Wow.',
       before: () => _tab('browse'),
       placement: 'center-above' },
     { sel: '#memory-tidy-btn',
-      text: '<b>Tidy</b> runs your model to clear out irrelevant memories and duplicates. It also triggers automatically from Tasks.',
+      text: '<b>Riordina</b> runs your model to clear out irrelevant memories and duplicates. It also triggers automatically from Tasks.',
       before: () => _tab('browse') },
     { sel: '.memory-tab-panel[data-memory-panel="skills"]',
       text: '<b>Skills</b> are basically your AI’s memory for improving its abilities.',
       before: () => _tab('skills') },
     { sel: '.memory-tab-panel[data-memory-panel="settings"]',
-      text: '<b>Settings</b> lets you turn off auto extraction and set how strong skills need to be before they are tagged.',
+      text: '<b>Impostazioni</b> lets you turn off auto extraction and set how strong skills need to be before they are tagged.',
       before: () => _tab('settings') },
   ];
 
@@ -4066,7 +3782,7 @@ async function _cmdTourTask1(args, ctx) {
       text: 'Tasks are <b>paused by default</b> — resume whichever ones make sense for you. (Or pause anything that\'s running.)' },
     { sel: '#tasks-modal .modal-body',
       text: 'When enabled, Tasks use the <b>utility model configured in Settings</b> for cleanup and organization jobs.' },
-  ], 'Use Tasks when you want ArgoDesk to handle background housekeeping.', {
+  ], 'Usa le Attività quando vuoi che ArgoDesk si occupi delle operazioni in background.', {
     continueLabel: 'continue →',
     continueText: '<b>Part 1 done.</b> Want to keep going into <b>adding & managing tasks</b>?',
   });
@@ -4077,14 +3793,14 @@ async function _cmdTourTask1(args, ctx) {
 async function _cmdTourTask2(args, ctx) {
   return _runTaskTour([
     { sel: '#tasks-modal .tasks-tab[data-tab="new"]',
-      text: '<b>Add</b> creates scheduled prompts, research jobs, actions, event triggers, or webhooks.',
+      text: '<b>Aggiungi</b> creates scheduled prompts, research jobs, actions, event triggers, or webhooks.',
       before: () => document.querySelector('#tasks-modal .tasks-tab[data-tab="new"]')?.click() },
     { sel: '#task-ai-input',
       text: 'You can just describe the task in plain chat language. Example: “weekday mornings summarize unread email”.' },
     { sel: '#tasks-modal .memory-item[data-idx="0"]',
-      text: 'Or pick a template and fill out the form manually.' },
+      text: 'Oppure scegli un modello e compila il modulo manualmente.' },
     { sel: '#task-form-save, #tasks-modal .tasks-tab[data-tab="tasks"]',
-      text: 'Tasks can be edited, paused, resumed, run now, or deleted from their cards.',
+      text: 'Le attività possono essere modificate, messe in pausa, riprese, eseguite subito o eliminate dalle loro schede.',
       before: () => document.querySelector('#tasks-modal .tasks-tab[data-tab="tasks"]')?.click() },
     // Tuck the modal out of the way so the chatbox is unmistakable, then
     // re-show it when the user moves past this step so the tour lands
@@ -4142,7 +3858,7 @@ async function _cmdTourResearch(args, ctx) {
     }
   }
   if (!overlay) {
-    slashReply('Could not open Deep Research. Try clicking the Deep Research tool first.');
+    slashReply('Impossibile aprire la Ricerca approfondita. Prova prima a cliccare lo strumento Ricerca approfondita.');
     return true;
   }
 
@@ -4271,7 +3987,7 @@ async function _cmdTourResearch(args, ctx) {
     { sel: '#research-query',
       text: 'Type what you want to researched here. Be specific — <i>"compare X vs Y for Z"</i> beats <i>"tell me about X"</i>.' },
     { sel: '#research-settings-body',
-      text: '<b>Rounds</b> is how long the model will keep searching for. You can set to <b>Auto</b>, or go deeper/quicker depending on preference.',
+      text: '<b>Round</b> is how long the model will keep searching for. You can set to <b>Auto</b>, or go deeper/quicker depending on preference.',
       before: _ensureSettingsOpen },
     { sel: '#research-pane',
       text: 'When a report finishes you can <b>discuss the results with the LLM</b> in chat, or open the full <b>visual HTML report</b> — sources, images, the works.',
@@ -4489,7 +4205,7 @@ async function _cmdTourLibrary(args, ctx) {
   // ── Phase 1: Library overview ──
   const libSteps = [
     { sel: '#doclib-modal .doclib-modal-content',
-      text: '<b>Welcome to Library!</b> Your hub for <b>Chats</b>, <b>Documents</b>, <b>Research</b>, and <b>Archive</b> — search, sort and tidy!',
+      text: '<b>Welcome to Library!</b> Your hub for <b>Chat</b>, <b>Documenti</b>, <b>Ricerca</b>, and <b>Archivia</b> — search, sort and tidy!',
       placement: 'center-above',
       before: () => {
         // Force the modal box to fill its intended frame so the halo wraps the
@@ -4501,7 +4217,7 @@ async function _cmdTourLibrary(args, ctx) {
         }
       } },
     { sel: '#doclib-create-btn',
-      text: '<b>Create</b> a fresh blank document — click it to try it out! (Or hit <b>Import</b> next to it to bring in a file from disk.)',
+      text: '<b>Crea</b> a fresh blank document — click it to try it out! (Or hit <b>Importa</b> next to it to bring in a file from disk.)',
       interactive: true },
     { sel: '#doclib-grid .doclib-card',
       text: 'Each card is a saved document. It’s linked to the chat you created it in — so either <b>clone</b> it for a new chat, or <b>open</b> it in its original.',
@@ -4558,14 +4274,14 @@ async function _cmdTourLibrary(args, ctx) {
       text: '<b>This is your document editor.</b> You can write here, but so can your model.',
       placement: 'center-above' },
     { sel: '#message',
-      text: 'Just tell your model what to write or edit.',
+      text: 'Di’ semplicemente al tuo modello cosa scrivere o modificare.',
       placement: 'center-above' },
     { sel: '#doc-tab-bar',
       text: 'Multiple docs as <b>tabs</b>. Drag to reorder, click <b>+</b> for a new one, click the dots for rename / clone / export / delete.' },
     { sel: '#doc-language-select',
       text: 'Switch the <b>document type</b> — markdown shows a preview, email shows To/Subject/Send, PDF lets you fill blanks with AI.' },
     { sel: '#doc-editor-textarea',
-      text: 'Ask the LLM to <i>draft</i>, <i>rewrite</i>, <i>summarize</i>, <i>feedback</i> — edits stream live.' },
+      text: 'Ask the LLM to <i>bozza</i>, <i>rewrite</i>, <i>summarize</i>, <i>feedback</i> — edits stream live.' },
   ];
 
   for (let i = 0; i < editorSteps.length; i++) {
@@ -4588,7 +4304,7 @@ async function _cmdTourLibrary(args, ctx) {
 // ── Prompt ──
 
 async function _cmdPrompt(args, ctx) {
-  // Pull chat-appropriate prompts from compare templates. Skip the
+  // Pull chat-appropriate prompts from the prompt-template library. Skip the
   // `image` category (raw image-gen prompts — wrong for a text chat)
   // and `search` (bare keyword queries, not full prompts).
   const CHAT_CATS = ['chat', 'code', 'agent', 'html'];
@@ -4829,7 +4545,7 @@ async function _cmdSetup(args, ctx) {
         await typewriterReply(`Feature toggles:\n\n${lines}\n\nType a feature name to toggle it.`);
         setupMode = 'features';
       } catch {
-        await typewriterReply('Could not load features. Check the Admin Panel.');
+        await typewriterReply('Impossibile caricare le funzionalità. Controlla il Pannello Admin.');
       }
       return true;
     }
@@ -4887,7 +4603,7 @@ async function _cmdShortcuts(args, ctx) {
     [formatCombo(keybinds.admin_panel), 'Admin panel'],
     [formatCombo(keybinds.cancel), 'Cancel stream / close panel'],
     ['Enter', 'Send message'],
-    ['Shift+Enter', 'New line'],
+    ['Shift+Enter', 'Nuova riga'],
   ];
   const maxKey = Math.max(...entries.map(e => e[0].length));
   const lines = entries.map(([key, desc]) => `  ${key.padEnd(maxKey + 2)}${desc}`);
@@ -4986,7 +4702,7 @@ async function _cmdFlip(args, ctx) {
   const wrap = document.createElement('div');
   wrap.style.cssText = 'display:flex;flex-direction:column;align-items:center;padding:16px 0;gap:6px;';
   wrap.appendChild(coin);
-  if (edge) { const lbl = document.createElement('div'); lbl.style.cssText='font-size:0.8em;opacity:0.5;';lbl.textContent='The coin landed on its edge.';wrap.appendChild(lbl); }
+  if (edge) { const lbl = document.createElement('div'); lbl.style.cssText='font-size:0.8em;opacity:0.5;';lbl.textContent='La moneta è caduta di taglio.';wrap.appendChild(lbl); }
   chatBox.appendChild(wrap);
   uiModule.scrollHistory();
   // Inject keyframes if not present
@@ -5389,7 +5105,7 @@ const COMMANDS = {
     help: 'Manage chat sessions',
     default: 'info',
     subs: {
-      'new':         { handler: _cmdSessionNew,         alias: ['create','mkdir'], help: 'Create new chat',             usage: '/chats new [name]' },
+      'new':         { handler: _cmdSessionNew,         alias: ['create','mkdir'], help: 'Crea nuova chat',             usage: '/chats new [name]' },
       'delete':      { handler: _cmdSessionDelete,      alias: ['del','rm'],       help: 'Delete chat',                 usage: '/chats delete [id]' },
       'archive':     { handler: _cmdSessionArchive,     alias: ['tar'],            help: 'Archive chat',                usage: '/chats archive [id]' },
       'rename':      { handler: _cmdSessionRename,      alias: ['mv'],             help: 'Rename current chat',         usage: '/chats rename Name' },
@@ -5462,7 +5178,7 @@ const COMMANDS = {
   setup: {
     alias: ['su', 'seutp'],
     category: 'Getting started',
-    help: 'Add local or API model endpoints',
+    help: 'Aggiungi endpoint di modelli locali o API',
     handler: _cmdSetup,
     usage: '/setup local URL  ·  /setup groq KEY  ·  /setup endpoint'
   },
@@ -5472,13 +5188,6 @@ const COMMANDS = {
     help: 'Full guided product tour',
     handler: _cmdDemo,
     usage: '/demo'
-  },
-  'tour-compare': {
-    alias: ['compare-tour'],
-    category: 'Tours',
-    help: 'Model comparison tour',
-    handler: _cmdTourCompare,
-    usage: '/tour-compare'
   },
   'tour-cookbook': {
     alias: ['cookbook-tour'],
@@ -5497,7 +5206,7 @@ const COMMANDS = {
   'tour-library': {
     alias: ['library-tour', 'tour-doc', 'tour-document', 'doc-tour', 'document-tour'],
     category: 'Tours',
-    help: 'Library and document editor tour',
+    help: 'Tour della libreria e dell’editor documenti',
     handler: _cmdTourLibrary,
     usage: '/tour-library'
   },
@@ -5560,7 +5269,7 @@ const COMMANDS = {
   settings: {
     alias: ['cfg', 'preferences', 'config'],
     category: 'Settings',
-    help: 'Open the Settings panel',
+    help: 'Apri il pannello Impostazioni',
     handler: _cmdSettings,
     usage: '/settings [tab]'
   },
@@ -5582,63 +5291,56 @@ const COMMANDS = {
   email: {
     alias: ['mail', 'inbox'],
     category: 'Tools',
-    help: 'Open Email',
+    help: 'Apri Email',
     handler: (args, ctx) => _cmdToolPanel('email', args, ctx),
     usage: '/email'
   },
   notes: {
     alias: [],
     category: 'Tools',
-    help: 'Open Notes',
+    help: 'Apri Note',
     handler: (args, ctx) => _cmdToolPanel('notes', args, ctx),
     usage: '/notes'
   },
   tasks: {
     alias: [],
     category: 'Tools',
-    help: 'Open Tasks',
+    help: 'Apri Attività',
     handler: (args, ctx) => _cmdToolPanel('tasks', args, ctx),
     usage: '/tasks'
   },
   brain: {
     alias: ['memories'],
     category: 'Tools',
-    help: 'Open Brain',
+    help: 'Apri Memoria',
     handler: (args, ctx) => _cmdToolPanel('brain', args, ctx),
     usage: '/brain'
   },
   library: {
     alias: ['docs', 'documents'],
     category: 'Tools',
-    help: 'Open Library',
+    help: 'Apri Libreria',
     handler: (args, ctx) => _cmdToolPanel('library', args, ctx),
     usage: '/library'
   },
   gallery: {
     alias: ['photos'],
     category: 'Tools',
-    help: 'Open Gallery',
+    help: 'Apri Galleria',
     handler: (args, ctx) => _cmdToolPanel('gallery', args, ctx),
     usage: '/gallery'
   },
   research: {
     alias: [],
     category: 'Tools',
-    help: 'Open Deep Research',
+    help: 'Apri Ricerca approfondita',
     handler: (args, ctx) => _cmdToolPanel('research', args, ctx),
     usage: '/research'
-  },
-  compare: {
-    alias: [],
-    category: 'Tools',
-    help: 'Open Compare',
-    handler: (args, ctx) => _cmdToolPanel('compare', args, ctx),
-    usage: '/compare'
   },
   models: {
     alias: ['model'],
     category: 'Settings',
-    help: 'List available models',
+    help: 'Elenca i modelli disponibili',
     handler: _cmdModels,
     usage: '/models'
   },
@@ -5655,7 +5357,7 @@ const COMMANDS = {
     alias: ['search-history'],
     category: 'Utility',
     hidden: true,
-    help: 'Search all conversations',
+    help: 'Cerca in tutte le conversazioni',
     handler: _cmdSearch,
     usage: '/find query'
   },
@@ -5679,7 +5381,7 @@ const COMMANDS = {
     alias: ['exec', 'run', 'shell'],
     category: 'Utility',
     hidden: true,
-    help: 'Run a shell command',
+    help: 'Esegui un comando shell',
     handler: _cmdShell,
     usage: '/sh command'
   },
@@ -5695,7 +5397,7 @@ const COMMANDS = {
     alias: ['?', 'man', 'commands'],
     category: 'Utility',
     hidden: true,
-    help: 'This help',
+    help: 'Questo aiuto',
     handler: _cmdHelp,
     usage: '/help'
   },
@@ -5865,7 +5567,7 @@ async function handleSlashCommand(input) {
           _showUser();
           if (wantsHelp) {
             const usage = subDef.usage || `/${leg.parent} ${leg.sub}`;
-            slashReply(`<pre>${usage}\n${subDef.help || 'No help available.'}</pre>`);
+            slashReply(`<pre>${usage}\n${subDef.help || 'Nessun aiuto disponibile.'}</pre>`);
             return true;
           }
           return await subDef.handler(args, ctx);
@@ -5874,7 +5576,7 @@ async function handleSlashCommand(input) {
         _showUser();
         if (wantsHelp) {
           const usage = cmdDef.usage || `/${cmdKey}`;
-          slashReply(`<pre>${usage}\n${cmdDef.help || 'No help available.'}</pre>`);
+          slashReply(`<pre>${usage}\n${cmdDef.help || 'Nessun aiuto disponibile.'}</pre>`);
           return true;
         }
         return await cmdDef.handler(args, ctx);
@@ -5910,7 +5612,7 @@ async function handleSlashCommand(input) {
           // Help for specific subcommand
           if (wantsHelp || subArgs.includes('--help') || subArgs.includes('-h')) {
             const usage = subDef.usage || `/${cmdKey} ${subKey}`;
-            slashReply(`<pre>${usage}\n${subDef.help || 'No help available.'}</pre>`);
+            slashReply(`<pre>${usage}\n${subDef.help || 'Nessun aiuto disponibile.'}</pre>`);
             return true;
           }
           return await subDef.handler(subArgs, ctx);
@@ -5934,7 +5636,7 @@ async function handleSlashCommand(input) {
       // Flat command (no subs)
       if (wantsHelp) {
         const usage = cmdDef.usage || `/${cmdKey}`;
-        slashReply(`<pre>${usage}\n${cmdDef.help || 'No help available.'}</pre>`);
+        slashReply(`<pre>${usage}\n${cmdDef.help || 'Nessun aiuto disponibile.'}</pre>`);
         return true;
       }
       return await cmdDef.handler(args, ctx);

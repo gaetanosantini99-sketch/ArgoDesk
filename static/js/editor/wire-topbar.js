@@ -143,10 +143,10 @@ export function wireTopbar(deps) {
   // Edge popup — Width input + Feather / Delete action buttons.
   function applyEdgeAction(hardDelete) {
     const layer = activeLayer();
-    if (!layer || layer.locked) { uiModule.showToast('Select an unlocked layer'); return; }
+    if (!layer || layer.locked) { uiModule.showToast('Seleziona un livello sbloccato'); return; }
     const widthInput = document.getElementById('ge-edge-width');
     const width = parseInt(widthInput?.value || '8');
-    if (isNaN(width) || width < 1) { uiModule.showToast('Invalid width'); return; }
+    if (isNaN(width) || width < 1) { uiModule.showToast('Larghezza non valida'); return; }
     saveState();
     applyEdgeFeather(layer, width, hardDelete);
     composite();

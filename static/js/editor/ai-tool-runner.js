@@ -90,7 +90,7 @@ export function createApplyImageTool({
       }
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      if (!data.image) throw new Error('No image returned');
+      if (!data.image) throw new Error('Nessuna immagine restituita');
       const img = new Image();
       img.onload = () => {
         if (!state.editorOpen) return; // user closed mid-decode (v2 review HIGH-4)
@@ -103,7 +103,7 @@ export function createApplyImageTool({
         renderLayerPanel();
         if (uiModule) uiModule.showToast(layerName + ' complete', 4500);
       };
-      img.onerror = () => { if (uiModule) uiModule.showToast('Failed to load result', 6000); };
+      img.onerror = () => { if (uiModule) uiModule.showToast('Caricamento del risultato non riuscito', 6000); };
       img.src = 'data:image/png;base64,' + data.image;
     } catch (e) {
       // Detect known failure modes and surface an action-toast.
@@ -129,7 +129,7 @@ export function createApplyImageTool({
         } else if (needsImg2Img && uiModule.showToast.length >= 2) {
           uiModule.showToast(layerName + ' failed: ' + e.message, {
             duration: 9000,
-            action: 'Open Cookbook',
+            action: 'Apri Cookbook',
             onAction: () => openCookbookForImg2img(),
           });
         } else {

@@ -34,6 +34,8 @@ class NoteCreate(BaseModel):
     image_url: Optional[str] = None
     repeat: Optional[str] = "none"
     sort_order: Optional[int] = None
+    linked_event_uid: Optional[str] = None
+    linked_calendar_id: Optional[str] = None
 
 
 class NoteUpdate(BaseModel):
@@ -50,6 +52,8 @@ class NoteUpdate(BaseModel):
     repeat: Optional[str] = None
     sort_order: Optional[int] = None
     agent_session_id: Optional[str] = None
+    linked_event_uid: Optional[str] = None
+    linked_calendar_id: Optional[str] = None
 
 
 # ---------------------------------------------------------------------------
@@ -90,6 +94,8 @@ def _note_to_dict(note: Note) -> Dict[str, Any]:
         "ai_classification": ai_cls,
         "ai_content_hash": getattr(note, "ai_content_hash", None),
         "agent_session_id": getattr(note, "agent_session_id", None),
+        "linked_event_uid": getattr(note, "linked_event_uid", None),
+        "linked_calendar_id": getattr(note, "linked_calendar_id", None),
         "created_at": note.created_at.isoformat() if note.created_at else None,
         "updated_at": note.updated_at.isoformat() if note.updated_at else None,
     }
@@ -106,6 +112,37 @@ def _note_to_dict(note: Note) -> Dict[str, Any]:
 # push a parallel in-app notification (frontend polls the scheduler's queue
 # and fires real browser Notification(...) popups). Optional; works without it.
 _scheduler_ref = None
+
+
+def _linked_event_line(note_id: str) -> str:
+    """Return a short 'When/Where' line for a note's linked calendar event.
+
+    Looks up Note.linked_event_uid → CalendarEvent and formats date/time and
+    location in Italian. Returns "" when there is no link or no event.
+    """
+    if not note_id:
+        return ""
+    from core.database import CalendarEvent
+    db = SessionLocal()
+    try:
+        note = db.query(Note).filter(Note.id == note_id).first()
+        uid = getattr(note, "linked_event_uid", None) if note else None
+        if not uid:
+            return ""
+        ev = db.query(CalendarEvent).filter(CalendarEvent.uid == uid).first()
+        if not ev:
+            return ""
+        parts = []
+        if ev.dtstart:
+            if getattr(ev, "all_day", False):
+                parts.append("📅 " + ev.dtstart.strftime("%d/%m/%Y"))
+            else:
+                parts.append("📅 " + ev.dtstart.strftime("%d/%m/%Y %H:%M"))
+        if (ev.location or "").strip():
+            parts.append("📍 " + ev.location.strip())
+        return " · ".join(parts)
+    finally:
+        db.close()
 
 
 async def dispatch_reminder(
@@ -134,6 +171,14 @@ async def dispatch_reminder(
     llm_on = bool(settings.get("reminder_llm_synthesis", False))
     title = (title or "").strip()
     note_body = (note_body or "").strip()
+    # If the note links a calendar event, fold its time/place into the body so
+    # the reminder says WHEN and WHERE, not just what.
+    try:
+        _ev_line = _linked_event_line(note_id)
+        if _ev_line:
+            note_body = (note_body + "\n" + _ev_line).strip() if note_body else _ev_line
+    except Exception as _e:
+        logger.debug(f"dispatch_reminder: linked-event lookup failed: {_e}")
     cache_key = str(note_id) if note_id else ""
     cache = {}
     cache_path = None
@@ -495,6 +540,15 @@ def setup_note_routes(task_scheduler=None):
         finally:
             db.close()
 
+    # --- UPCOMING CALENDAR EVENTS (for the reminder→event link selector) ---
+    # Declared before the dynamic `/{note_id}` route so "calendar-events" is
+    # not swallowed as a note id.
+    @router.get("/calendar-events")
+    def note_calendar_events(request: Request):
+        user = _owner(request)
+        from core.database import get_upcoming_events
+        return {"events": get_upcoming_events(user)}
+
     # --- CREATE ---
     @router.post("")
     def create_note(request: Request, body: NoteCreate):
@@ -517,6 +571,8 @@ def setup_note_routes(task_scheduler=None):
                 image_url=body.image_url,
                 repeat=body.repeat or "none",
                 sort_order=body.sort_order if body.sort_order is not None else 0,
+                linked_event_uid=body.linked_event_uid,
+                linked_calendar_id=body.linked_calendar_id,
             )
             db.add(note)
             db.commit()
@@ -583,6 +639,10 @@ def setup_note_routes(task_scheduler=None):
                 note.sort_order = body.sort_order
             if body.agent_session_id is not None:
                 note.agent_session_id = body.agent_session_id
+            if body.linked_event_uid is not None:
+                note.linked_event_uid = body.linked_event_uid or None
+            if body.linked_calendar_id is not None:
+                note.linked_calendar_id = body.linked_calendar_id or None
 
             db.commit()
             db.refresh(note)

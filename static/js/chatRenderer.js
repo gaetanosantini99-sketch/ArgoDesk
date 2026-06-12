@@ -138,7 +138,7 @@ function buildAttachCards(attachments) {
           ocrBtn.type = 'button';
           ocrBtn.className = 'attach-ocr-btn';
           ocrBtn.title = 'View / edit OCR text';
-          ocrBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg><span class="attach-ocr-label">Caption</span>';
+          ocrBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg><span class="attach-ocr-label">Didascalia</span>';
           ocrBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             _openVisionEditor(att, ocrBtn.closest('.msg'));
@@ -225,7 +225,7 @@ function _openImageLightbox(att) {
   full.addEventListener('error', () => {
     const err = document.createElement('div');
     err.className = 'attach-lightbox-err';
-    err.textContent = 'Failed to load full-resolution image.';
+    err.textContent = 'Caricamento dell’immagine a piena risoluzione non riuscito.';
     overlay.appendChild(err);
   });
   full.src = `/api/upload/${att.id}`;
@@ -277,7 +277,7 @@ function _openVisionEditor(att, userMsgEl) {
   title.className = 'vision-editor-title';
   // Eye icon matches the one in Settings → Vision so users recognise where
   // this text originates.
-  title.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.7;flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span>Vision text</span>';
+  title.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.7;flex-shrink:0"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><span>Testo visione</span>';
   panel.appendChild(title);
   const desc = document.createElement('div');
   desc.className = 'vision-editor-desc';
@@ -286,7 +286,7 @@ function _openVisionEditor(att, userMsgEl) {
   const ta = document.createElement('textarea');
   ta.className = 'vision-editor-text';
   ta.rows = 10;
-  ta.placeholder = 'Loading…';
+  ta.placeholder = 'Caricamento…';
   ta.disabled = true;
   panel.appendChild(ta);
   const actions = document.createElement('div');
@@ -294,7 +294,7 @@ function _openVisionEditor(att, userMsgEl) {
   const closeBtn = document.createElement('button');
   closeBtn.type = 'button';
   closeBtn.className = 'vision-editor-btn';
-  closeBtn.innerHTML = '<span class="vision-btn-label">Close</span>';
+  closeBtn.innerHTML = '<span class="vision-btn-label">Chiudi</span>';
   closeBtn.addEventListener('click', _closeVisionEditor);
   const _saveVisionText = async () => {
     const res = await fetch(`/api/upload/${att.id}/vision`, {
@@ -308,18 +308,18 @@ function _openVisionEditor(att, userMsgEl) {
   const saveBtn = document.createElement('button');
   saveBtn.type = 'button';
   saveBtn.className = 'vision-editor-btn vision-editor-btn-primary';
-  saveBtn.innerHTML = '<span class="vision-btn-label">Save</span>';
+  saveBtn.innerHTML = '<span class="vision-btn-label">Salva</span>';
   saveBtn.disabled = true;
   saveBtn.addEventListener('click', async () => {
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<span class="vision-btn-label">Saving…</span>';
     try {
       await _saveVisionText();
-      if (uiModule?.showToast) uiModule.showToast('Saved');
+      if (uiModule?.showToast) uiModule.showToast('Salvato');
       _closeVisionEditor();
     } catch (e) {
       saveBtn.disabled = false;
-      saveBtn.innerHTML = '<span class="vision-btn-label">Save</span>';
+      saveBtn.innerHTML = '<span class="vision-btn-label">Salva</span>';
       if (uiModule?.showError) uiModule.showError('Failed to save OCR text');
     }
   });
@@ -328,8 +328,8 @@ function _openVisionEditor(att, userMsgEl) {
   const regenBtn = document.createElement('button');
   regenBtn.type = 'button';
   regenBtn.className = 'vision-editor-btn vision-editor-btn-primary';
-  regenBtn.title = 'Save and regenerate the message';
-  regenBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.74 9.74 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg><span class="vision-btn-label">Regenerate message</span>';
+  regenBtn.title = 'Salva e rigenera il messaggio';
+  regenBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.74 9.74 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg><span class="vision-btn-label">Rigenera messaggio</span>';
   regenBtn.disabled = true;
   regenBtn.addEventListener('click', async () => {
     regenBtn.disabled = true;
@@ -340,7 +340,7 @@ function _openVisionEditor(att, userMsgEl) {
       if (userMsgEl && window.chatModule?.resendUserMessage) {
         window.chatModule.resendUserMessage(userMsgEl);
       } else if (uiModule?.showToast) {
-        uiModule.showToast('Saved');
+        uiModule.showToast('Salvato');
       }
     } catch (e) {
       regenBtn.disabled = false;
@@ -373,7 +373,7 @@ function _openVisionEditor(att, userMsgEl) {
     })
     .catch(() => {
       ta.value = '';
-      ta.placeholder = 'Could not load OCR text — type your correction and save.';
+      ta.placeholder = 'Impossibile caricare il testo OCR — digita la correzione e salva.';
       ta.disabled = false;
       saveBtn.disabled = false;
       regenBtn.disabled = !userMsgEl;
@@ -578,15 +578,15 @@ export function applyModelColor(roleEl, modelName) {
       let html = '<div style="font-weight:600;margin-bottom:6px;color:var(--fg);display:flex;align-items:center;gap:6px;">';
       if (logoHtml) html += '<span class="role-provider-logo" style="opacity:0.7">' + logoHtml + '</span>';
       html += short + '</div>';
-      html += '<div><span class="ctx-label">Model</span> ' + modelName.split('/').pop() + '</div>';
+      html += '<div><span class="ctx-label">Modello</span> ' + modelName.split('/').pop() + '</div>';
       // Show static context initially, then fetch real from server
       const _realCtx = window._realContextLengths && window._realContextLengths[modelName];
       if (_realCtx) {
-        html += '<div><span class="ctx-label">Context</span> ' + _fmtCtx(_realCtx) + ' tokens';
+        html += '<div><span class="ctx-label">Contesto</span> ' + _fmtCtx(_realCtx) + ' tokens';
         if (info && info.ctx && info.ctx !== _realCtx) html += ' <span style="opacity:0.35">(spec: ' + _fmtCtx(info.ctx) + ')</span>';
         html += '</div>';
       } else if (info && info.ctx) {
-        html += '<div><span class="ctx-label">Context</span> <span id="_ctx-val">' + _fmtCtx(info.ctx) + ' tokens</span></div>';
+        html += '<div><span class="ctx-label">Contesto</span> <span id="_ctx-val">' + _fmtCtx(info.ctx) + ' tokens</span></div>';
       }
       // Fetch real context from server async
       if (!_realCtx && window.sessionModule) {
@@ -613,7 +613,7 @@ export function applyModelColor(roleEl, modelName) {
         const _preset = _pid ? window.presetsModule.getPreset(_pid) : null;
         const _mt = _preset?.max_tokens;
         if (_mt && _mt > 0 && _mt <= 8192) {
-          html += '<div><span class="ctx-label">Max tokens</span> ' + _mt.toLocaleString() + ' <span style="opacity:0.4">(configured)</span></div>';
+          html += '<div><span class="ctx-label">Token massimi</span> ' + _mt.toLocaleString() + ' <span style="opacity:0.4">(configured)</span></div>';
         }
       }
       if (info && info.input != null) html += '<div><span class="ctx-label">Input</span> $' + info.input.toFixed(2) + ' / 1M</div>';
@@ -932,9 +932,9 @@ function _appendReportButton(container, sessionId) {
       chatBtn.disabled = false;
       chatBtn.innerHTML = origLabel;
       if (window.uiModule && uiModule.showError) {
-        uiModule.showError('Could not start follow-up chat: ' + e.message);
+        uiModule.showError('Impossibile avviare la chat di approfondimento: ' + e.message);
       } else {
-        alert('Could not start follow-up chat: ' + e.message);
+        alert('Impossibile avviare la chat di approfondimento: ' + e.message);
       }
     }
   });
@@ -1083,7 +1083,7 @@ export function buildImageBubble(imageUrl, prompt, model, size, quality, imageId
   const copyBtn = document.createElement('button');
   copyBtn.className = 'footer-copy-btn';
   copyBtn.type = 'button';
-  copyBtn.title = 'Copy prompt';
+  copyBtn.title = 'Copia prompt';
   copyBtn.innerHTML = COPY_ICON;
   copyBtn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -1096,7 +1096,7 @@ export function buildImageBubble(imageUrl, prompt, model, size, quality, imageId
   const dlBtn = document.createElement('button');
   dlBtn.className = 'footer-copy-btn';
   dlBtn.type = 'button';
-  dlBtn.title = 'Download image';
+  dlBtn.title = 'Scarica immagine';
   dlBtn.textContent = '\u2913';
   dlBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -1119,7 +1119,7 @@ export function buildImageBubble(imageUrl, prompt, model, size, quality, imageId
   const editBtn = document.createElement('button');
   editBtn.className = 'footer-copy-btn';
   editBtn.type = 'button';
-  editBtn.title = 'Edit in image editor';
+  editBtn.title = 'Modifica nell’editor immagini';
   editBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>';
   editBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -1153,7 +1153,7 @@ export function buildImageBubble(imageUrl, prompt, model, size, quality, imageId
   const delBtn = document.createElement('button');
   delBtn.className = 'footer-copy-btn footer-delete-btn';
   delBtn.type = 'button';
-  delBtn.title = 'Delete image';
+  delBtn.title = 'Elimina immagine';
   delBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>';
   delBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -1171,12 +1171,12 @@ export function buildImageBubble(imageUrl, prompt, model, size, quality, imageId
           method: 'DELETE', credentials: 'same-origin',
         });
         if (!res.ok && res.status !== 404) {
-          uiModule.showToast?.('Delete failed', 4000);
+          uiModule.showToast?.('Eliminazione non riuscita', 4000);
           return;
         }
         window.dispatchEvent(new CustomEvent('gallery-refresh'));
       } catch (_) {
-        uiModule.showToast?.('Delete failed', 4000);
+        uiModule.showToast?.('Eliminazione non riuscita', 4000);
         return;
       }
     }
@@ -1275,18 +1275,18 @@ export function createMsgFooter(msgElement) {
 
   // Define all available actions: { id, icon, title, className, handler }
   const allActions = [
-    { id: 'copy', icon: COPY_ICON, title: 'Copy message', cls: 'footer-copy-btn', html: true, handler(e) {
+    { id: 'copy', icon: COPY_ICON, title: 'Copia messaggio', cls: 'footer-copy-btn', html: true, handler(e) {
       e.stopPropagation();
       const btn = e.currentTarget;
       uiModule.copyToClipboard(msgElement.dataset.raw || msgElement.querySelector('.body')?.textContent || '');
       btn.innerHTML = CHECK_ICON;
       setTimeout(() => { btn.innerHTML = COPY_ICON; }, 1500);
     }},
-    { id: 'edit', icon: '\u270E', title: 'Edit', cls: 'msg-action-btn', handler(e) {
+    { id: 'edit', icon: '\u270E', title: 'Modifica', cls: 'msg-action-btn', handler(e) {
       e.stopPropagation();
       if (window.chatModule?.editAIMessage) window.chatModule.editAIMessage(msgElement);
     }},
-    { id: 'regen', icon: '\u21BB', title: 'Regenerate from here', cls: 'msg-action-btn', handler(e) {
+    { id: 'regen', icon: '\u21BB', title: 'Rigenera da qui', cls: 'msg-action-btn', handler(e) {
       e.stopPropagation();
       if (window.chatModule?.regenerateFrom) window.chatModule.regenerateFrom(msgElement);
     }},
@@ -1298,11 +1298,11 @@ export function createMsgFooter(msgElement) {
       e.stopPropagation();
       if (window.chatModule?.rewriteWith) window.chatModule.rewriteWith(msgElement, 'Explain your last response in simpler terms. Use plain language and short sentences.');
     }},
-    { id: 'fork', icon: '\u2ADD', title: 'Fork conversation', cls: 'msg-action-btn', handler(e) {
+    { id: 'fork', icon: '\u2ADD', title: 'Biforca la conversazione', cls: 'msg-action-btn', handler(e) {
       e.stopPropagation();
       if (window.chatModule?.forkFrom) window.chatModule.forkFrom(msgElement);
     }},
-    { id: 'delete', icon: '\u2715', title: 'Delete message', cls: 'msg-action-btn msg-delete-btn', handler(e) {
+    { id: 'delete', icon: '\u2715', title: 'Elimina messaggio', cls: 'msg-action-btn msg-delete-btn', handler(e) {
       e.stopPropagation();
       if (window.chatModule?.deleteMessage) window.chatModule.deleteMessage(msgElement);
     }},
@@ -1418,7 +1418,7 @@ export function createMsgFooter(msgElement) {
         const row = document.createElement('div');
         row.className = 'memory-used-row';
         row.style.cursor = 'pointer';
-        row.title = 'Click to open memory manager';
+        row.title = 'Clicca per aprire il gestore della memoria';
         const badge = document.createElement('span');
         badge.className = 'memory-used-badge ' + (m.type === 'pinned' ? 'pinned' : 'recalled');
         badge.textContent = m.type === 'pinned' ? '\u25CF' : '\u21BB';
@@ -1486,15 +1486,15 @@ export function createUserMsgFooter(msgElement) {
   actions.className = 'msg-actions';
 
   const allActions = [
-    { id: 'edit', icon: '\u270E', title: 'Edit message', cls: 'msg-action-btn', handler(e) {
+    { id: 'edit', icon: '\u270E', title: 'Modifica messaggio', cls: 'msg-action-btn', handler(e) {
       e.stopPropagation();
       if (window.chatModule?.editUserMessage) window.chatModule.editUserMessage(msgElement);
     }},
-    { id: 'delete', icon: '\u2715', title: 'Delete message', cls: 'msg-action-btn msg-delete-btn', handler(e) {
+    { id: 'delete', icon: '\u2715', title: 'Elimina messaggio', cls: 'msg-action-btn msg-delete-btn', handler(e) {
       e.stopPropagation();
       if (window.chatModule?.deleteMessage) window.chatModule.deleteMessage(msgElement);
     }},
-    { id: 'copy', icon: COPY_ICON, title: 'Copy message', cls: 'footer-copy-btn', html: true, handler(e) {
+    { id: 'copy', icon: COPY_ICON, title: 'Copia messaggio', cls: 'footer-copy-btn', html: true, handler(e) {
       e.stopPropagation();
       const btn = e.currentTarget;
       uiModule.copyToClipboard(msgElement.querySelector('.body')?.textContent || '');
@@ -1626,7 +1626,7 @@ export function displayMetrics(messageElement, metrics) {
   if (!metricsLabel) return;
   metricsContainer.textContent = metricsLabel;
   metricsContainer.style.cursor = 'pointer';
-  metricsContainer.title = 'Click for details';
+  metricsContainer.title = 'Clicca per i dettagli';
   const metricsDivider = document.createElement('span');
   metricsDivider.textContent = ' | ';
   metricsDivider.style.color = 'var(--color-muted-alt)';
@@ -1650,29 +1650,29 @@ export function displayMetrics(messageElement, metrics) {
     let sessionCostStr = '';
     const sc = getSessionCost();
     if (sc > 0) {
-      sessionCostStr = `<div><span class="ctx-label">Session</span> $${sc < 0.01 ? sc.toFixed(4) : sc.toFixed(3)}</div>`;
+      sessionCostStr = `<div><span class="ctx-label">Sessione</span> $${sc < 0.01 ? sc.toFixed(4) : sc.toFixed(3)}</div>`;
     }
 
     const popup = document.createElement('div');
     popup.className = 'ctx-popup';
     popup.innerHTML = `
-      <div style="font-weight:600;margin-bottom:6px;color:var(--fg);">Message Stats</div>
-      <div><span class="ctx-label">Model</span> ${model.split('/').pop()}</div>
+      <div style="font-weight:600;margin-bottom:6px;color:var(--fg);">Statistiche messaggio</div>
+      <div><span class="ctx-label">Modello</span> ${model.split('/').pop()}</div>
       <div><span class="ctx-label">Input</span> ${inputTokens.toLocaleString()} tokens${isReal ? '' : '~'}</div>
       <div><span class="ctx-label">Output</span> ${outputTokens.toLocaleString()} tokens${isReal ? '' : '~'}</div>
-      <div><span class="ctx-label">Total</span> ${totalTok.toLocaleString()} tokens</div>
-      <div><span class="ctx-label">Speed</span> ${speedStr}</div>
-      <div><span class="ctx-label">Time</span> ${responseTime}s</div>
-      ${prepTime != null ? `<div><span class="ctx-label">Prep</span> ${prepTime}s</div>` : ''}
-      ${modelWaitTime != null ? `<div><span class="ctx-label">Model wait</span> ${modelWaitTime}s</div>` : ''}
-      <div><span class="ctx-label">Cost</span> ${costStr}</div>
+      <div><span class="ctx-label">Totale</span> ${totalTok.toLocaleString()} tokens</div>
+      <div><span class="ctx-label">Velocità</span> ${speedStr}</div>
+      <div><span class="ctx-label">Ora</span> ${responseTime}s</div>
+      ${prepTime != null ? `<div><span class="ctx-label">Preparazione</span> ${prepTime}s</div>` : ''}
+      ${modelWaitTime != null ? `<div><span class="ctx-label">Attesa modello</span> ${modelWaitTime}s</div>` : ''}
+      <div><span class="ctx-label">Costo</span> ${costStr}</div>
       ${sessionCostStr}
       ${prepDetails ? `<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);font-size:0.85em;opacity:0.8;">
-        <div style="font-weight:600;margin-bottom:4px;color:var(--fg);">Agent prep</div>
+        <div style="font-weight:600;margin-bottom:4px;color:var(--fg);">Preparazione agente</div>
         ${prepDetails}
       </div>` : ''}
       ${ctxPct !== undefined && ctxPct > 0 ? `<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--border);">
-        <span class="ctx-label">Context</span> <span style="color:${ctxColor};font-weight:600;">${ctxPct}%</span> used
+        <span class="ctx-label">Contesto</span> <span style="color:${ctxColor};font-weight:600;">${ctxPct}%</span> used
       </div>` : ''}
       ${isReal ? '' : '<div style="margin-top:4px;font-size:0.8em;opacity:0.4;">~ estimated token count</div>'}
     `;
@@ -1734,7 +1734,7 @@ export function displayMetrics(messageElement, metrics) {
       const popup = document.createElement('div');
       popup.className = 'ctx-detail-popup';
       popup.innerHTML = `
-        <div style="font-weight:600;margin-bottom:8px;color:var(--fg);">Context Window</div>
+        <div style="font-weight:600;margin-bottom:8px;color:var(--fg);">Finestra di contesto</div>
         <div class="ctx-bar-wrap">
           <div class="ctx-bar-fill" style="width:${Math.min(ctxPct, 100)}%;background:${ctxColor};"></div>
         </div>
@@ -1743,11 +1743,11 @@ export function displayMetrics(messageElement, metrics) {
           <span>${fmtNum(totalCtx)} total</span>
         </div>
         <div style="margin-top:8px;font-size:0.8rem;">
-          <div><span class="ctx-label">Model</span> ${modelShort}</div>
-          <div><span class="ctx-label">Usage</span> <span style="color:${ctxColor};font-weight:600;">${ctxPct}%</span></div>
-          <div><span class="ctx-label">Window</span> ${fmtNum(totalCtx)} tokens</div>
+          <div><span class="ctx-label">Modello</span> ${modelShort}</div>
+          <div><span class="ctx-label">Utilizzo</span> <span style="color:${ctxColor};font-weight:600;">${ctxPct}%</span></div>
+          <div><span class="ctx-label">Finestra</span> ${fmtNum(totalCtx)} tokens</div>
         </div>
-        ${ctxPct >= 70 ? `<button class="ctx-compact-btn" title="Summarize older messages to free up context">Compact context</button>` : ''}
+        ${ctxPct >= 70 ? `<button class="ctx-compact-btn" title="Summarize older messages to free up context">Compatta contesto</button>` : ''}
       `;
 
       const compactBtn = popup.querySelector('.ctx-compact-btn');
@@ -1797,14 +1797,14 @@ export function displayMetrics(messageElement, metrics) {
               setTimeout(() => {
                 const msgs = document.querySelectorAll('#chat-history .msg');
                 for (const m of msgs) {
-                  if (m.querySelector('.body')?.textContent.includes('Conversation compacted')) {
+                  if (m.querySelector('.body')?.textContent.includes('Conversazione compattata')) {
                     m.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     break;
                   }
                 }
               }, 200);
             } else {
-              compactBody.innerHTML = '<span style="color:var(--red);">Compaction failed. Try again later.</span>';
+              compactBody.innerHTML = '<span style="color:var(--red);">Compattazione non riuscita. Riprova più tardi.</span>';
             }
           } catch (err) {
             clearInterval(waveInterval);
@@ -1953,7 +1953,7 @@ export function addMessage(role, content, modelName, metadata) {
               outHtml = `<details class="agent-tool-output"><summary>Output</summary><pre>${esc(ev.output)}</pre></details>`;
             }
             if (ev.screenshot) {
-              outHtml += `<details class="agent-tool-output"><summary>Screenshot</summary><img src="${esc(ev.screenshot)}" style="max-width:100%;border-radius:6px;margin-top:6px;border:1px solid var(--border)" /></details>`;
+              outHtml += `<details class="agent-tool-output"><summary>Schermata</summary><img src="${esc(ev.screenshot)}" style="max-width:100%;border-radius:6px;margin-top:6px;border:1px solid var(--border)" /></details>`;
             }
             const node = document.createElement('div');
             node.className = 'agent-thread-node' + (ok ? '' : ' error');
@@ -2077,7 +2077,7 @@ export function addMessage(role, content, modelName, metadata) {
     // so the parsing-and-strip side-effect on `text` still happens.
     void _visionBlocks;
 
-    // Add "Open Visual Report" button for persisted research messages
+    // Add "Apri report visivo" button for persisted research messages
     if (role === 'assistant' && metadata?.research) {
       var _sid = window.sessionModule?.getCurrentSessionId?.();
       if (_sid) _appendReportButton(b, _sid);
@@ -2118,7 +2118,7 @@ export function addMessage(role, content, modelName, metadata) {
       // Differentiate between "stopped mid-stream" (had content, can continue)
       // and "cancelled before any content" — the latter has no Continue affordance.
       stoppedLabel.textContent = metadata.cancelled
-        ? '[Cancelled by user]'
+        ? '[Annullato dall’utente]'
         : '[Message interrupted]';
       stoppedIndicator.appendChild(stoppedLabel);
       // Continue button only makes sense when there's partial content to
@@ -2126,7 +2126,7 @@ export function addMessage(role, content, modelName, metadata) {
       if (!metadata.cancelled) {
         const continueBtn = document.createElement('button');
         continueBtn.className = 'continue-btn';
-        continueBtn.title = 'Continue';
+        continueBtn.title = 'Continua';
         continueBtn.textContent = '\u25B8';
         continueBtn.addEventListener('click', () => {
           stoppedIndicator.remove();

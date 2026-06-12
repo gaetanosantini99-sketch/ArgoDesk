@@ -286,8 +286,8 @@ export function _wirePanelEvents(panel, model, backend) {
     copyBtn.addEventListener('click', () => {
       const cmd = panel.querySelector('.hwfit-panel-cmd')?.textContent || '';
       _copyText(cmd).then(() => {
-        copyBtn.textContent = 'Copied';
-        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+        copyBtn.textContent = 'Copiato';
+        setTimeout(() => { copyBtn.textContent = 'Copia'; }, 1500);
       });
     });
   }
@@ -303,7 +303,7 @@ export function _wirePanelEvents(panel, model, backend) {
       const presets = _loadPresets();
       presets.push({ name, model: model.name, backend, fields });
       _savePresets(presets);
-      uiModule.showToast('Preset saved');
+      uiModule.showToast('Preset salvato');
     });
   }
 
@@ -441,7 +441,7 @@ export async function _runPanelCmd(panel, cmd, opts = {}) {
       output.textContent += (output.textContent ? '\n' : '') + '(stopped)';
     } else {
       output.classList.add('cookbook-output-error');
-      output.textContent += (output.textContent ? '\n' : '') + 'Request failed: ' + err.message;
+      output.textContent += (output.textContent ? '\n' : '') + 'Richiesta non riuscita: ' + err.message;
     }
   } finally {
     if (serveBtn) serveBtn.style.display = '';
@@ -598,13 +598,13 @@ export async function _runModelDownload(panel, model, backend, hostOverride) {
     }
     const data = await res.json();
     if (!data.ok) {
-      uiModule.showToast('Download failed: ' + (data.error || ''), 9000);
+      uiModule.showToast('Download non riuscito: ' + (data.error || ''), 9000);
       return;
     }
     _addTask(data.session_id, shortName, 'download', payload);
     uiModule.showToast(`Downloading ${shortName}...`);
   } catch (e) {
-    uiModule.showToast('Download failed: ' + e.message, 9000);
+    uiModule.showToast('Download non riuscito: ' + e.message, 9000);
   }
 }
 

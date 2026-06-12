@@ -369,7 +369,7 @@ export function capture(opts = {}) {
       <div class="modal-content" style="width:min(560px,94vw);">
         <div class="modal-header">
           <h4>Draw your signature</h4>
-          <button class="sig-close modal-close" title="Close">×</button>
+          <button class="sig-close modal-close" title="Chiudi">×</button>
         </div>
         <div class="modal-body">
           <canvas class="sig-canvas" width="900" height="280" data-no-swipe-dismiss></canvas>
@@ -381,11 +381,11 @@ export function capture(opts = {}) {
           <input class="sig-name" type="text" placeholder="Name (optional, e.g. 'Full' or 'Initials')" style="margin-top:10px;">
         </div>
         <div class="modal-footer" style="display:flex;gap:8px;justify-content:flex-end;padding-top:8px;border-top:1px solid var(--border);margin-top:6px;">
-          <button class="sig-clear confirm-btn confirm-btn-secondary">Clear</button>
-          <button class="sig-undo confirm-btn confirm-btn-secondary">Undo</button>
+          <button class="sig-clear confirm-btn confirm-btn-secondary">Cancella</button>
+          <button class="sig-undo confirm-btn confirm-btn-secondary">Annulla</button>
           <span style="flex:1;"></span>
-          <button class="sig-cancel confirm-btn confirm-btn-secondary">Cancel</button>
-          <button class="sig-save confirm-btn confirm-btn-primary" disabled>Save</button>
+          <button class="sig-cancel confirm-btn confirm-btn-secondary">Annulla</button>
+          <button class="sig-save confirm-btn confirm-btn-primary" disabled>Salva</button>
         </div>
       </div>
     `);
@@ -435,7 +435,7 @@ export function capture(opts = {}) {
         setLastUsed(out);
         close(out);
       } catch (e) {
-        alert('Failed to save signature: ' + e.message);
+        alert('Salvataggio della firma non riuscito: ' + e.message);
         saveBtn.disabled = false;
       }
     };
@@ -450,7 +450,7 @@ export function pick(opts = {}) {
       <div class="sig-tile" data-id="${s.id}">
         <img src="${s.data_url}"/>
         <div style="margin-top:4px;font-size:0.72rem;color:var(--fg);opacity:0.85;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${(s.name || '').replace(/[<>&]/g, '')}</div>
-        <button class="sig-tile-del" data-id="${s.id}" title="Delete">×</button>
+        <button class="sig-tile-del" data-id="${s.id}" title="Elimina">×</button>
       </div>
     `).join('');
 
@@ -458,7 +458,7 @@ export function pick(opts = {}) {
       <div class="modal-content" style="width:min(560px,94vw);">
         <div class="modal-header">
           <h4>Choose a signature</h4>
-          <button class="sig-close modal-close" title="Close">×</button>
+          <button class="sig-close modal-close" title="Chiudi">×</button>
         </div>
         <div class="modal-body">
           <button class="sig-new-tile confirm-btn confirm-btn-primary" style="width:100%;margin-bottom:12px;padding:8px;">+ Draw new signature</button>

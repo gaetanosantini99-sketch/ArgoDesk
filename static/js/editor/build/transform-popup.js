@@ -13,13 +13,13 @@ export function transformPopupHTML() {
       <span class="ge-adj-icon">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 7 7 3 11 7"/><line x1="7" y1="3" x2="7" y2="21"/><polyline points="21 17 17 21 13 17"/><line x1="17" y1="21" x2="17" y2="3"/></svg>
       </span>
-      <span class="ge-adj-title">Transform</span>
+      <span class="ge-adj-title">Trasforma</span>
       <button type="button" id="ge-transform-aspect" class="ge-transform-aspect-btn" title="Lock aspect ratio" aria-pressed="true">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
       </button>
       <span class="ge-head-btns">
-        <button class="ge-adj-min" type="button" title="Minimise" id="ge-transform-min">&minus;</button>
-        <button class="ge-adj-close" type="button" title="Cancel" id="ge-transform-cancel">&times;</button>
+        <button class="ge-adj-min" type="button" title="Riduci a icona" id="ge-transform-min">&minus;</button>
+        <button class="ge-adj-close" type="button" title="Annulla" id="ge-transform-cancel">&times;</button>
       </span>
     </div>
     <div class="ge-transform-popup-body">
@@ -48,10 +48,10 @@ export function transformPopupHTML() {
           <button type="button" data-spin="up" tabindex="-1" aria-label="Rotate +1°">+</button>
         </span>
       </div>
-      <button type="button" class="ge-btn ge-btn-sm" id="ge-transform-cancel-btn">Cancel</button>
-      <button type="button" class="ge-btn ge-btn-sm ge-btn-primary" id="ge-transform-apply">Apply</button>
+      <button type="button" class="ge-btn ge-btn-sm" id="ge-transform-cancel-btn">Annulla</button>
+      <button type="button" class="ge-btn ge-btn-sm ge-btn-primary" id="ge-transform-apply">Applica</button>
     </div>
-    <p class="ge-transform-popup-hint">Type <strong>-</strong> before W / H to flip.</p>
+    <p class="ge-transform-popup-hint">Tipo <strong>-</strong> before W / H to flip.</p>
   `;
 }
 

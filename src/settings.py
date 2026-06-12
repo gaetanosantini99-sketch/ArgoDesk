@@ -148,6 +148,10 @@ DEFAULT_SETTINGS = {
     # library can grow beyond this; cleanup/retirement is an explicit review flow.
     "skill_max_injected": 3,
     # Reminders
+    # GraphRAG-lite (Fase 5): build a knowledge graph from ingested documents
+    # and inject a compact subgraph alongside RAG chunks. Off by default — it
+    # spends LLM tokens on extraction and the agent injection is opt-in.
+    "knowledge_graph_enabled": False,
     "reminder_channel": "browser",   # "browser" | "email" | "ntfy"
     "reminder_llm_synthesis": False,
     "reminder_ntfy_topic": "Reminders",

@@ -66,15 +66,15 @@ function showOutput(panel, text, isError) {
       } catch (_) {}
       if (!ok && navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(text).then(() => {
-          if (uiModule.showToast) uiModule.showToast('Copied');
-          cbtn.textContent = 'Copied!';
+          if (uiModule.showToast) uiModule.showToast('Copiato');
+          cbtn.textContent = 'Copiato!';
           setTimeout(() => { cbtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>Copy'; }, 1500);
-        }).catch(() => { if (uiModule.showToast) uiModule.showToast('Copy failed'); });
+        }).catch(() => { if (uiModule.showToast) uiModule.showToast('Copia non riuscita'); });
         return;
       }
-      if (uiModule.showToast) uiModule.showToast(ok ? 'Copied' : 'Copy failed');
+      if (uiModule.showToast) uiModule.showToast(ok ? 'Copied' : 'Copia non riuscita');
       const orig = cbtn.innerHTML;
-      cbtn.textContent = ok ? 'Copied!' : 'Copy failed';
+      cbtn.textContent = ok ? 'Copiato!' : 'Copia non riuscita';
       setTimeout(() => { cbtn.innerHTML = orig; }, 1500);
     });
     // Button lives directly in the panel — no wrapping bar. The panel is
@@ -95,7 +95,7 @@ function addCopyBtn_unused(panel, text) {
   const btn = document.createElement('button');
   btn.type = 'button';  // Default <button> type is 'submit' — explicit "button" avoids any accidental form submission.
   btn.className = 'code-runner-copy';
-  btn.title = 'Copy output';
+  btn.title = 'Copia output';
   btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
   btn.addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -122,7 +122,7 @@ function addCopyBtn_unused(panel, text) {
       try { await navigator.clipboard.writeText(text); ok = true; } catch (_) {}
     }
     if (uiModule && uiModule.showToast) {
-      uiModule.showToast(ok ? 'Copied' : 'Copy failed');
+      uiModule.showToast(ok ? 'Copied' : 'Copia non riuscita');
     }
     const _orig = btn.innerHTML;
     btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
@@ -172,7 +172,7 @@ function loadPyodide() {
     };
     script.onerror = () => {
       pyodideLoading = false;
-      const err = new Error('Failed to load Pyodide');
+      const err = new Error('Caricamento di Pyodide non riuscito');
       pyodideQueue.forEach(q => q.reject(err));
       pyodideQueue.length = 0;
       reject(err);
@@ -309,7 +309,7 @@ try {
  * Run code server-side via POST /api/shell/exec
  */
 export async function runServer(code, panel, lang) {
-  showLoading(panel, 'Running on server...');
+  showLoading(panel, 'In esecuzione sul server...');
   var command;
   if (lang === 'python' || lang === 'py') {
     command = 'python3 -c ' + JSON.stringify(code);
@@ -358,7 +358,7 @@ export function runHTML(code, panel) {
 
   const win = window.open('', '_blank', 'width=800,height=600,menubar=no,toolbar=no,location=no,status=no');
   if (!win) {
-    showOutput(panel, 'Popup blocked — please allow popups for this site.', true);
+    showOutput(panel, 'Popup bloccato — consenti i popup per questo sito.', true);
     addCloseBtn(panel);
     return;
   }
@@ -366,7 +366,7 @@ export function runHTML(code, panel) {
   win.document.write(code);
   win.document.close();
 
-  showOutput(panel, 'Opened in new window', false);
+  showOutput(panel, 'Aperto in una nuova finestra', false);
   addCloseBtn(panel);
 }
 

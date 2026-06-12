@@ -142,7 +142,7 @@ class AITTSManager {
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.detail?.message || 'Synthesis failed');
+                throw new Error(error.detail?.message || 'Sintesi non riuscita');
             }
 
             const audioBlob = await response.blob();
@@ -285,7 +285,7 @@ class AITTSManager {
         button.innerHTML = ICON_LOADING;
         button.classList.add('loading');
         button.style.color = '#ccc';
-        button.title = 'Loading...';
+        button.title = 'Caricamento...';
 
         try {
             if (!this._processing) return;
@@ -297,7 +297,7 @@ class AITTSManager {
             button.innerHTML = ICON_STOP;
             button.classList.remove('loading');
             button.classList.add('playing');
-            button.title = 'Stop';
+            button.title = 'Ferma';
 
             if (this.useBrowserTTS) {
                 const plainText = this.extractPlainText(text);

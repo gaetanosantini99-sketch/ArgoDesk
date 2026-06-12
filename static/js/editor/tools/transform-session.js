@@ -42,7 +42,7 @@ export function createTransformSession({
 }) {
   function startTransform() {
     const layer = activeLayer();
-    if (!layer || layer.locked) { uiModule.showToast('Select an unlocked layer'); return; }
+    if (!layer || layer.locked) { uiModule.showToast('Seleziona un livello sbloccato'); return; }
     if (state.transformActive) { cancelTransform(); return; } // toggle off
     state.transformActive = true;
     state.transformLayer = layer;

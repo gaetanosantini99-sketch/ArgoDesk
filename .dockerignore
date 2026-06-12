@@ -12,6 +12,8 @@ build/
 .env.bak.*
 /data/
 /logs/
+/data-test/
+/logs-test/
 .git/
 .claude/
 .playwright-mcp/

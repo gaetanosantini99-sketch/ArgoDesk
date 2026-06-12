@@ -706,7 +706,7 @@ export function makeEdgeDockController(modal, side = 'right', dockClass) {
   stripe.style.pointerEvents = 'auto';
   stripe.style.touchAction = 'none';
   stripe.style.display = 'none';
-  stripe.title = 'Drag to resize email and draft';
+  stripe.title = 'Trascina per ridimensionare email e bozza';
 
   const _activeLeftDockContent = () => {
     const modal = document.querySelector(

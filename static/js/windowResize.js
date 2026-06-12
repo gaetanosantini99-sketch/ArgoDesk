@@ -10,7 +10,7 @@
 //   inner element. Absolutely-positioned handle children would scroll away
 //   with the content in the first case. Detecting pointer proximity to the
 //   window's border works uniformly regardless of the overflow model and
-//   matches the user's mental model ("drag the edges or corners").
+//   matches the user's mental model ("trascina i bordi o gli angoli").
 //
 // API:
 //   makeWindowResizable(content, {

@@ -231,14 +231,10 @@ def setup_cookbook_routes() -> APIRouter:
         return state
 
     def _load_stored_hf_token() -> str:
-        if not _cookbook_state_path.exists():
-            return ""
-        try:
-            state = json.loads(_cookbook_state_path.read_text(encoding="utf-8"))
-            env = state.get("env") if isinstance(state, dict) else {}
-            return _decrypt_secret(env.get("hfToken") if isinstance(env, dict) else "")
-        except Exception:
-            return ""
+        # Shared with src/api_keys_facade.py via src/cookbook_secrets.py so the
+        # Settings → Chiavi API panel and Cookbook read the same stored token.
+        from src.cookbook_secrets import load_hf_token
+        return load_hf_token()
 
     def _cookbook_ssh_dir() -> Path:
         # The Docker image keeps cookbook keys under /app/.ssh; that path only

@@ -75,8 +75,6 @@ function _setSortMode(mode) {
  * Build a single model row element.
  */
 function _startChat(url, mid, endpointId) {
-  // Block model switching while compare mode is active
-  if (window.compareModule && window.compareModule.isActive()) return;
   _trackUsage(mid);
   if (sessionModule) {
     sessionModule.createDirectChat(url, mid, endpointId);
@@ -94,7 +92,7 @@ function _buildModelRow(mid, url, displayName, endpointId, offline, modelType) {
   const handle = document.createElement('span');
   handle.className = 'item-drag-handle';
   handle.textContent = '\u22EE\u22EE';
-  handle.title = 'Drag to reorder';
+  handle.title = 'Trascina per riordinare';
   row.appendChild(handle);
 
   // Favorite indicator — provider logo or colored dot
@@ -123,7 +121,7 @@ function _buildModelRow(mid, url, displayName, endpointId, offline, modelType) {
     const badge = document.createElement('span');
     badge.className = 'model-type-badge';
     badge.textContent = 'IMG';
-    badge.title = 'Image generation model';
+    badge.title = 'Modello di generazione immagini';
     badge.style.cssText = 'font-size:0.65em;padding:1px 4px;border-radius:3px;background:var(--accent,#7c3aed);color:#fff;margin-left:6px;vertical-align:middle;';
     span.appendChild(badge);
   }
@@ -182,7 +180,7 @@ export async function refreshModels(force = false) {
       _cachedItems = data.items || [];
     } catch (e) {
       console.error(e);
-      box.textContent = '(scan failed)';
+      box.textContent = '(scansione non riuscita)';
       return;
     } finally {
       box.innerHTML = '';
@@ -490,7 +488,7 @@ export async function refreshModels(force = false) {
     if (totalModelCount >= 10) {
       const searchBox = document.createElement('input');
       searchBox.type = 'text';
-      searchBox.placeholder = 'Search models...';
+      searchBox.placeholder = 'Cerca modelli...';
       searchBox.className = 'model-search-input';
       searchBox.addEventListener('click', (e) => e.stopPropagation());
       searchBox.addEventListener('touchstart', (e) => e.stopPropagation());
@@ -582,7 +580,7 @@ export async function refreshModels(force = false) {
     }
   } catch (e) {
     console.error(e);
-    box.textContent = '(render failed: ' + e.message + ')';
+    box.textContent = '(rendering non riuscito: ' + e.message + ')';
   }
 }
 
@@ -613,7 +611,7 @@ export async function refreshProviders() {
     } else {
       const opt = document.createElement('option');
       opt.value = '';
-      opt.textContent = '(OPENAI_API_KEY not set on server)';
+      opt.textContent = '(OPENAI_API_KEY non impostata sul server)';
       sel.appendChild(opt);
     }
   } catch (e) {

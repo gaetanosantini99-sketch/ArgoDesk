@@ -24,7 +24,7 @@ export async function openAssistantChat() {
   try {
     const info = await _fetchJSON(`${API}/session`);
     if (!info?.session_id) {
-      uiModule.showToast('Assistant session unavailable');
+      uiModule.showToast('Sessione assistente non disponibile');
       return;
     }
     await selectSession(info.session_id);
@@ -32,7 +32,7 @@ export async function openAssistantChat() {
     _cachedSettings = null;
   } catch (e) {
     console.error('openAssistantChat failed:', e);
-    uiModule.showToast('Could not open assistant');
+    uiModule.showToast('Impossibile aprire l’assistente');
   }
 }
 
@@ -69,10 +69,10 @@ async function _runCheckInNow(taskId) {
       method: 'POST',
       credentials: 'same-origin',
     });
-    uiModule.showToast('Check-in running…');
+    uiModule.showToast('Check-in in corso…');
   } catch (e) {
     console.error(e);
-    uiModule.showToast('Could not run check-in');
+    uiModule.showToast('Impossibile eseguire il check-in');
   }
 }
 
@@ -146,12 +146,12 @@ function _renderSettingsBody(body, data, tzList) {
   const checkInsHTML = checkIns.map((c) => `
     <div class="assistant-checkin-row" data-task-id="${_esc(c.id)}">
       <div class="assistant-checkin-head">
-        <input type="checkbox" class="assistant-checkin-enabled" ${c.enabled ? 'checked' : ''} title="Enable this check-in" />
-        <input type="text" class="assistant-checkin-name" value="${_esc(c.name)}" placeholder="Name" />
+        <input type="checkbox" class="assistant-checkin-enabled" ${c.enabled ? 'checked' : ''} title="Attiva questo check-in" />
+        <input type="text" class="assistant-checkin-name" value="${_esc(c.name)}" placeholder="Nome" />
         <input type="time" class="assistant-checkin-time" value="${_esc(c.scheduled_time || '')}" />
-        <button type="button" class="assistant-checkin-run" title="Run now">Run now</button>
+        <button type="button" class="assistant-checkin-run" title="Esegui ora">Esegui ora</button>
       </div>
-      <textarea class="assistant-checkin-prompt" rows="3" placeholder="Prompt for this check-in">${_esc(c.prompt || '')}</textarea>
+      <textarea class="assistant-checkin-prompt" rows="3" placeholder="Prompt per questo check-in">${_esc(c.prompt || '')}</textarea>
       <div class="assistant-checkin-meta">
         ${c.next_run ? `next run: ${_esc(c.next_run)}` : ''}
         ${c.last_run ? ` · last run: ${_esc(c.last_run)}` : ''}
@@ -174,20 +174,20 @@ function _renderSettingsBody(body, data, tzList) {
   body.innerHTML = `
     <div class="assistant-settings-form">
       <label class="assistant-field">
-        <span>Name</span>
-        <input type="text" id="assistant-name" value="${_esc(crew.name)}" placeholder="Assistant" />
+        <span>Nome</span>
+        <input type="text" id="assistant-name" value="${_esc(crew.name)}" placeholder="Assistente" />
       </label>
       <div class="assistant-field">
-        <span style="display:flex;align-items:center;gap:8px;">Personality
+        <span style="display:flex;align-items:center;gap:8px;">Personalità
           <select id="assistant-character-pick" style="font-size:11px;padding:1px 6px;border:1px solid var(--border);border-radius:3px;background:var(--bg);color:var(--fg);max-width:180px;">
             <option value="">-- pick from persona --</option>
           </select>
         </span>
-        <textarea id="assistant-personality" rows="6" placeholder="Describe the assistant's personality, tone, and behavior...">${_esc(crew.personality || '')}</textarea>
+        <textarea id="assistant-personality" rows="6" placeholder="Descrivi l’assistente's personality, tone, and behavior...">${_esc(crew.personality || '')}</textarea>
       </div>
       <div class="assistant-field-row">
         <label class="assistant-field">
-          <span>Timezone</span>
+          <span>Fuso orario</span>
           <select id="assistant-timezone">
             <option value=""${!crew.timezone ? ' selected' : ''}>(default -- UTC)</option>
             ${tzOptions}
@@ -196,20 +196,20 @@ function _renderSettingsBody(body, data, tzList) {
       </div>
       <div class="assistant-field-row">
         <label class="assistant-field" style="flex:1;">
-          <span>Model endpoint</span>
+          <span>Endpoint del modello</span>
           <select id="assistant-endpoint" style="width:100%;">
             <option value="">(loading...)</option>
           </select>
         </label>
         <label class="assistant-field" style="flex:1;">
-          <span>Model</span>
+          <span>Modello</span>
           <select id="assistant-model" style="width:100%;">
             <option value="${_esc(crew.model || '')}">${_esc(crew.model || '(default)')}</option>
           </select>
         </label>
       </div>
       <div class="assistant-field">
-        <span style="display:flex;align-items:center;gap:8px;">Tools
+        <span style="display:flex;align-items:center;gap:8px;">Strumenti
           <button type="button" id="assistant-tools-all" class="assistant-tools-toggle" style="font-size:10px;opacity:0.5;cursor:pointer;background:none;border:1px solid var(--border);border-radius:3px;padding:1px 6px;">all</button>
           <button type="button" id="assistant-tools-none" class="assistant-tools-toggle" style="font-size:10px;opacity:0.5;cursor:pointer;background:none;border:1px solid var(--border);border-radius:3px;padding:1px 6px;">none</button>
         </span>
@@ -218,12 +218,12 @@ function _renderSettingsBody(body, data, tzList) {
         </div>
       </div>
       <div class="assistant-checkins">
-        <h5>Daily check-ins</h5>
+        <h5>Check-in giornalieri</h5>
         ${checkInsHTML || '<div style="opacity:0.6;">No check-ins configured.</div>'}
       </div>
       <div class="assistant-settings-actions">
-        <button type="button" class="cal-btn" id="assistant-settings-cancel">Cancel</button>
-        <button type="button" class="cal-btn cal-btn-primary" id="assistant-settings-save">Save</button>
+        <button type="button" class="cal-btn" id="assistant-settings-cancel">Annulla</button>
+        <button type="button" class="cal-btn cal-btn-primary" id="assistant-settings-save">Salva</button>
       </div>
     </div>
   `;
@@ -359,11 +359,11 @@ function _renderSettingsBody(body, data, tzList) {
     };
     try {
       await _saveSettings(payload);
-      uiModule.showToast('Assistant settings saved');
+      uiModule.showToast('Impostazioni dell’assistente salvate');
       _closeModal();
     } catch (e) {
       console.error(e);
-      uiModule.showToast('Save failed');
+      uiModule.showToast('Salvataggio non riuscito');
     }
   });
   body.querySelectorAll('.assistant-checkin-run').forEach((btn) => {
@@ -409,7 +409,7 @@ export async function openAssistantSettings() {
     _renderSettingsBody(body, data, tzList);
   } catch (e) {
     console.error(e);
-    body.innerHTML = '<div style="padding:12px;opacity:0.6;">Could not load assistant settings.</div>';
+    body.innerHTML = '<div style="padding:12px;opacity:0.6;">Impossibile caricare le impostazioni dell’assistente.</div>';
   }
 }
 

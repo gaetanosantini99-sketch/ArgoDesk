@@ -10,7 +10,7 @@ const _defaultKeybinds = {
   cancel: 'escape', tts: 'alt+shift+t',
   incognito: 'ctrl+alt+i', settings: 'ctrl+,', focus_input: 'ctrl+/',
   // Open-tool shortcuts (Calendar bound by default; rest unbound).
-  open_calendar: 'ctrl+alt+c', open_compare: '', open_cookbook: '',
+  open_calendar: 'ctrl+alt+c', open_cookbook: '',
   open_research: '', open_gallery: '', open_library: '', open_memory: '',
   open_notes: '', open_tasks: '', open_theme: '',
 };
@@ -105,7 +105,6 @@ export function initKeyboardShortcuts(modules) {
     'gallery-modal':          'tool-gallery-btn',
     'research-overlay':       'tool-research-btn',
     'cookbook-modal':         'tool-cookbook-btn',
-    'compare-model-overlay':  'tool-compare-btn',
     'calendar-modal':         'tool-calendar-btn',
     'email-lib-modal':        'email-section-title',
   };
@@ -188,7 +187,7 @@ export function initKeyboardShortcuts(modules) {
       fetch(`${API_BASE}/api/session/${sid}/important`, { method: 'POST', body: fd });
       s.is_important = newVal;
       sessionModule.renderSessionList();
-      uiModule.showToast(newVal ? 'Session favorited' : 'Session unfavorited');
+      uiModule.showToast(newVal ? 'Session favorited' : 'Sessione rimossa dai preferiti');
       return;
     }
     if (_matchesCombo(e, kb.delete_session)) {
@@ -197,7 +196,7 @@ export function initKeyboardShortcuts(modules) {
       if (!sid) return;
       const s = sessionModule.getSessions().find(x => x.id === sid);
       if (!s) return;
-      if (s.is_important) { uiModule.showToast('Unstar before deleting'); return; }
+      if (s.is_important) { uiModule.showToast('Rimuovi dai preferiti prima di eliminare'); return; }
       uiModule.styledConfirm('Delete this session?', { confirmText: 'Delete', danger: true }).then(ok => {
         if (!ok) return;
         const allSessions = sessionModule.getSessions();
@@ -264,7 +263,6 @@ export function initKeyboardShortcuts(modules) {
     // own open/toggle logic runs. Unbound (empty) combos never match.
     const _toolBtns = {
       open_calendar: 'tool-calendar-btn',
-      open_compare:  'tool-compare-btn',
       open_cookbook: 'tool-cookbook-btn',
       open_research: 'tool-research-btn',
       open_gallery:  'tool-gallery-btn',

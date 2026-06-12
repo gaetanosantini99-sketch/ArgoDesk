@@ -386,7 +386,7 @@ export function createWhirlpool(size = 24) {
  * once the element leaves the DOM (see _drawWhirlpool), so callers can just
  * replace it with results — no manual cleanup needed.
  */
-export function createLoadingRow(text = 'Loading…', size = 16) {
+export function createLoadingRow(text = 'Caricamento…', size = 16) {
   const sp = new Spinner('', 'clean', 'whirlpool');
   sp._wpSize = size;
   const canvas = sp.createElement();

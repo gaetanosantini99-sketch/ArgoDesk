@@ -635,6 +635,15 @@ app.include_router(setup_assistant_routes(task_scheduler))
 from routes.calendar_routes import setup_calendar_routes
 app.include_router(setup_calendar_routes())
 
+from routes.connect_routes import setup_connect_routes
+app.include_router(setup_connect_routes())
+
+from routes.knowledge_routes import setup_knowledge_routes
+app.include_router(setup_knowledge_routes())
+
+from routes.project_routes import setup_project_routes
+app.include_router(setup_project_routes())
+
 # Shell (user-facing command execution)
 from routes.shell_routes import setup_shell_routes
 app.include_router(setup_shell_routes())

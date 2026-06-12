@@ -2,7 +2,7 @@ import os
 import logging
 import sqlite3
 from datetime import datetime
-from sqlalchemy import event, create_engine, Column, String, Text, Boolean, DateTime, Integer, ForeignKey, JSON, Index, func, text
+from sqlalchemy import event, create_engine, Column, String, Text, Boolean, DateTime, Integer, Float, ForeignKey, JSON, Index, func, text
 from sqlalchemy.engine import Engine
 from sqlalchemy.types import TypeDecorator
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
@@ -697,6 +697,95 @@ class WikiPage(TimestampMixin, Base):
     )
 
 
+class KnowledgeCategory(TimestampMixin, Base):
+    """A user-definable knowledge area/category for guided RAG uploads.
+
+    Stored in the DB (not just Chroma metadata) so categories are queryable and
+    can be linked to the knowledge graph (Fase 5) and projects (Fase 6).
+    owner = ORG_OWNER for company-shared categories; a username for private."""
+    __tablename__ = "knowledge_categories"
+
+    id = Column(String, primary_key=True, index=True)
+    owner = Column(String, nullable=True, index=True)
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True, default="")
+    color = Column(String, nullable=True)
+
+    __table_args__ = (
+        Index('ix_knowcat_owner_name', 'owner', 'name'),
+    )
+
+
+class KnowledgeEntity(TimestampMixin, Base):
+    """A node in the GraphRAG-lite knowledge graph (person/org/concept/doc/project).
+
+    Extracted from ingested documents by services/knowledge/graph_extractor.
+    `norm_name` (lowercased/stripped) drives dedup so the same entity mentioned
+    across documents collapses to one node. owner = ORG_OWNER for company graph."""
+    __tablename__ = "knowledge_entities"
+
+    id         = Column(String, primary_key=True, index=True)
+    owner      = Column(String, nullable=True, index=True)
+    name       = Column(String, nullable=False)
+    norm_name  = Column(String, nullable=False, index=True)
+    type       = Column(String, default="concept")  # person|org|concept|doc|project
+    source_doc = Column(String, nullable=True)
+
+    __table_args__ = (
+        Index('ix_knowent_owner_norm', 'owner', 'norm_name'),
+    )
+
+
+class KnowledgeRelation(TimestampMixin, Base):
+    """A directed edge between two KnowledgeEntity nodes."""
+    __tablename__ = "knowledge_relations"
+
+    id              = Column(String, primary_key=True, index=True)
+    owner           = Column(String, nullable=True, index=True)
+    src_entity_id   = Column(String, ForeignKey("knowledge_entities.id"), nullable=False, index=True)
+    dst_entity_id   = Column(String, ForeignKey("knowledge_entities.id"), nullable=False, index=True)
+    relation        = Column(String, nullable=False, default="related_to")
+    confidence      = Column(Float, default=0.5)
+    source_chunk_ref = Column(String, nullable=True)
+
+    __table_args__ = (
+        Index('ix_knowrel_owner_src', 'owner', 'src_entity_id'),
+    )
+
+
+class Project(TimestampMixin, Base):
+    """A Notion-style project that ties together notes, albums, chats and
+    knowledge. owner = ORG_OWNER → company-shared; a username → private."""
+    __tablename__ = "projects"
+
+    id          = Column(String, primary_key=True, index=True)
+    owner       = Column(String, nullable=True, index=True)
+    name        = Column(String, nullable=False)
+    description = Column(Text, nullable=True, default="")
+    color       = Column(String, nullable=True)
+    cover       = Column(String, nullable=True)
+    archived    = Column(Boolean, default=False)
+    sort_order  = Column(Integer, default=0)
+
+
+class ProjectLink(TimestampMixin, Base):
+    """A polymorphic link from a Project to some target object.
+
+    No FK integrity on target_id (kinds span tables) — `/contents` resolves and
+    skips orphans, with a cleanup pass. kind ∈ note|document|album|session|
+    knowledge_entity|knowledge_category."""
+    __tablename__ = "project_links"
+
+    id         = Column(String, primary_key=True, index=True)
+    project_id = Column(String, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True)
+    kind       = Column(String, nullable=False)
+    target_id  = Column(String, nullable=False)
+
+    __table_args__ = (
+        Index('ix_projlink_project_kind', 'project_id', 'kind'),
+    )
+
+
 class AuditLog(Base):
     """ArgoDesk audit trail for GDPR / EU AI Act basics: who did what, when.
 
@@ -977,6 +1066,25 @@ def _migrate_add_notes_sort_order():
         conn.close()
     except Exception as e:
         logging.getLogger(__name__).warning(f"notes migration failed: {e}")
+
+def _migrate_add_note_calendar_links():
+    """Add linked_event_uid / linked_calendar_id columns to notes (additive)."""
+    import sqlite3
+    db_path = DATABASE_URL.replace("sqlite:///", "")
+    if not os.path.exists(db_path):
+        return
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.execute("PRAGMA table_info(notes)")
+        columns = [row[1] for row in cursor.fetchall()]
+        if columns and "linked_event_uid" not in columns:
+            conn.execute("ALTER TABLE notes ADD COLUMN linked_event_uid TEXT")
+        if columns and "linked_calendar_id" not in columns:
+            conn.execute("ALTER TABLE notes ADD COLUMN linked_calendar_id TEXT")
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logging.getLogger(__name__).warning(f"note calendar-link migration failed: {e}")
 
 def _migrate_add_mode_column():
     """Add mode column to sessions table if it doesn't exist."""
@@ -1469,6 +1577,11 @@ class Note(TimestampMixin, Base):
     # Chat session spawned by the note's "Agent" button (solve-this-todo).
     # The note shows a clickable tag that opens this session for review.
     agent_session_id  = Column(String, nullable=True)
+    # Optional link to a calendar event so a reminder can carry the event's
+    # time/place. linked_event_uid → CalendarEvent.uid; linked_calendar_id
+    # scopes the lookup to one calendar. Both nullable (additive migration).
+    linked_event_uid   = Column(String, nullable=True)
+    linked_calendar_id = Column(String, nullable=True)
 
 
 class CalendarCal(TimestampMixin, Base):
@@ -1608,6 +1721,7 @@ def init_db():
     _migrate_add_cached_models_column()
     _migrate_add_pinned_models_column()
     _migrate_add_notes_sort_order()
+    _migrate_add_note_calendar_links()
     _migrate_add_model_type_column()
     _migrate_add_model_endpoint_owner_column()
     _migrate_add_supports_tools_column()

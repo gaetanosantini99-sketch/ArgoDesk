@@ -196,15 +196,15 @@ function buildFolderSubmenu(sessionId, currentFolder, dropdown) {
     sub.appendChild(opt);
   });
 
-  // "New folder" option
+  // "Nuova cartella" option
   const newOpt = document.createElement('div');
   newOpt.className = 'dropdown-item-compact';
   newOpt.style.color = 'var(--accent-primary)';
-  newOpt.textContent = '+ New Folder';
+  newOpt.textContent = '+ Nuova cartella';
   newOpt.addEventListener('click', async (e) => {
     e.stopPropagation();
     const name = await styledPrompt('Name this folder:', {
-      title: 'New folder',
+      title: 'Nuova cartella',
       placeholder: 'e.g. Work, Research, Drafts',
       confirmText: 'Create',
     });
@@ -283,7 +283,7 @@ function createSessionItem(s) {
   const handle = document.createElement('span');
   handle.className = 'item-drag-handle';
   handle.textContent = '\u22EE\u22EE';
-  handle.title = 'Drag to reorder';
+  handle.title = 'Trascina per riordinare';
   div.appendChild(handle);
 
   // Provider dot indicator
@@ -444,7 +444,7 @@ function createSessionItem(s) {
   // Create a dropdown menu button
   const menuBtn = document.createElement('button');
   menuBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-  menuBtn.title = 'Session actions';
+  menuBtn.title = 'Azioni sessione';
   menuBtn.className = 'hamburger session-menu-btn';
 
   // Create dropdown menu
@@ -460,15 +460,15 @@ function createSessionItem(s) {
 
   const renameItem = document.createElement('div');
   renameItem.className = 'dropdown-item-compact';
-  renameItem.innerHTML = _icon(_renameIcon) + '<span>Rename</span>';
+  renameItem.innerHTML = _icon(_renameIcon) + '<span>Rinomina</span>';
 
   const archiveItem = document.createElement('div');
   archiveItem.className = 'dropdown-item-compact';
-  archiveItem.innerHTML = _icon(_archiveIcon) + '<span>Archive</span>';
+  archiveItem.innerHTML = _icon(_archiveIcon) + '<span>Archivia</span>';
 
   const deleteItem = document.createElement('div');
   deleteItem.className = 'dropdown-item-compact dropdown-item-danger';
-  deleteItem.innerHTML = _icon(_deleteIcon) + '<span>Delete</span><span class="dropdown-shortcut">' + _mod + '+Alt+D</span>';
+  deleteItem.innerHTML = _icon(_deleteIcon) + '<span>Elimina</span><span class="dropdown-shortcut">' + _mod + '+Alt+D</span>';
 
 
 
@@ -505,7 +505,7 @@ function createSessionItem(s) {
       const res = await fetch(`${API_BASE}/api/history/${s.id}`);
       const data = await res.json();
       const msgs = data.history || [];
-      if (!msgs.length) { uiModule.showToast('No messages to copy'); return; }
+      if (!msgs.length) { uiModule.showToast('Nessun messaggio da copiare'); return; }
       const lines = msgs
         .filter(m => m.role === 'user' || m.role === 'assistant')
         .map(m => {
@@ -526,7 +526,7 @@ function createSessionItem(s) {
         document.execCommand('copy');
         ta.remove();
       }
-      uiModule.showToast('Chat copied to clipboard');
+      uiModule.showToast('Chat copiata negli appunti');
     } catch (e) {
       console.error('Copy chat failed:', e);
       uiModule.showError('Failed to copy chat');
@@ -539,7 +539,7 @@ function createSessionItem(s) {
   if (!isOpenClaw) {
     const selectMoreItem = document.createElement('div');
     selectMoreItem.className = 'dropdown-item-compact';
-    selectMoreItem.innerHTML = _icon('<span style="font-size:16px;line-height:1;">●</span>') + '<span>Select</span>';
+    selectMoreItem.innerHTML = _icon('<span style="font-size:16px;line-height:1;">●</span>') + '<span>Seleziona</span>';
     selectMoreItem.addEventListener('click', (e) => {
       e.stopPropagation();
       dropdown.style.display = 'none';
@@ -574,7 +574,7 @@ function createSessionItem(s) {
   const _cancelIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
   const cancelItem = document.createElement('div');
   cancelItem.className = 'dropdown-item-compact dropdown-cancel-mobile';
-  cancelItem.innerHTML = _icon(_cancelIcon) + '<span>Cancel</span>';
+  cancelItem.innerHTML = _icon(_cancelIcon) + '<span>Annulla</span>';
   cancelItem.addEventListener('click', (e) => {
     e.stopPropagation();
     dropdown.style.display = 'none';
@@ -647,7 +647,7 @@ function createSessionItem(s) {
 
   deleteItem.addEventListener('click', async () => {
     if (s.is_important) {
-      uiModule.showToast('Unfavorite before deleting');
+      uiModule.showToast('Rimuovi dai preferiti prima di eliminare');
       dropdown.style.display = 'none';
       return;
     }
@@ -697,7 +697,7 @@ function createSessionItem(s) {
         _forceSidebarOpen();
         await loadSessions();
         dropdown.style.display = 'none';
-        uiModule.showToast('Session archived');
+        uiModule.showToast('Sessione archiviata');
       } else {
         throw new Error('Failed to archive session');
       }
@@ -880,7 +880,7 @@ function _renderSessionListImpl() {
     const dragHandle = document.createElement('span');
     dragHandle.className = 'folder-drag-handle';
     dragHandle.textContent = '\u2630';
-    dragHandle.title = 'Drag to reorder folder';
+    dragHandle.title = 'Trascina per riordinare la cartella';
     header.appendChild(dragHandle);
 
     const toggle = document.createElement('span');
@@ -902,7 +902,7 @@ function _renderSessionListImpl() {
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'folder-delete-btn';
     deleteBtn.textContent = '\u00d7';
-    deleteBtn.title = 'Delete folder and all sessions';
+    deleteBtn.title = 'Elimina la cartella e tutte le sessioni';
     deleteBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       const count = folders[folderName].length;
@@ -938,7 +938,7 @@ function _renderSessionListImpl() {
       e.stopPropagation();
       if (e.target.closest('.folder-delete-btn')) return;
       const newName = await styledPrompt('Rename folder:', {
-        title: 'Rename folder',
+        title: 'Rinomina cartella',
         defaultValue: folderName,
         confirmText: 'Rename',
       });
@@ -1009,7 +1009,7 @@ function _renderSessionListImpl() {
     const dragHandle = document.createElement('span');
     dragHandle.className = 'folder-drag-handle';
     dragHandle.textContent = '\u2630';
-    dragHandle.title = 'Drag to reorder folder';
+    dragHandle.title = 'Trascina per riordinare la cartella';
     unsortedHeader.appendChild(dragHandle);
 
     const toggle = document.createElement('span');
@@ -1028,7 +1028,7 @@ function _renderSessionListImpl() {
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'folder-delete-btn';
     deleteBtn.textContent = '\u00d7';
-    deleteBtn.title = 'Delete all unsorted sessions';
+    deleteBtn.title = 'Elimina tutte le sessioni non ordinate';
     deleteBtn.addEventListener('click', async (e) => {
       e.stopPropagation();
       if (!await uiModule.styledConfirm(`Delete all ${unfiled.length} unsorted session(s)?`, { confirmText: 'Delete', danger: true })) return;
@@ -1489,11 +1489,6 @@ export async function loadSessions() {
 }
 
 export async function selectSession(id, { keepSidebar = false } = {}) {
-  // Exit compare mode cleanly if active
-  if (window.compareModule && window.compareModule.isActive()) {
-    window.compareModule.deactivate(true);
-    return; // deactivate does a page reload
-  }
   try {
     const navToken = ++_sessionNavToken;
     const prevSessionId = currentSessionId;
@@ -1547,11 +1542,6 @@ export async function selectSession(id, { keepSidebar = false } = {}) {
       sendBtn.dataset.mode = '';
       sendBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
       sendBtn.title = 'Send message';
-    }
-    // Deactivate compare mode on session switch
-    if (window.compareModule) {
-      if (window.compareModule.isActive()) window.compareModule.deactivate(true);
-      else if (window.compareModule.hasVisibleResults()) window.compareModule.cleanupResults();
     }
     const msgInput = document.getElementById('message');
     if (msgInput) {
@@ -1809,7 +1799,7 @@ export function createDirectChat(url, modelId, endpointId) {
   // Update current-meta header
   const metaEl = document.getElementById('current-meta');
   if (metaEl) {
-    metaEl.textContent = 'New Chat';
+    metaEl.textContent = 'Nuova chat';
   }
 
   // Enable input
@@ -1943,7 +1933,7 @@ async function _onSessionListKeydown(e) {
     const s = sessions.find(x => x.id === sid);
     if (!s) return;
     if (s.is_important) {
-      uiModule.showToast('Unfavorite before deleting');
+      uiModule.showToast('Rimuovi dai preferiti prima di eliminare');
       return;
     }
     const ok = await uiModule.styledConfirm('Delete this session?', { confirmText: 'Delete', danger: true });
@@ -2340,7 +2330,7 @@ async function _arcPeekOpen(sid) {
     // Find the archived session metadata
     const meta = _arc.data.find(s => s.id === sid);
     const metaEl = document.getElementById('current-meta');
-    if (metaEl) metaEl.textContent = (meta?.name || 'Archived') + ' (archived)';
+    if (metaEl) metaEl.textContent = (meta?.name || 'Archiviata') + ' (archived)';
 
     // Render the chat history
     const chatBox = document.getElementById('chat-history');
@@ -2377,7 +2367,7 @@ async function _arcRestore(sid) {
     if (!res.ok) throw new Error('Failed');
     _arcRemove(sid);
     _arcRefreshUI();
-    uiModule.showToast('Session restored');
+    uiModule.showToast('Sessione ripristinata');
     loadSessions();
   } catch { uiModule.showError('Failed to restore session'); }
 }
@@ -2390,7 +2380,7 @@ async function _arcDelete(sid) {
     await _animateSessionRowsRemoving([sid], '#archive-grid .archive-row[data-session-id]');
     _arcRemove(sid);
     _arcRefreshUI();
-    uiModule.showToast('Session deleted');
+    uiModule.showToast('Sessione eliminata');
   } catch { uiModule.showError('Failed to delete session'); }
 }
 
@@ -2541,7 +2531,7 @@ function _arcRenderCard(s) {
       </div>
     </div>
     <div class="memory-item-actions">
-      <button class="memory-item-btn archive-menu-btn" title="Actions"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+      <button class="memory-item-btn archive-menu-btn" title="Azioni"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
     </div>
   `;
 
@@ -2558,9 +2548,9 @@ function _arcRenderCard(s) {
   card.querySelector('.archive-menu-btn').addEventListener('click', (e) => {
     e.stopPropagation();
     _showDropdown(e.currentTarget, [
-      { label: 'Open', action: () => _arcPeekOpen(s.id) },
+      { label: 'Apri', action: () => _arcPeekOpen(s.id) },
       { label: 'Restore', action: () => _arcRestore(s.id) },
-      { label: 'Delete', action: () => _arcDelete(s.id), danger: true },
+      { label: 'Elimina', action: () => _arcDelete(s.id), danger: true },
     ]);
   });
   card.addEventListener('click', () => {
@@ -2615,31 +2605,31 @@ export function openLibrary(defaultTab) {
   modal.innerHTML = `
     <div class="modal-content doclib-modal-content">
       <div class="modal-header">
-        <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Library <span id="lib-stats" style="font-size:0.8em;opacity:0.5;font-weight:normal;margin-left:4px"></span></h4>
+        <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Libreria <span id="lib-stats" style="font-size:0.8em;opacity:0.5;font-weight:normal;margin-left:4px"></span></h4>
         <button class="close-btn" id="lib-close">✖</button>
       </div>
       <div class="modal-body">
         <div class="lib-tabs" id="lib-tabs">
-          <button class="lib-tab${_lib.tab === 'chats' ? ' active' : ''}" data-lib-tab="chats">Chats</button>
-          <button class="lib-tab${_lib.tab === 'documents' ? ' active' : ''}" data-lib-tab="documents">Documents</button>
-          <button class="lib-tab${_lib.tab === 'archive' ? ' active' : ''}" data-lib-tab="archive">Archive</button>
-          <button class="lib-tab${_lib.tab === 'research' ? ' active' : ''}" data-lib-tab="research">Research</button>
+          <button class="lib-tab${_lib.tab === 'chats' ? ' active' : ''}" data-lib-tab="chats">Chat</button>
+          <button class="lib-tab${_lib.tab === 'documents' ? ' active' : ''}" data-lib-tab="documents">Documenti</button>
+          <button class="lib-tab${_lib.tab === 'archive' ? ' active' : ''}" data-lib-tab="archive">Archivia</button>
+          <button class="lib-tab${_lib.tab === 'research' ? ' active' : ''}" data-lib-tab="research">Ricerca</button>
         </div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
           <select class="memory-sort-select" id="lib-sort">
-            <option value="recent">Recent</option>
-            <option value="oldest">Oldest</option>
-            <option value="most-messages">Most messages</option>
+            <option value="recent">Recenti</option>
+            <option value="oldest">Meno recenti</option>
+            <option value="most-messages">Più messaggi</option>
             <option value="alpha">A\u2013Z</option>
           </select>
           <input type="text" class="memory-search-input" id="lib-search" placeholder="Filter\u2026" style="flex:1;" />
-          <button class="memory-toolbar-btn" id="lib-select-btn" title="Select">Select</button>
+          <button class="memory-toolbar-btn" id="lib-select-btn" title="Seleziona">Seleziona</button>
         </div>
         <div class="memory-bulk-bar hidden" id="lib-bulk-bar">
-          <label class="memory-bulk-check-all"><input type="checkbox" id="lib-select-all"> All</label>
+          <label class="memory-bulk-check-all"><input type="checkbox" id="lib-select-all"> Tutti</label>
           <span id="lib-selected-count" style="color:color-mix(in srgb, var(--fg) 50%, transparent);font-size:10px;flex:1;">0 selected</span>
           <button class="memory-toolbar-btn" id="lib-bulk-action1"></button>
-          <button class="memory-toolbar-btn danger" id="lib-bulk-delete">Delete</button>
+          <button class="memory-toolbar-btn danger" id="lib-bulk-delete">Elimina</button>
         </div>
         <div class="doclib-grid archive-list" id="lib-grid"></div>
       </div>
@@ -2677,8 +2667,8 @@ export function openLibrary(defaultTab) {
       const action1 = document.getElementById('lib-bulk-action1');
       if (_lib.tab === 'archive') { action1.textContent = 'Restore'; }
       else if (_lib.tab === 'chats') { action1.textContent = 'Archive'; }
-      else if (_lib.tab === 'research') { action1.textContent = 'Open Report'; }
-      else { action1.textContent = 'Export'; }
+      else if (_lib.tab === 'research') { action1.textContent = 'Apri report'; }
+      else { action1.textContent = 'Esporta'; }
       _renderLibGrid();
     });
   });
@@ -2791,9 +2781,9 @@ function _renderLibChats(grid) {
     card.querySelector('.archive-menu-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       _showDropdown(e.currentTarget, [
-        { label: 'Open', action: () => { closeLibrary(); selectSession(s.id); } },
+        { label: 'Apri', action: () => { closeLibrary(); selectSession(s.id); } },
         { label: 'Archive', action: async () => { await fetch(`${API_BASE}/api/session/${s.id}/archive`, { method: 'POST', headers: { 'Content-Type': 'application/json' } }); await loadSessions(); _renderLibGrid(); } },
-        { label: 'Delete', action: async () => { if (!await uiModule.styledConfirm('Delete?', { confirmText: 'Delete', danger: true })) return; await fetch(`${API_BASE}/api/session/${s.id}`, { method: 'DELETE' }); await loadSessions(); _renderLibGrid(); }, danger: true },
+        { label: 'Elimina', action: async () => { if (!await uiModule.styledConfirm('Delete?', { confirmText: 'Delete', danger: true })) return; await fetch(`${API_BASE}/api/session/${s.id}`, { method: 'DELETE' }); await loadSessions(); _renderLibGrid(); }, danger: true },
       ]);
     });
     grid.appendChild(card);
@@ -2802,7 +2792,7 @@ function _renderLibChats(grid) {
 
 async function _renderLibArchive(grid) {
   grid.innerHTML = '';
-  grid.appendChild(spinnerModule.createLoadingRow('Loading…'));
+  grid.appendChild(spinnerModule.createLoadingRow('Caricamento…'));
   try {
     const params = new URLSearchParams({ limit: '50', sort: _lib.sort === 'most-messages' ? 'messages' : _lib.sort });
     if (_lib.search) params.set('search', _lib.search);
@@ -2823,7 +2813,7 @@ async function _renderLibArchive(grid) {
         e.stopPropagation();
         _showDropdown(e.currentTarget, [
           { label: 'Restore', action: async () => { await fetch(`${API_BASE}/api/session/${s.id}/restore`, { method: 'POST' }); await loadSessions(); _renderLibGrid(); } },
-          { label: 'Delete', action: async () => { if (!await uiModule.styledConfirm('Delete?', { confirmText: 'Delete', danger: true })) return; await fetch(`${API_BASE}/api/session/${s.id}`, { method: 'DELETE' }); _renderLibGrid(); }, danger: true },
+          { label: 'Elimina', action: async () => { if (!await uiModule.styledConfirm('Delete?', { confirmText: 'Delete', danger: true })) return; await fetch(`${API_BASE}/api/session/${s.id}`, { method: 'DELETE' }); _renderLibGrid(); }, danger: true },
         ]);
       });
       grid.appendChild(card);
@@ -2833,7 +2823,7 @@ async function _renderLibArchive(grid) {
 
 async function _renderLibDocuments(grid) {
   grid.innerHTML = '';
-  grid.appendChild(spinnerModule.createLoadingRow('Loading…'));
+  grid.appendChild(spinnerModule.createLoadingRow('Caricamento…'));
   try {
     const params = new URLSearchParams({ limit: '50', sort: _lib.sort });
     if (_lib.search) params.set('search', _lib.search);
@@ -2860,8 +2850,8 @@ async function _renderLibDocuments(grid) {
       card.querySelector('.archive-menu-btn').addEventListener('click', (e) => {
         e.stopPropagation();
         _showDropdown(e.currentTarget, [
-          { label: 'Open', action: () => { if (d.session_id) { closeLibrary(); selectSession(d.session_id); } } },
-          { label: 'Delete', action: async () => { if (!await uiModule.styledConfirm('Delete?', { confirmText: 'Delete', danger: true })) return; await fetch(`${API_BASE}/api/document/${d.id}`, { method: 'DELETE' }); _renderLibGrid(); }, danger: true },
+          { label: 'Apri', action: () => { if (d.session_id) { closeLibrary(); selectSession(d.session_id); } } },
+          { label: 'Elimina', action: async () => { if (!await uiModule.styledConfirm('Delete?', { confirmText: 'Delete', danger: true })) return; await fetch(`${API_BASE}/api/document/${d.id}`, { method: 'DELETE' }); _renderLibGrid(); }, danger: true },
         ]);
       });
       grid.appendChild(card);
@@ -2907,15 +2897,15 @@ async function _renderLibResearch(grid) {
         menuBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           _showDropdown(e.currentTarget, [
-            { label: 'Open Report', action: () => window.open(`${API_BASE}/api/research/report/${item.id}`, '_blank') },
-            { label: 'Re-run', action: () => {
+            { label: 'Apri report', action: () => window.open(`${API_BASE}/api/research/report/${item.id}`, '_blank') },
+            { label: 'Riesegui', action: () => {
               const modal = document.getElementById('library-modal');
               if (modal) modal.style.display = 'none';
               const msgInput = document.getElementById('message');
               if (msgInput) { msgInput.value = item.query; msgInput.focus(); }
-              uiModule.showToast('Toggle Research and send to re-run');
+              uiModule.showToast('Attiva Ricerca e invia per rieseguire');
             }},
-            { label: 'Delete', danger: true, action: async () => {
+            { label: 'Elimina', danger: true, action: async () => {
               if (!await window.styledConfirm('Delete this research?', { confirmText: 'Delete', danger: true })) return;
               await fetch(`${API_BASE}/api/research/${item.id}`, { method: 'DELETE' });
               _renderLibGrid();
@@ -2945,7 +2935,7 @@ function _buildLibCard(id, title, count, meta, time, isActive, isDoc) {
       <div class="memory-item-meta" style="font-size:10px;opacity:0.4;margin-top:2px;">${metaParts.join(' \u00b7 ')}</div>
     </div>
     <div class="memory-item-actions">
-      <button class="memory-item-btn archive-menu-btn" title="Actions"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
+      <button class="memory-item-btn archive-menu-btn" title="Azioni"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button>
     </div>
   `;
   const cb = card.querySelector('.memory-select-cb');
@@ -2985,29 +2975,29 @@ export function openArchive() {
   modal.innerHTML = `
     <div class="modal-content doclib-modal-content">
       <div class="modal-header">
-        <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>Archive <span id="archive-stats" style="font-size:0.8em;opacity:0.5;font-weight:normal;margin-left:4px"></span></h4>
+        <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>Archivia <span id="archive-stats" style="font-size:0.8em;opacity:0.5;font-weight:normal;margin-left:4px"></span></h4>
         <button class="close-btn" id="archive-close">✖</button>
       </div>
       <div class="modal-body">
         <div class="doclib-chips" id="archive-chips"></div>
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
           <select class="memory-sort-select" id="archive-sort">
-            <option value="recent">Recent</option>
-            <option value="oldest">Oldest</option>
-            <option value="most-messages">Most messages</option>
+            <option value="recent">Recenti</option>
+            <option value="oldest">Meno recenti</option>
+            <option value="most-messages">Più messaggi</option>
             <option value="alpha">A\u2013Z</option>
           </select>
           <input type="text" class="memory-search-input" id="archive-search" placeholder="Filter\u2026" style="flex:1;" />
-          <button class="memory-toolbar-btn" id="archive-select-btn" title="Select sessions">Select</button>
+          <button class="memory-toolbar-btn" id="archive-select-btn" title="Seleziona sessioni">Seleziona</button>
         </div>
         <div class="memory-bulk-bar hidden" id="archive-bulk-bar">
-          <label class="memory-bulk-check-all"><input type="checkbox" id="archive-select-all"> All</label>
+          <label class="memory-bulk-check-all"><input type="checkbox" id="archive-select-all"> Tutti</label>
           <span id="archive-selected-count" style="color:color-mix(in srgb, var(--fg) 50%, transparent);font-size:10px;flex:1;">0 selected</span>
-          <button class="memory-toolbar-btn" id="archive-bulk-restore">Restore</button>
-          <button class="memory-toolbar-btn danger" id="archive-bulk-delete">Delete</button>
+          <button class="memory-toolbar-btn" id="archive-bulk-restore">Ripristina</button>
+          <button class="memory-toolbar-btn danger" id="archive-bulk-delete">Elimina</button>
         </div>
         <div class="doclib-grid archive-list" id="archive-grid"></div>
-        <button class="doclib-load-more" id="archive-load-more" style="display:none">Load more</button>
+        <button class="doclib-load-more" id="archive-load-more" style="display:none">Carica altro</button>
       </div>
     </div>
   `;

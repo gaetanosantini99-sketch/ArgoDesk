@@ -89,7 +89,7 @@ function buildCategoryChips() {
 async function syncToggles() {
   // The settings tab no longer hosts a separate "Memory in context" toggle —
   // the header toggle owns that pref directly now.
-  await syncPrefToggle('memory-enabled-header-toggle', 'memory_enabled', 'Memory enabled', 'Memory disabled', false);
+  await syncPrefToggle('memory-enabled-header-toggle', 'memory_enabled', 'Memoria attivata', 'Memoria disattivata', false);
   // The Skills header toggle owns the `skills_enabled` pref (was never wired —
   // toggling it did nothing, so skills stayed on). Now it actually gates skill
   // injection (see chat_helpers.py: uprefs.skills_enabled).
@@ -180,11 +180,11 @@ async function syncPrefSlider(elementId, prefKey, labelId, defaultVal) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ value: pref })
         });
-        if (!res.ok) { showError('Failed to save preference'); return; }
+        if (!res.ok) { showError('Salvataggio della preferenza non riuscito'); return; }
         showToast(pref === 0 ? 'Skill confidence: All' : `Skill confidence ≥ ${Math.round(pref * 100)}%`);
       } catch (e) {
         console.error(`Failed to save ${prefKey} pref:`, e);
-        showError('Failed to save preference');
+        showError('Salvataggio della preferenza non riuscito');
       }
     });
   }
@@ -222,11 +222,11 @@ async function syncPrefNumber(elementId, prefKey, defaultVal) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ value: v })
         });
-        if (!res.ok) { showError('Failed to save preference'); return; }
+        if (!res.ok) { showError('Salvataggio della preferenza non riuscito'); return; }
         showToast(v === 0 ? 'No skills injected' : `Max injected skills: ${v}`);
       } catch (e) {
         console.error(`Failed to save ${prefKey} pref:`, e);
-        showError('Failed to save preference');
+        showError('Salvataggio della preferenza non riuscito');
       }
     });
   }
@@ -259,7 +259,7 @@ async function syncPrefToggle(elementId, prefKey, onMsg, offMsg, dimBelow = true
           console.error(`PUT ${prefKey} returned ${res.status}`);
           toggle.checked = !toggle.checked; // revert
           if (dimBelow) syncToggleDim(toggle);
-          showError('Failed to save preference');
+          showError('Salvataggio della preferenza non riuscito');
           return;
         }
         showToast(toggle.checked ? onMsg : offMsg);
@@ -267,7 +267,7 @@ async function syncPrefToggle(elementId, prefKey, onMsg, offMsg, dimBelow = true
         console.error(`Failed to save ${prefKey} pref:`, e);
         toggle.checked = !toggle.checked; // revert
         if (dimBelow) syncToggleDim(toggle);
-        showError('Failed to save preference');
+        showError('Salvataggio della preferenza non riuscito');
       }
     });
   }
@@ -319,7 +319,7 @@ function enterSelectMode() {
   const bulkBar = document.getElementById('memory-bulk-bar');
   const selectBtn = document.getElementById('memory-select-btn');
   if (bulkBar) bulkBar.classList.remove('hidden');
-  if (selectBtn) { selectBtn.classList.add('active'); selectBtn.textContent = 'Cancel'; }
+  if (selectBtn) { selectBtn.classList.add('active'); selectBtn.textContent = 'Annulla'; }
   updateBulkCount();
   renderMemoryList();
 }
@@ -331,7 +331,7 @@ function exitSelectMode() {
   const selectBtn = document.getElementById('memory-select-btn');
   const selectAll = document.getElementById('memory-select-all');
   if (bulkBar) bulkBar.classList.add('hidden');
-  if (selectBtn) { selectBtn.classList.remove('active'); selectBtn.textContent = 'Select'; }
+  if (selectBtn) { selectBtn.classList.remove('active'); selectBtn.textContent = 'Seleziona'; }
   if (selectAll) selectAll.checked = false;
   renderMemoryList();
 }
@@ -429,7 +429,7 @@ export async function tidyMemories() {
     if ((data.removed || 0) === 0) {
       if (tidySpinner) tidySpinner.destroy();
       if (tidyBtn) { tidyBtn.disabled = false; tidyBtn.innerHTML = '<svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style="vertical-align:-1px;margin-right:2px;"><path d="M12 0L14.59 8.41L23 12L14.59 15.59L12 24L9.41 15.59L1 12L9.41 8.41Z"/></svg> Tidy'; }
-      showToast('Already clean');
+      showToast('Già pulito');
       return;
     }
 
@@ -464,7 +464,7 @@ export async function tidyMemories() {
     showToast(`Tidied: ${data.removed} removed (${data.before} \u2192 ${data.after})`);
   } catch (error) {
     console.error('Tidy failed:', error);
-    showError('Tidy failed — check console');
+    showError('Riordino non riuscito — controlla la console');
   } finally {
     if (tidySpinner) tidySpinner.destroy();
     if (tidyBtn) {
@@ -716,19 +716,19 @@ export function renderMemoryList() {
 
       const editItem = document.createElement('div');
       editItem.className = 'dropdown-item-compact';
-      editItem.textContent = '✎ Edit';
+      editItem.textContent = '✎ Modifica';
       editItem.addEventListener('click', () => { dropdown.style.display = 'none'; startInlineEdit(item, memory); });
 
       const deleteItem = document.createElement('div');
       deleteItem.className = 'dropdown-item-compact memory-dropdown-delete';
-      deleteItem.textContent = '✕ Delete';
+      deleteItem.textContent = '✕ Elimina';
       deleteItem.addEventListener('click', () => { dropdown.style.display = 'none'; deleteMemory(memory.id); });
 
       // Select — enters bulk-select mode and pre-selects this memory. Same
       // pattern as the email/documents/skills Select item.
       const selectItem = document.createElement('div');
       selectItem.className = 'dropdown-item-compact';
-      selectItem.innerHTML = '<span class="dropdown-icon"><span style="font-size:16px;line-height:1;">●</span></span><span>Select</span>';
+      selectItem.innerHTML = '<span class="dropdown-icon"><span style="font-size:16px;line-height:1;">●</span></span><span>Seleziona</span>';
       selectItem.addEventListener('click', (e) => {
         e.stopPropagation();
         if (dropdown.parentNode) dropdown.remove();
@@ -743,7 +743,7 @@ export function renderMemoryList() {
       // dismisses cleanly.
       const cancelItem = document.createElement('div');
       cancelItem.className = 'dropdown-item-compact dropdown-cancel-mobile';
-      cancelItem.textContent = '✕ Cancel';
+      cancelItem.textContent = '✕ Annulla';
       cancelItem.addEventListener('click', (e) => { e.stopPropagation(); if (dropdown.parentNode) dropdown.remove(); });
 
       dropdown.appendChild(pinItem);
@@ -939,7 +939,7 @@ async function saveInlineEdit(id, newText, newCategory) {
 
     if (response.ok) {
       await loadMemories();
-      showToast('Memory updated');
+      showToast('Ricordo aggiornato');
     } else {
       const errorData = await response.json();
       throw new Error(errorData.detail || 'Failed to update memory');
@@ -979,7 +979,7 @@ export async function addNewMemory() {
   const text = input.value.trim();
 
   if (!text) {
-    showError('Memory text cannot be empty');
+    showError('Il testo del ricordo non può essere vuoto');
     return;
   }
 
@@ -997,7 +997,7 @@ export async function addNewMemory() {
     if (response.ok) {
       input.value = '';
       await loadMemories();
-      showToast('Memory added');
+      showToast('Ricordo aggiunto');
     } else {
       const errorData = await response.json();
       console.error('Server error details:', errorData);
@@ -1033,7 +1033,7 @@ async function togglePin(id, pinned) {
     }
   } catch (e) {
     console.error('Failed to toggle pin:', e);
-    showError('Failed to update pin');
+    showError('Aggiornamento del fissaggio non riuscito');
   }
 }
 
@@ -1051,12 +1051,12 @@ export async function deleteMemory(id) {
     if (response.ok) {
       await animateMemoryRemoval([id]);
       await loadMemories();
-      showToast('Memory deleted');
+      showToast('Ricordo eliminato');
     } else {
-      throw new Error('Failed to delete');
+      throw new Error('Eliminazione non riuscita');
     }
   } catch (error) {
-    showError('Failed to delete memory');
+    showError('Eliminazione del ricordo non riuscita');
   }
 }
 
@@ -1119,7 +1119,7 @@ export async function extractMemory(sessionId) {
         });
         btn.disabled = true;
         btn.textContent = 'saved';
-        showToast('Saved to memory');
+        showToast('Salvato in memoria');
       });
       div.appendChild(txt);
       div.appendChild(btn);
@@ -1134,7 +1134,7 @@ export async function extractMemory(sessionId) {
 
 export function exportMemories() {
   if (!memories || memories.length === 0) {
-    showToast('No memories to export');
+    showToast('Nessun ricordo da esportare');
     return;
   }
   const data = JSON.stringify(memories, null, 2);
@@ -1187,7 +1187,7 @@ async function handleImportFile(file) {
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      throw new Error(err.detail || 'Import failed');
+      throw new Error(err.detail || 'Importazione non riuscita');
     }
 
     const data = await res.json();
@@ -1292,7 +1292,7 @@ async function handleImportFile(file) {
           updateHeaderTitle();
           btn.disabled = true;
           btn.textContent = 'saved';
-          showToast('Saved to memory');
+          showToast('Salvato in memoria');
         });
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'memory-item-btn delete';
@@ -1314,7 +1314,7 @@ async function handleImportFile(file) {
     modal.classList.remove('hidden');
     document.querySelector('.memory-tab[data-memory-tab="browse"]')?.click();
   } catch (error) {
-    console.error('Import failed:', error);
+    console.error('Importazione non riuscita:', error);
     showError('Import failed — ' + error.message);
   } finally {
     if (importSpin) importSpin.destroy();

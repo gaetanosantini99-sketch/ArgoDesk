@@ -44,7 +44,7 @@ export function wireMergeButtons({ saveState, createLayer, renderLayerPanel, com
   // Flatten Copy.
   document.getElementById('ge-flatten')?.addEventListener('click', () => {
     if (state.layers.length < 2) return;
-    saveState('Flatten copy');
+    saveState('Unisci copia');
     const merged = createLayer('Flattened', state.imgWidth, state.imgHeight);
     const ctx = merged.ctx;
     for (const l of state.layers) {
@@ -58,14 +58,14 @@ export function wireMergeButtons({ saveState, createLayer, renderLayerPanel, com
     state.activeLayerId = merged.id;
     renderLayerPanel();
     composite();
-    uiModule.showToast('Flattened copy created');
+    uiModule.showToast('Copia appiattita creata');
   });
 
   // Merge All — drop hidden layers; base = lowest visible.
   document.getElementById('ge-merge-all')?.addEventListener('click', () => {
     const visibleLayers = state.layers.filter(l => l.visible);
     if (visibleLayers.length < 2) {
-      if (uiModule) uiModule.showToast('Need at least two visible layers to merge');
+      if (uiModule) uiModule.showToast('Servono almeno due livelli visibili per unire');
       return;
     }
     saveState('Merge all');

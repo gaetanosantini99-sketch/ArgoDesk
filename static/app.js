@@ -10,7 +10,6 @@ import ragModule from './js/rag.js';
 import presetsModule from './js/presets.js';
 import searchModule from './js/search.js';
 import chatModule from './js/chat.js';
-import compareModule from './js/compare/index.js';
 import documentModule from './js/document.js';
 import searchChatModule from './js/search-chat.js';
 import markdownModule from './js/markdown.js';
@@ -43,6 +42,9 @@ import spinnerModule from './js/spinner.js';
 import { initKeyboardShortcuts } from './js/keyboard-shortcuts.js';
 import { initSidebarLayout, syncRailSide } from './js/sidebar-layout.js';
 import { initSectionCollapse, initSectionDrag } from './js/section-management.js';
+import './js/connectWizard.js';
+import './js/knowledge.js';
+import './js/projects.js';
 
 const API_BASE = window.location.origin;
 window.themeModule = themeModule;
@@ -50,6 +52,7 @@ window.sessionModule = sessionModule;
 window.uiModule = uiModule;
 window.adminModule = adminModule;
 window.cookbookModule = cookbookModule;
+window.settingsModule = settingsModule;
 
 // Redirect to login on 401 from any fetch
 const _origFetch = window.fetch;
@@ -554,13 +557,6 @@ function initializeEventListeners() {
         return;
       }
 
-      // Compare model selector
-      const cmpOverlay = document.getElementById('compare-model-overlay');
-      if (cmpOverlay) {
-        cmpOverlay.remove();
-        return;
-      }
-
       // Theme popup
       const themeModal = document.getElementById('theme-modal');
       if (themeModal && !themeModal.classList.contains('hidden')) {
@@ -837,37 +833,12 @@ function initializeEventListeners() {
     if (ws) { ws.style.animation = 'none'; ws.offsetHeight; ws.style.animation = 'welcome-enter 0.3s ease-out both'; }
   }
 
-  // ── Close compare if active (used by all tool/sidebar activations) ──
-  // Returns true if compare was active (page will reload), caller should return early
+  // ── Compare removed — retained as a no-op so existing callers stay intact ──
   function _closeCompareIfActive() {
-    if (compareModule && compareModule.isActive()) {
-      compareModule.deactivate(true);
-      return true;
-    }
     return false;
   }
 
   // ── Tools section click handlers ──
-  const toolCompareBtn = el('tool-compare-btn');
-  if (toolCompareBtn) {
-    toolCompareBtn.addEventListener('click', () => {
-      if (compareModule) {
-        if (compareModule.isActive()) {
-          // Already active — toggle off
-          compareModule.toggleMode();
-          return;
-        }
-        // Close other exclusive tools before opening compare
-        const resChk = el('research-toggle');
-        if (resChk && resChk.checked) {
-          _syncResearchIndicator(false);
-        }
-        _startFreshChat();
-        compareModule.toggleMode();
-      }
-    });
-  }
-
   const toolResearchBtn = el('tool-research-btn');
   if (toolResearchBtn) {
     toolResearchBtn.addEventListener('click', () => {
@@ -955,6 +926,18 @@ function initializeEventListeners() {
       if (notesModule) {
         notesModule.togglePanel();
       }
+    });
+  }
+  const toolKnowledgeBtn = el('tool-knowledge-btn');
+  if (toolKnowledgeBtn) {
+    toolKnowledgeBtn.addEventListener('click', () => {
+      try { window.knowledgeModule?.open(); } catch (_) {}
+    });
+  }
+  const toolProjectsBtn = el('tool-projects-btn');
+  if (toolProjectsBtn) {
+    toolProjectsBtn.addEventListener('click', () => {
+      try { window.projectsModule?.open(); } catch (_) {}
     });
   }
   // Refresh notes due-reminder badge on load and every 5 minutes
@@ -2199,16 +2182,6 @@ function initializeEventListeners() {
   })();
 
 
-  // ── Compare indicator (sidebar only, no overflow) ──
-  const compareIndicatorBtn = el('compare-indicator-btn');
-  if (compareIndicatorBtn) {
-    compareIndicatorBtn.addEventListener('click', () => {
-      if (compareModule && compareModule.isActive()) {
-        compareModule.closeCompare();
-      }
-    });
-  }
-
   // ── Overflow RAG toggle ──
   const overflowRagBtn = el('overflow-rag-btn');
   const ragIndicatorBtn = el('rag-indicator-btn');
@@ -2439,7 +2412,6 @@ function initializeEventListeners() {
     // Per-tool visibility — fine-grained control over which entries show
     // inside the Tools section in the sidebar.
     'tool-calendar':       '#tool-calendar-btn',
-    'tool-compare':        '#tool-compare-btn',
     'tool-cookbook':       '#tool-cookbook-btn',
     'tool-research':       '#tool-research-btn',
     'tool-gallery':        '#tool-gallery-btn',
@@ -3470,10 +3442,6 @@ function startArgoDeskApp() {
   chatModule.init(API_BASE);
   chatModule.initListeners();
   groupModule.init(API_BASE);
-  // Initialize compare module
-  if (compareModule) {
-    compareModule.init(API_BASE);
-  }
   researchPanelModule.init(API_BASE, markdownModule, sessionModule);
   // Initialize document editor module
   if (documentModule) {
@@ -3499,7 +3467,6 @@ function startArgoDeskApp() {
 
   // Rail tool buttons — delegate to sidebar tool buttons
   const _railToolMap = {
-    'rail-compare':   'tool-compare-btn',
     'rail-research':  'tool-research-btn',
     'rail-cookbook':   'tool-cookbook-btn',
     'rail-archive':   'tool-library-btn',
@@ -3607,11 +3574,6 @@ function startArgoDeskApp() {
     _submitting = true;
     // Release after a short delay (stream start sets its own isStreaming guard)
     setTimeout(() => { _submitting = false; }, 300);
-
-    // Compare mode: route submit to compare handler (same message to all panes)
-    if (compareModule && compareModule.isActive()) {
-      return compareModule.handleCompareSubmit(e);
-    }
 
     // Group chat: route to group module
     if (groupModule && groupModule.isActive()) {

@@ -131,7 +131,7 @@ async function _fetchAlbums() {
 
 
 // v2 review HIGH-7: return a boolean so callers can stop showing
-// "Tags saved" / "Photo deleted" toasts when the server actually
+// "Tags saved" / "Foto eliminata" toasts when the server actually
 // returned 4xx/5xx. The previous swallow-and-return-undefined caused
 // silent UI lies on permission failures.
 async function _patchImage(id, patch) {
@@ -333,9 +333,9 @@ async function _handleGalleryDrop(e) {
     dtItems.some(it => it.kind === 'string')
   );
   if (looksLikeFolderUri) {
-    uiModule.showError('Browsers can’t read folders dropped from native file managers (Thunar/Nautilus). Use the "Upload album" tile in the Albums tab instead.');
+    uiModule.showError('Browsers can’t read folders dropped from native file managers (Thunar/Nautilus). Use the "Carica album" tile in the Albums tab instead.');
   } else if (entries.length || dtItems.length) {
-    uiModule.showToast('No images found in that drop');
+    uiModule.showToast('Nessuna immagine trovata nel rilascio');
   }
 }
 
@@ -359,7 +359,7 @@ function _renderTags(tags) {
 function _renderModels(models) {
   const sel = document.getElementById('gallery-model-filter');
   if (!sel) return;
-  let html = '<option value="">All sources</option>';
+  let html = '<option value="">Tutte le fonti</option>';
   models.forEach(m => {
     const selected = _activeModel === m ? ' selected' : '';
     html += `<option value="${_esc(m)}"${selected}>${_esc(m)}</option>`;
@@ -377,9 +377,9 @@ function _renderAlbums() {
     // Order: All, then the heart, then any active tag chips (to the right of
     // both), then the active-album chip. No favorites-within-an-album view, so
     // the heart is hidden while an album is active.
-    let fhtml = `<button class="gallery-chip${!_activeAlbum && !_favoritesOnly ? ' active' : ''}" data-album="">All</button>`;
+    let fhtml = `<button class="gallery-chip${!_activeAlbum && !_favoritesOnly ? ' active' : ''}" data-album="">Tutti</button>`;
     if (!_activeAlbum) {
-      fhtml += `<button class="gallery-chip gallery-chip-fav${_favoritesOnly ? ' active' : ''}" data-fav="true" title="Favorites">&#9829;</button>`;
+      fhtml += `<button class="gallery-chip gallery-chip-fav${_favoritesOnly ? ' active' : ''}" data-fav="true" title="Preferiti">&#9829;</button>`;
     }
     _activeTags.forEach(t => {
       fhtml += `<span class="gallery-chip gallery-chip-active-album" title="Filtered to tag — click × to remove"><span>#${_esc(t)}</span><button class="gallery-chip-clear" data-clear-tag="${_esc(t)}" aria-label="Remove tag filter">&times;</button></span>`;
@@ -448,14 +448,14 @@ function _ensureAlbumsToolbar(container) {
   container.innerHTML = `
     <div class="gallery-toolbar" id="gallery-albums-toolbar">
       <div class="gallery-search-wrap">
-        <input type="text" class="gallery-search" id="gallery-albums-search" placeholder="Search albums..." />
+        <input type="text" class="gallery-search" id="gallery-albums-search" placeholder="Cerca album..." />
       </div>
-      <button class="gallery-select-btn gallery-toolbar-action" id="gallery-albums-select-btn" title="Select for bulk actions" style="position:relative;top:2px;"><span style="position:relative;top:1px;">Select</span></button>
+      <button class="gallery-select-btn gallery-toolbar-action" id="gallery-albums-select-btn" title="Seleziona per azioni multiple" style="position:relative;top:2px;"><span style="position:relative;top:1px;">Seleziona</span></button>
     </div>
     <div class="memory-bulk-bar hidden" id="gallery-albums-bulk-bar">
-      <label class="memory-bulk-check-all" style="position:relative;top:-1px;"><input type="checkbox" id="gallery-albums-bulk-all"> All</label>
+      <label class="memory-bulk-check-all" style="position:relative;top:-1px;"><input type="checkbox" id="gallery-albums-bulk-all"> Tutti</label>
       <span id="gallery-albums-bulk-count" style="position:relative;top:-1px;">0 selected</span>
-      <button class="memory-toolbar-btn" id="gallery-albums-bulk-delete" title="Delete selected" style="margin-left:auto;color:var(--color-error, #f44);position:relative;top:-3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>Delete</button>
+      <button class="memory-toolbar-btn" id="gallery-albums-bulk-delete" title="Elimina selezionati" style="margin-left:auto;color:var(--color-error, #f44);position:relative;top:-3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>Elimina</button>
       <button class="memory-toolbar-btn" id="gallery-albums-bulk-cancel" title="Cancel (Esc)" style="margin-left:4px;padding:3px 6px;position:relative;top:-3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
     <div id="gallery-albums-grid-wrap"></div>
@@ -489,7 +489,7 @@ function _ensureAlbumsToolbar(container) {
   });
   container.querySelector('#gallery-albums-bulk-delete').addEventListener('click', (e) => {
     e.stopPropagation();
-    if (!_albumSelected.size) { uiModule.showToast('Select albums first'); return; }
+    if (!_albumSelected.size) { uiModule.showToast('Seleziona prima gli album'); return; }
     _bulkDeleteAlbums([..._albumSelected]);
   });
 }
@@ -591,11 +591,15 @@ function _renderAlbumsGrid() {
           </div>
           <div class="dropdown-item-compact" data-action="rename">
             <span class="dropdown-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></span>
-            <span>Rename</span>
+            <span>Rinomina</span>
+          </div>
+          <div class="dropdown-item-compact" data-action="add-to-project">
+            <span class="dropdown-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+            <span>Aggiungi a progetto</span>
           </div>
           <div class="dropdown-item-compact dropdown-item-danger" data-action="delete">
             <span class="dropdown-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></span>
-            <span>Delete</span>
+            <span>Elimina</span>
           </div>
         </div>
         <div class="gallery-album-cover">${cover}</div>
@@ -691,6 +695,11 @@ function _wireAlbumsEvents(scope) {
       document.body.appendChild(picker);
       picker.click();
     });
+    pop.querySelector('[data-action="add-to-project"]')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      pop.hidden = true;
+      try { window.projectsModule?.addAlbumToProject(id); } catch (_) {}
+    });
     pop.querySelector('[data-action="rename"]')?.addEventListener('click', async (e) => {
       e.stopPropagation();
       pop.hidden = true;
@@ -706,7 +715,7 @@ function _wireAlbumsEvents(scope) {
         _renderAlbumsTab();
         if (uiModule) uiModule.showToast('Album renamed');
       } else if (uiModule) {
-        uiModule.showError('Rename failed');
+        uiModule.showError('Rinomina non riuscita');
       }
     });
     pop.querySelector('[data-action="delete"]')?.addEventListener('click', async (e) => {
@@ -726,16 +735,16 @@ function _wireAlbumsEvents(scope) {
         await _fetchAlbums();
         _renderAlbumsTab();
         _renderAlbums();
-        if (uiModule) uiModule.showToast('Album deleted');
+        if (uiModule) uiModule.showToast('Album eliminato');
       } else if (uiModule) {
-        uiModule.showError('Delete failed');
+        uiModule.showError('Eliminazione non riuscita');
       }
     });
   });
 
   document.getElementById('gallery-albums-new')?.addEventListener('click', async () => {
     const name = (uiModule.styledPrompt
-      ? await uiModule.styledPrompt('Name your new album.', { title: 'New album', placeholder: 'e.g. Vacation 2026', confirmText: 'Create' })
+      ? await uiModule.styledPrompt('Dai un nome al nuovo album.', { title: 'Nuovo album', placeholder: 'e.g. Vacation 2026', confirmText: 'Create' })
       : prompt('Album name:'));
     if (!name?.trim()) return;
     await fetch(`${API_BASE}/api/gallery/albums`, {
@@ -759,7 +768,7 @@ function _wireAlbumsEvents(scope) {
       const images = all.filter(_isMediaFile);
       picker.remove();
       if (!images.length) {
-        if (uiModule) uiModule.showToast('No images or videos in that folder');
+        if (uiModule) uiModule.showToast('Nessuna immagine o video in quella cartella');
         return;
       }
       // Derive folder name from the first file's relative path (e.g.
@@ -784,7 +793,7 @@ function _wireAlbumsEvents(scope) {
         }
       }
       if (!album) {
-        if (uiModule) uiModule.showError('Could not create album');
+        if (uiModule) uiModule.showError('Impossibile creare l’album');
         return;
       }
       await _bulkUpload(images, album.id);
@@ -836,7 +845,7 @@ function _draftsShowLoading(section) {
       _draftsSpinner.element.style.cssText = 'width:28px;height:28px;margin:0;';
       ov.appendChild(_draftsSpinner.element);
     } catch (_) {
-      ov.textContent = 'Loading…';
+      ov.textContent = 'Caricamento…';
     }
     section.appendChild(ov);
   }
@@ -925,7 +934,7 @@ function _draftsPaint() {
           <div class="gallery-editor-draft-name">${_esc(d.name || 'Untitled')}</div>
           <div class="gallery-editor-draft-meta">${_esc([dims, updated].filter(Boolean).join(' · '))}</div>
         </div>
-        <button class="gallery-editor-draft-delete" data-draft-id="${_esc(d.id)}" title="Delete project" aria-label="Delete project">×</button>
+        <button class="gallery-editor-draft-delete" data-draft-id="${_esc(d.id)}" title="Elimina progetto" aria-label="Elimina progetto">×</button>
       </div>`;
   }).join('');
   grid.querySelectorAll('.gallery-editor-draft-card').forEach(card => {
@@ -1100,10 +1109,10 @@ function _renderEditorLanding() {
         <div class="gallery-editor-drafts-header">
           <h4 class="gallery-editor-drafts-title">Saved projects</h4>
           <input type="search" class="gallery-editor-drafts-search" id="gallery-editor-drafts-search" placeholder="Search projects…" autocomplete="off" />
-          <button class="gallery-select-btn" id="gallery-editor-drafts-select" title="Toggle multi-select">Select</button>
+          <button class="gallery-select-btn" id="gallery-editor-drafts-select" title="Toggle multi-select">Seleziona</button>
         </div>
         <div class="gallery-bulk-bar hidden" id="gallery-editor-drafts-bulk">
-          <label class="memory-bulk-check-all"><input type="checkbox" id="gallery-editor-drafts-select-all"> All</label>
+          <label class="memory-bulk-check-all"><input type="checkbox" id="gallery-editor-drafts-select-all"> Tutti</label>
           <span class="gallery-bulk-count" id="gallery-editor-drafts-bulk-count">0 selected</span>
           <button class="gallery-bulk-delete" id="gallery-editor-drafts-bulk-delete"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>Delete selected</button>
           <button class="memory-toolbar-btn" id="gallery-editor-drafts-bulk-cancel" title="Cancel (Esc)" style="margin-left:4px;padding:3px 6px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
@@ -1125,7 +1134,7 @@ function _renderEditorLanding() {
     // openEditor() now returns a Promise — it's async because the size
     // prompt is a styled modal. Await it before checking whether the
     // editor actually opened (the user may have cancelled).
-    await openEditor(null, null, null, 'New canvas');
+    await openEditor(null, null, null, 'Nuova tela');
     if (!isEditorOpen()) _renderEditorLanding();
   });
   document.getElementById('gallery-editor-pick')?.addEventListener('click', () => {
@@ -1173,7 +1182,7 @@ function _renderGrid() {
   // tile in the Albums tab so the upload entry point is consistent across
   // both grids.
   const uploadTile = `
-    <div class="gallery-card gallery-card-upload" id="gallery-upload-tile" title="Upload photos or videos">
+    <div class="gallery-card gallery-card-upload" id="gallery-upload-tile" title="Carica foto o video">
       <div class="gallery-card-upload-inner">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         <div class="gallery-card-upload-label">Upload</div>
@@ -1207,8 +1216,8 @@ function _renderGrid() {
     html += `
       <div class="gallery-card" data-id="${_esc(img.id)}">
         <span class="gallery-select-dot" style="display:none;"></span>
-        <button class="gallery-fav-btn${favCls}" data-id="${_esc(img.id)}" title="Favorite">&#9829;</button>
-        <button class="gallery-dl-btn" data-id="${_esc(img.id)}" data-url="${_esc(img.url)}" data-filename="${_esc(img.filename || '')}" title="Download">
+        <button class="gallery-fav-btn${favCls}" data-id="${_esc(img.id)}" title="Preferito">&#9829;</button>
+        <button class="gallery-dl-btn" data-id="${_esc(img.id)}" data-url="${_esc(img.url)}" data-filename="${_esc(img.filename || '')}" title="Scarica">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         </button>
         ${_isVideoUrl(img.url)
@@ -1326,7 +1335,6 @@ function _openDetail(img) {
     ? `${_dateObj.toLocaleString()}<span class="gallery-date-rel"> (${_relAgo(_dateObj)})</span>`
     : 'Unknown';
   const userTags = img.user_tags || img.tags || '';
-  const aiTags = img.ai_tags || '';
   const dims = img.width && img.height ? `${img.width} x ${img.height}` : (img.size || 'Unknown');
   const fileSize = img.file_size ? _humanSize(img.file_size) : '';
   // "Edited" row: only show when updated_at is meaningfully later than
@@ -1347,13 +1355,13 @@ function _openDetail(img) {
       <div style="flex:1"></div>
       <button class="gallery-detail-back" id="gallery-edit-direct-btn" title="Edit (E)" aria-label="Edit photo" style="display:inline-flex;align-items:center;gap:4px;">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-        Edit
+        Modifica
       </button>
-      <button class="gallery-detail-back gallery-detail-fav-header${img.favorite ? ' active' : ''}" id="gallery-detail-fav-header" title="${img.favorite ? 'Unfavorite' : 'Favorite'}" aria-label="Favorite" aria-pressed="${img.favorite ? 'true' : 'false'}" style="display:inline-flex;align-items:center;justify-content:center;padding:4px 8px;">
+      <button class="gallery-detail-back gallery-detail-fav-header${img.favorite ? ' active' : ''}" id="gallery-detail-fav-header" title="${img.favorite ? 'Unfavorite' : 'Favorite'}" aria-label="Preferito" aria-pressed="${img.favorite ? 'true' : 'false'}" style="display:inline-flex;align-items:center;justify-content:center;padding:4px 8px;">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="${img.favorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </button>
       <div class="gallery-detail-menu-wrap">
-        <button class="gallery-detail-action gallery-detail-menu-btn" id="gallery-detail-menu-btn" title="Actions" aria-label="Photo actions">
+        <button class="gallery-detail-action gallery-detail-menu-btn" id="gallery-detail-menu-btn" title="Azioni" aria-label="Photo actions">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
         </button>
         <div class="gallery-detail-menu dropdown" id="gallery-detail-menu" hidden>
@@ -1361,13 +1369,9 @@ function _openDetail(img) {
             <span class="dropdown-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="${img.favorite ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
             ${img.favorite ? 'Favorited' : 'Favorite'}
           </button>
-          <button class="dropdown-item-compact" id="gallery-ai-tag-btn" data-mode="${aiTags ? 'clear' : 'tag'}">
-            <span class="dropdown-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></span>
-            ${aiTags ? 'Clear AI tags' : 'AI Tag'}
-          </button>
           <button class="dropdown-item-compact" id="gallery-download-btn">
             <span class="dropdown-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span>
-            Download
+            Scarica
           </button>
           ${img.album_id ? `<button class="dropdown-item-compact" id="gallery-set-cover-btn">
             <span class="dropdown-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>
@@ -1375,7 +1379,7 @@ function _openDetail(img) {
           </button>` : ''}
           <button class="dropdown-item-compact dropdown-item-danger" id="gallery-delete-btn">
             <span class="dropdown-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></span>
-            Delete
+            Elimina
           </button>
         </div>
       </div>
@@ -1388,7 +1392,7 @@ function _openDetail(img) {
         <button class="gallery-detail-rotate gallery-detail-rotate-cw" id="gallery-rotate-btn" title="Rotate 90° clockwise" aria-label="Rotate right">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
         </button>
-        <button class="gallery-detail-nav gallery-detail-nav-prev" id="gallery-detail-prev" title="Previous (←)" aria-label="Previous">
+        <button class="gallery-detail-nav gallery-detail-nav-prev" id="gallery-detail-prev" title="Previous (←)" aria-label="Precedente">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
         <div class="gallery-detail-img-frame">
@@ -1397,13 +1401,13 @@ function _openDetail(img) {
             : `<img id="gallery-detail-img" src="${_esc(img.url)}" alt="${_esc(img.prompt)}" />`}
           <div id="gallery-detail-face-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></div>
         </div>
-        <button class="gallery-detail-nav gallery-detail-nav-next" id="gallery-detail-next" title="Next (→)" aria-label="Next">
+        <button class="gallery-detail-nav gallery-detail-nav-next" id="gallery-detail-next" title="Next (→)" aria-label="Successivo">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
       <div class="gallery-detail-sidebar">
         <div class="gallery-detail-section">
-          <label>Name</label>
+          <label>Nome</label>
           <div class="gallery-name-wrap">
             <input type="text" class="gallery-detail-name-input" id="gallery-detail-name-input"
               value="${_esc(img.prompt || '')}" placeholder="Untitled photo (press Enter to save)" />
@@ -1421,13 +1425,12 @@ function _openDetail(img) {
           <div>${dims}${fileSize ? ` (${fileSize})` : ''}</div>
         </div>
         ${img.camera ? `<div class="gallery-detail-section"><label>Camera</label><div>${_esc(img.camera)}</div></div>` : ''}
-        ${img.gps ? `<div class="gallery-detail-section"><label>Location</label><div>${img.gps.lat}, ${img.gps.lng}</div></div>` : ''}
+        ${img.gps ? `<div class="gallery-detail-section"><label>Luogo</label><div>${img.gps.lat}, ${img.gps.lng}</div></div>` : ''}
         ${img.model ? `<div class="gallery-detail-section"><label>Source</label><div>${_esc(img.model)}</div></div>` : ''}
-        ${img.session_name ? `<div class="gallery-detail-section"><label>Session</label><div>${_esc(img.session_name)}</div></div>` : ''}
-        ${aiTags ? `<div class="gallery-detail-section"><label>AI Tags</label><div class="gallery-ai-tags">${aiTags.split(',').map(t => t.trim()).filter(Boolean).map(t => `<button class="gallery-ai-chip gallery-aitag-chip" data-tag-filter="${_esc(t)}" title="AI-generated tag — click to filter to photos tagged “${_esc(t)}”"><span class="gallery-aitag-mark" aria-hidden="true">✦</span>${_esc(t)}</button>`).join('')}</div></div>` : ''}
+        ${img.session_name ? `<div class="gallery-detail-section"><label>Sessione</label><div>${_esc(img.session_name)}</div></div>` : ''}
         <div class="gallery-detail-section">
           <label>Tags</label>
-          <div class="gallery-ai-tags" id="gallery-user-tag-chips">${userTags.split(',').map(t => t.trim()).filter(Boolean).map(t => `<button class="gallery-ai-chip gallery-user-chip" data-tag-filter="${_esc(t)}" title="Filter to photos tagged “${_esc(t)}”">${_esc(t)}<span class="gallery-tag-x" title="Remove tag" aria-label="Remove tag">×</span></button>`).join('')}</div>
+          <div class="gallery-ai-tags" id="gallery-user-tag-chips">${userTags.split(',').map(t => t.trim()).filter(Boolean).map(t => `<button class="gallery-ai-chip gallery-user-chip" data-tag-filter="${_esc(t)}" title="Filter to photos tagged “${_esc(t)}”">${_esc(t)}<span class="gallery-tag-x" title="Rimuovi etichetta" aria-label="Rimuovi etichetta">×</span></button>`).join('')}</div>
           <div class="gallery-tag-input-wrap">
             <input type="text" class="gallery-tag-input" id="gallery-tag-input"
               value="" placeholder="Add a tag" title="Type a tag and press Enter to add it" />
@@ -1437,7 +1440,7 @@ function _openDetail(img) {
         <div class="gallery-detail-section">
           <label>Album</label>
           <select id="gallery-detail-album" class="gallery-tag-input" style="padding:4px 6px;">
-            <option value="">None</option>
+            <option value="">Nessuno</option>
             ${_albums.map(a => `<option value="${a.id}" ${img.album_id === a.id ? 'selected' : ''}>${_esc(a.name)}</option>`).join('')}
           </select>
         </div>
@@ -1525,49 +1528,6 @@ function _openDetail(img) {
   };
   document.getElementById('gallery-fav-detail').addEventListener('click', _toggleDetailFavorite);
   document.getElementById('gallery-detail-fav-header')?.addEventListener('click', _toggleDetailFavorite);
-
-  document.getElementById('gallery-ai-tag-btn').addEventListener('click', async (e) => {
-    // When the photo already has AI tags this button is "Clear AI tags".
-    const clearMode = e.currentTarget.dataset.mode === 'clear';
-    // The button lives in the ⋮ menu which closes on click, so its text never
-    // shows — surface a whirlpool overlay on the image instead.
-    const stage = document.getElementById('gallery-detail-image-wrap') || document.getElementById('gallery-detail-img')?.parentElement;
-    let overlay = null, spinner = null;
-    if (stage) {
-      overlay = document.createElement('div');
-      overlay.style.cssText = 'position:absolute;inset:0;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;background:color-mix(in srgb, var(--bg) 55%, transparent);z-index:5;';
-      try {
-        spinner = spinnerModule.createWhirlpool(36);
-        spinner.element.style.cssText = 'width:36px;height:36px;margin:0;';
-        overlay.appendChild(spinner.element);
-        const label = document.createElement('div');
-        label.textContent = clearMode ? 'Clearing…' : 'AI tagging…';
-        label.style.cssText = 'font-size:11px;opacity:0.7;';
-        overlay.appendChild(label);
-      } catch (_) { overlay.textContent = clearMode ? 'Clearing…' : 'AI tagging…'; }
-      if (getComputedStyle(stage).position === 'static') stage.style.position = 'relative';
-      stage.appendChild(overlay);
-    }
-    const cleanup = () => { try { spinner?.destroy?.(); } catch {} overlay?.remove(); };
-    try {
-      const url = clearMode
-        ? `${API_BASE}/api/gallery/clear-ai-tags?image_id=${encodeURIComponent(img.id)}`
-        : `${API_BASE}/api/gallery/${img.id}/ai-tag`;
-      const res = await fetch(url, { method: 'POST', credentials: 'same-origin' });
-      const data = await res.json();
-      cleanup();
-      if (data.ok) {
-        img.ai_tags = clearMode ? '' : data.ai_tags;
-        uiModule.showToast(clearMode ? 'AI tags cleared' : 'AI tags added');
-        _openDetail(img); // re-render detail
-      } else {
-        uiModule.showError(data.error || (clearMode ? 'Clear failed' : 'AI tagging failed'));
-      }
-    } catch (e2) {
-      cleanup();
-      uiModule.showError(clearMode ? 'Clear failed' : 'AI tagging failed');
-    }
-  });
 
   document.getElementById('gallery-download-btn').addEventListener('click', async () => {
     try {
@@ -1708,7 +1668,7 @@ function _openDetail(img) {
         credentials: 'same-origin',
         body: JSON.stringify({ angle }),
       });
-      if (!r.ok) { cleanup(); uiModule.showError('Rotate failed'); return; }
+      if (!r.ok) { cleanup(); uiModule.showError('Rotazione non riuscita'); return; }
       // Cache-bust the image in the detail view, then wait for the new
       // image to actually load before clearing the spinner so the user
       // doesn't see a flash of the old/blank image.
@@ -1725,7 +1685,7 @@ function _openDetail(img) {
       _fetchLibrary(false);
     } catch (e) {
       cleanup();
-      uiModule.showError('Rotate failed');
+      uiModule.showError('Rotazione non riuscita');
     }
   };
   document.getElementById('gallery-rotate-btn')?.addEventListener('click', () => _rotate(90));
@@ -1742,13 +1702,13 @@ function _openDetail(img) {
         body: JSON.stringify({ cover_id: img.id }),
       });
       if (r.ok) {
-        uiModule.showToast('Album cover updated');
+        uiModule.showToast('Copertina dell’album aggiornata');
         await _fetchAlbums();
       } else {
-        uiModule.showError('Failed to set cover');
+        uiModule.showError('Impostazione della copertina non riuscita');
       }
     } catch (e) {
-      uiModule.showError('Failed to set cover');
+      uiModule.showError('Impostazione della copertina non riuscita');
     }
   });
 
@@ -1756,7 +1716,7 @@ function _openDetail(img) {
     if (!await uiModule.styledConfirm('Delete this photo? This cannot be undone.', { confirmText: 'Delete', danger: true })) return;
     const ok = await _deleteImage(img.id);
     if (!ok) {
-      uiModule.showError('Failed to delete photo');
+      uiModule.showError('Eliminazione della foto non riuscita');
       return;
     }
     detail.style.display = 'none';
@@ -1764,7 +1724,7 @@ function _openDetail(img) {
     _total = Math.max(0, _total - 1);
     _renderGrid();
     _renderStats();
-    if (uiModule) uiModule.showToast('Photo deleted');
+    if (uiModule) uiModule.showToast('Foto eliminata');
   });
 
   // Tag input — Enter saves; also strips a leading '#' from each tag so
@@ -1788,7 +1748,7 @@ function _openDetail(img) {
         if (uiModule) uiModule.showToast('Renamed');
         window.dispatchEvent(new CustomEvent('gallery-refresh'));
       } catch {
-        if (uiModule) uiModule.showError('Failed to rename');
+        if (uiModule) uiModule.showError('Rinomina non riuscita');
       }
     };
     _nameInput.addEventListener('keydown', (e) => {
@@ -1843,8 +1803,8 @@ function _openDetail(img) {
           b.textContent = t;
           const x = document.createElement('span');
           x.className = 'gallery-tag-x';
-          x.title = 'Remove tag';
-          x.setAttribute('aria-label', 'Remove tag');
+          x.title = 'Rimuovi etichetta';
+          x.setAttribute('aria-label', 'Rimuovi etichetta');
           x.textContent = '×';
           b.appendChild(x);
           chips.appendChild(b);
@@ -1864,7 +1824,7 @@ function _openDetail(img) {
     const ok = await _patchImage(img.id, { album_id: albumId || '' });
     if (!ok) { uiModule.showError('Failed to update album'); return; }
     img.album_id = albumId || null;
-    uiModule.showToast(albumId ? 'Added to album' : 'Removed from album');
+    uiModule.showToast(albumId ? 'Added to album' : 'Rimosso dall’album');
   });
 }
 
@@ -1910,26 +1870,22 @@ export function openGallery() {
   modal.innerHTML = `
     <div class="modal-content gallery-modal-content">
       <div class="modal-header">
-        <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Gallery <span id="gallery-stats" class="memory-count" style="font-size:0.6em;opacity:0.6;font-weight:normal;margin-left:8px"></span></h4>
+        <h4><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:6px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Galleria <span id="gallery-stats" class="memory-count" style="font-size:0.6em;opacity:0.6;font-weight:normal;margin-left:8px"></span></h4>
         <button class="modal-close" id="gallery-close">&times;</button>
       </div>
       <div class="gallery-tabs">
         <button class="gallery-tab active" data-tab="images">
           <span class="gallery-tab-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
-          <span class="gallery-tab-label">Photos</span>
+          <span class="gallery-tab-label">Foto</span>
         </button>
         <button class="gallery-tab" data-tab="albums">
           <span class="gallery-tab-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
-          <span class="gallery-tab-label">Albums</span>
+          <span class="gallery-tab-label">Album</span>
         </button>
         <button class="gallery-tab" data-tab="editor" id="gallery-editor-tab">
           <span class="gallery-tab-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></span>
-          <span class="gallery-tab-label">Edit</span>
-          <span class="gallery-tab-close" id="gallery-editor-tab-close" title="Close edit" aria-label="Close edit">×</span>
-        </button>
-        <button class="gallery-tab" data-tab="settings">
-          <span class="gallery-tab-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
-          <span class="gallery-tab-label">Settings</span>
+          <span class="gallery-tab-label">Modifica</span>
+          <span class="gallery-tab-close" id="gallery-editor-tab-close" title="Chiudi modifica" aria-label="Chiudi modifica">×</span>
         </button>
       </div>
       <div class="modal-body">
@@ -1944,56 +1900,34 @@ export function openGallery() {
         <div class="gallery-album-chips gallery-people-chips" id="gallery-people-chips" style="display:none"></div>
         <div class="gallery-toolbar">
           <div class="gallery-search-wrap">
-            <input type="text" class="gallery-search" id="gallery-search" placeholder="Search photos, tags..." />
+            <input type="text" class="gallery-search" id="gallery-search" placeholder="Cerca foto, etichette..." />
             <span class="gallery-search-enter-hint" aria-hidden="true"><svg class="gallery-enter-key" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 10 4 15 9 20"/><path d="M20 4v7a4 4 0 0 1-4 4H4"/></svg>to tag</span>
           </div>
           <span class="gallery-toolbar-break" aria-hidden="true"></span>
           <select class="gallery-model-filter" id="gallery-model-filter">
-            <option value="">All sources</option>
+            <option value="">Tutte le fonti</option>
           </select>
           <select class="gallery-sort" id="gallery-sort">
             <option value="shuffle">Random</option>
-            <option value="recent">Recent</option>
-            <option value="oldest">Oldest</option>
+            <option value="recent">Recenti</option>
+            <option value="oldest">Meno recenti</option>
           </select>
-          <button class="gallery-select-btn gallery-toolbar-action" id="gallery-select-btn" title="Select for bulk actions"><span style="position:relative;top:1px;">Select</span></button>
+          <button class="gallery-select-btn gallery-toolbar-action" id="gallery-select-btn" title="Seleziona per azioni multiple"><span style="position:relative;top:1px;">Seleziona</span></button>
         </div>
         <div class="gallery-album-chips" id="gallery-filter-chips" style="margin-top:0;"></div>
         <div class="memory-bulk-bar hidden" id="gallery-bulk-bar" style="margin-bottom:4px;">
-          <label class="memory-bulk-check-all" style="position:relative;top:-1px;"><input type="checkbox" id="gallery-bulk-select-all"> All</label>
+          <label class="memory-bulk-check-all" style="position:relative;top:-1px;"><input type="checkbox" id="gallery-bulk-select-all"> Tutti</label>
           <span id="gallery-bulk-count" style="position:relative;top:-1px;">0 selected</span>
-          <button class="memory-toolbar-btn" id="gallery-bulk-actions" style="position:relative;top:-3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px;"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Actions <span style="opacity:0.55;font-size:9px;">▼</span></button>
+          <button class="memory-toolbar-btn" id="gallery-bulk-actions" style="position:relative;top:-3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px;"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>Azioni <span style="opacity:0.55;font-size:9px;">▼</span></button>
           <button class="memory-toolbar-btn" id="gallery-bulk-cancel" title="Cancel (Esc)" style="margin-left:4px;padding:3px 6px;position:relative;top:-3px;"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         </div>
         <div class="gallery-tag-chips" id="gallery-tag-chips"></div>
         <div class="gallery-grid" id="gallery-grid"></div>
-        <button class="gallery-load-more" id="gallery-load-more" style="display:none">Load more</button>
+        <button class="gallery-load-more" id="gallery-load-more" style="display:none">Carica altro</button>
         <div class="gallery-detail" id="gallery-detail" style="display:none"></div>
         </div>
         <div class="gallery-albums-container" id="gallery-albums-container" style="display:none;"></div>
         <div class="gallery-editor-container" id="gallery-editor-container" style="display:none;"></div>
-        <div class="gallery-settings-container" id="gallery-settings-container" style="display:none;">
-          <div class="admin-card">
-            <h2>AI Tagging <span id="gallery-tag-count" class="memory-count" style="font-size:0.6em;opacity:0.6;font-weight:normal;"></span></h2>
-            <p class="memory-desc doclib-desc">Auto-tag photos by content with your <a href="#" id="gallery-vision-link" class="ge-vision-link">vision model</a>. Your own tags are kept.</p>
-            <div id="gallery-tag-bar" style="display:none;padding:8px 0 0;">
-              <div style="background:var(--border);border-radius:4px;overflow:hidden;height:6px;">
-                <div id="gallery-tag-progress" style="height:100%;background:var(--accent, var(--red));width:0%;transition:width 0.2s;"></div>
-              </div>
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
-                <div id="gallery-tag-status" style="font-size:10px;opacity:0.5;"></div>
-                <button id="gallery-tag-cancel" class="gallery-select-btn" style="font-size:10px;padding:1px 6px;">Cancel</button>
-              </div>
-            </div>
-            <div class="memory-toolbar" style="display:flex;flex-direction:row;gap:6px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-top:32px;">
-              <button class="memory-toolbar-btn" id="gallery-clear-ai-tags-btn" title="Remove all AI-generated tags from every photo">Clear AI tags</button>
-              <button class="memory-toolbar-btn" id="gallery-tag-all-btn" title="AI-tag all untagged photos (in the current album, if any)">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;margin-right:5px;"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                Start AI tag
-              </button>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   `;
@@ -2059,7 +1993,7 @@ export function openGallery() {
       const input = document.createElement('input');
       input.type = 'text';
       input.value = current === 'Edit' ? '' : current;
-      input.placeholder = 'Edit name';
+      input.placeholder = 'Modifica nome';
       input.className = 'gallery-tab-rename-input';
       // Replace only the label span's contents so the icon SVG next to
       // it stays visible during the rename.
@@ -2095,11 +2029,9 @@ export function openGallery() {
       const imagesContainer = document.getElementById('gallery-images-container');
       const albumsContainer = document.getElementById('gallery-albums-container');
       const editorContainer = document.getElementById('gallery-editor-container');
-      const settingsContainer = document.getElementById('gallery-settings-container');
       if (imagesContainer) imagesContainer.style.display = target === 'images' ? '' : 'none';
       if (albumsContainer) albumsContainer.style.display = target === 'albums' ? '' : 'none';
       if (editorContainer) editorContainer.style.display = target === 'editor' ? 'flex' : 'none';
-      if (settingsContainer) settingsContainer.style.display = target === 'settings' ? '' : 'none';
       if (target === 'images') {
         // Keep active edits alive when leaving the Edit tab. The edit
         // session is only torn down by the explicit Edit-tab close.
@@ -2213,111 +2145,6 @@ export function openGallery() {
 
   // ── Import images ──
 
-  // "vision model" link → open Settings on the AI tab (where the vision model
-  // is configured).
-  const visionLink = document.getElementById('gallery-vision-link');
-  if (visionLink) {
-    visionLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      import('./settings.js').then(m => {
-        m.open('ai');
-        // The gallery modal gets a bumped z-index from modalManager; settings
-        // opens with its lower static z-index and lands BEHIND it. Raise it above.
-        const sm = document.getElementById('settings-modal');
-        const gm = document.getElementById('gallery-modal');
-        if (sm) {
-          const gz = gm ? (parseInt(getComputedStyle(gm).zIndex) || 0) : 0;
-          sm.style.setProperty('z-index', String(Math.max(gz + 1, 10050)), 'important');
-        }
-      }).catch(() => {});
-    });
-  }
-
-  // ── Tag All Untagged ──
-  let _tagCancelRequested = false;
-  let _tagging = false;
-  const tagAllBtn = document.getElementById('gallery-tag-all-btn');
-  const _tagAllOrigHTML = tagAllBtn ? tagAllBtn.innerHTML : '';
-  if (tagAllBtn) {
-    tagAllBtn.addEventListener('click', async () => {
-      // While a run is active this button acts as Cancel.
-      if (_tagging) {
-        _tagCancelRequested = true;
-        const _se = document.getElementById('gallery-tag-status');
-        if (_se) _se.textContent = 'Cancelling…';
-        tagAllBtn.textContent = 'Cancelling…';
-        tagAllBtn.disabled = true;
-        return;
-      }
-      if (tagAllBtn.disabled) return;
-      const scope = _activeAlbum
-        ? (_albums.find(a => a.id === _activeAlbum)?.name || 'this album')
-        : 'entire gallery';
-      const params = new URLSearchParams();
-      if (_activeAlbum) params.set('album_id', _activeAlbum);
-      let listRes;
-      try {
-        const r = await fetch(`${API_BASE}/api/gallery/ai-tag-batch?${params.toString()}`, {
-          method: 'POST', credentials: 'same-origin',
-        });
-        listRes = await r.json();
-      } catch (e) { uiModule.showError('Failed to fetch tag queue'); return; }
-      if (!listRes.ok || !Array.isArray(listRes.image_ids) || listRes.image_ids.length === 0) {
-        uiModule.showToast(`No untagged photos in ${scope}`);
-        return;
-      }
-      const total = listRes.image_ids.length;
-      const untagged = listRes.total_untagged || total;
-      if (!await uiModule.styledConfirm(
-        `Tag ${total} of ${untagged} untagged photo${total > 1 ? 's' : ''} in ${scope}?`,
-        { confirmText: 'Tag All' }
-      )) return;
-
-      const bar = document.getElementById('gallery-tag-bar');
-      const progEl = document.getElementById('gallery-tag-progress');
-      const statusEl = document.getElementById('gallery-tag-status');
-      const cancelBtn = document.getElementById('gallery-tag-cancel');
-      bar.style.display = '';
-      progEl.style.width = '0%';
-      // The Start button becomes the Cancel control for the run (kept enabled so
-      // it's clickable; the click handler above routes to cancel via _tagging).
-      _tagging = true;
-      _tagCancelRequested = false;
-      tagAllBtn.classList.add('active', 'gallery-tag-cancelling');
-      tagAllBtn.textContent = 'Cancel';
-      if (cancelBtn) cancelBtn.style.display = 'none';   // start button covers it now
-      cancelBtn.onclick = () => { _tagCancelRequested = true; statusEl.textContent = 'Cancelling...'; };
-
-      let done = 0, failed = 0;
-      for (const id of listRes.image_ids) {
-        if (_tagCancelRequested) break;
-        try {
-          const r = await fetch(`${API_BASE}/api/gallery/${id}/ai-tag`, {
-            method: 'POST', credentials: 'same-origin',
-          });
-          const d = await r.json();
-          if (!d.ok) failed++;
-        } catch (_) { failed++; }
-        done++;
-        progEl.style.width = `${Math.round((done / total) * 100)}%`;
-        statusEl.textContent = `Tagging ${done}/${total}${failed ? ` — ${failed} failed` : ''}`;
-      }
-
-      statusEl.textContent = _tagCancelRequested
-        ? `Cancelled after ${done}/${total}${failed ? ` (${failed} failed)` : ''}`
-        : `Done — tagged ${done - failed}/${total}${failed ? ` (${failed} failed)` : ''}`;
-      // Restore the Start button.
-      _tagging = false;
-      tagAllBtn.disabled = false;
-      tagAllBtn.classList.remove('active', 'gallery-tag-cancelling');
-      tagAllBtn.innerHTML = _tagAllOrigHTML;
-      if (cancelBtn) cancelBtn.style.display = '';
-      setTimeout(() => { bar.style.display = 'none'; }, 3000);
-      await _fetchLibrary(false);
-      if (uiModule) uiModule.showToast(`Tagged ${done - failed} photo${(done - failed) !== 1 ? 's' : ''}`);
-    });
-  }
-
   // ── Toolbar overflow (⋮) ──
   const moreBtn = document.getElementById('gallery-toolbar-more-btn');
   const moreMenu = document.getElementById('gallery-toolbar-more-menu');
@@ -2334,34 +2161,6 @@ export function openGallery() {
       if (!moreMenu.hidden && !moreMenu.contains(e.target) && e.target !== moreBtn) _setMore(false);
     });
   }
-
-  // ── Clear AI Tags ──
-  const clearAiTagsBtn = document.getElementById('gallery-clear-ai-tags-btn');
-  if (clearAiTagsBtn) {
-    clearAiTagsBtn.addEventListener('click', async () => {
-      if (clearAiTagsBtn.disabled) return;
-      if (moreMenu) { moreMenu.hidden = true; moreMenu.style.display = 'none'; }
-      if (!await uiModule.styledConfirm(
-        'Remove all AI-generated tags from every photo? Your own tags are kept.',
-        { confirmText: 'Clear AI Tags', danger: true }
-      )) return;
-      clearAiTagsBtn.disabled = true;
-      try {
-        const r = await fetch(`${API_BASE}/api/gallery/clear-ai-tags`, {
-          method: 'POST', credentials: 'same-origin',
-        });
-        const d = await r.json();
-        if (!d.ok) throw new Error(d.error || 'Clear failed');
-        uiModule.showToast(`Cleared AI tags on ${d.cleared} photo${d.cleared === 1 ? '' : 's'}`);
-        await _fetchLibrary(false);
-      } catch (e) {
-        uiModule.showError(`Failed to clear AI tags: ${e.message || e}`);
-      } finally {
-        clearAiTagsBtn.disabled = false;
-      }
-    });
-  }
-
 
   // ── Select mode + bulk delete ──
   let _selectMode = false;
@@ -2531,11 +2330,11 @@ export function openGallery() {
     const _cancelIco = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
     const items = [
       { label: 'Favorite', icon: _favIco, action: () => _bulkFavorite(_selectedIds()) },
-      { label: 'Add tag…', icon: _tagIco, action: () => _bulkTag(_selectedIds()) },
-      { label: 'Download', icon: _dlIco, action: () => _bulkDownload(_selectedIds()) },
-      { label: 'Delete', icon: _delIco, danger: true, action: () => _bulkDelete(_selectedIds()) },
+      { label: 'Aggiungi etichetta…', icon: _tagIco, action: () => _bulkTag(_selectedIds()) },
+      { label: 'Scarica', icon: _dlIco, action: () => _bulkDownload(_selectedIds()) },
+      { label: 'Elimina', icon: _delIco, danger: true, action: () => _bulkDelete(_selectedIds()) },
       { separator: true },
-      { label: 'Cancel', icon: _cancelIco, action: () => _exitSelectMode() },
+      { label: 'Annulla', icon: _cancelIco, action: () => _exitSelectMode() },
     ];
     for (const a of items) {
       if (a.separator) {
@@ -2568,7 +2367,7 @@ export function openGallery() {
     // the anchor, so the button itself has to do its own dismiss.
     const existing = document.querySelector('.gallery-bulk-menu');
     if (existing) { existing.remove(); return; }
-    if (!_selectedIds().length) { uiModule.showToast('Select photos first'); return; }
+    if (!_selectedIds().length) { uiModule.showToast('Seleziona prima le foto'); return; }
     _showGalleryBulkMenu(e.currentTarget);
   });
 
@@ -2663,7 +2462,7 @@ export function openGallery() {
   }
 
   async function _bulkTag(ids) {
-    const tag = (await uiModule.styledPrompt('', { title: 'Add tag to selected', placeholder: 'tag', confirmText: 'Add', maxLength: 60 }) || '').trim().replace(/^#+/, '').trim();
+    const tag = (await uiModule.styledPrompt('', { title: 'Aggiungi etichetta ai selezionati', placeholder: 'tag', confirmText: 'Add', maxLength: 60 }) || '').trim().replace(/^#+/, '').trim();
     if (!tag) return;
     let n = 0;
     for (const id of ids) {
@@ -2759,7 +2558,7 @@ export function openGallery() {
 function _doCloseGallery() {
   const editorMounted = !!document.querySelector('#gallery-editor-container .gallery-editor');
   if ((window.__galleryEditLive || isEditorOpen() || editorMounted) && !window.__galleryAllowCloseEditor) {
-    if (uiModule) uiModule.showToast('Close the edit tab first');
+    if (uiModule) uiModule.showToast('Chiudi prima la scheda di modifica');
     return;
   }
   _open = false;

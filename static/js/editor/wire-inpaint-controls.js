@@ -102,7 +102,7 @@ export function wireInpaintControls({
     const btn = document.getElementById('ge-mask-vis');
     if (!btn) { composite(); return; }
     btn.innerHTML = `${state.maskVisible ? EYE_OPEN_SM : EYE_OFF_SM}<span id="ge-mask-vis-label">${state.maskVisible ? 'Hide' : 'Show'}</span>`;
-    btn.title = state.maskVisible ? 'Hide mask' : 'Show mask';
+    btn.title = state.maskVisible ? 'Nascondi maschera' : 'Mostra maschera';
     btn.classList.toggle('visible', state.maskVisible);
     composite();
   });

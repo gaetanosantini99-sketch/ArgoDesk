@@ -128,7 +128,7 @@ export function createLayerPanelRenderer(deps) {
       // drag-init to this handle so row body clicks still activate.
       const handle = document.createElement('span');
       handle.className = 'ge-layer-drag';
-      handle.title = 'Drag to reorder';
+      handle.title = 'Trascina per riordinare';
       handle.innerHTML = '<svg width="8" height="14" viewBox="0 0 8 14" fill="currentColor"><circle cx="2" cy="2" r="1"/><circle cx="6" cy="2" r="1"/><circle cx="2" cy="7" r="1"/><circle cx="6" cy="7" r="1"/><circle cx="2" cy="12" r="1"/><circle cx="6" cy="12" r="1"/></svg>';
       item.appendChild(handle);
 
@@ -447,7 +447,7 @@ export function createLayerPanelRenderer(deps) {
           const delBtn = document.createElement('button');
           delBtn.className = 'ge-layer-btn danger';
           delBtn.textContent = '×';
-          delBtn.title = 'Delete adjustment';
+          delBtn.title = 'Elimina regolazione';
           delBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             saveState(`Delete ${adjLayerLabel(adj.type)}`);
@@ -490,7 +490,7 @@ export function createLayerPanelRenderer(deps) {
           const sVis = document.createElement('button');
           sVis.className = 'ge-layer-vis' + (mk.visible ? ' visible' : '');
           sVis.innerHTML = mk.visible ? EYE_OPEN_SM : EYE_OFF_SM;
-          sVis.title = mk.visible ? 'Hide mask' : 'Show mask';
+          sVis.title = mk.visible ? 'Nascondi maschera' : 'Mostra maschera';
           sVis.addEventListener('click', (e) => {
             e.stopPropagation();
             mk.visible = !mk.visible;
@@ -535,7 +535,7 @@ export function createLayerPanelRenderer(deps) {
           const delBtn = document.createElement('button');
           delBtn.className = 'ge-layer-btn danger';
           delBtn.textContent = '×';
-          delBtn.title = 'Delete mask';
+          delBtn.title = 'Elimina maschera';
           delBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             saveState(`Delete mask "${mk.name}"`);

@@ -215,6 +215,8 @@ def setup_personal_routes(personal_docs_manager, rag_manager, rag_available):
         request: Request,
         files: List[UploadFile] = File(...),
         shared: bool = Form(False),
+        purpose: str = Form(""),
+        category: str = Form(""),
     ):
         """Upload files directly into RAG. Supports text and PDF.
 
@@ -274,12 +276,30 @@ def setup_personal_routes(personal_docs_manager, rag_manager, rag_available):
                     }
                     if doc_owner:
                         metadata["owner"] = doc_owner
+                    # Guided-upload context ("why am I uploading this"): scalar
+                    # Chroma metadata, queryable later and used by the graph.
+                    if purpose.strip():
+                        metadata["purpose"] = purpose.strip()[:500]
+                    if category.strip():
+                        metadata["category"] = category.strip()[:120]
                     if rag.add_document(chunk, metadata):
                         total_indexed += 1
                     else:
                         total_failed += 1
 
                 uploaded_files.append(safe_name)
+
+                # GraphRAG-lite (Fase 5): extract entities/relations in the
+                # background so uploads stay fast. Gated by a feature flag so
+                # it never spends LLM tokens unless the org opted in.
+                try:
+                    from src.settings import load_settings as _ls
+                    if _ls().get("knowledge_graph_enabled"):
+                        import asyncio as _asyncio
+                        from services.knowledge.graph_extractor import extract_graph_for_document
+                        _asyncio.create_task(extract_graph_for_document(text, doc_owner, safe_name))
+                except Exception as _ge:
+                    logger.debug(f"graph extraction trigger skipped: {_ge}")
             except Exception as e:
                 logger.error(f"Failed to upload/index {upload.filename}: {e}")
                 total_failed += 1

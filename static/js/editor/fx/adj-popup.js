@@ -300,13 +300,13 @@ export function createAdjPopupSystem({ composite, saveState, renderLayerPanel })
       <span class="ge-adj-icon">${ADJ_ICONS[type] || ''}</span>
       <span class="ge-adj-title">${adjLayerLabel(type)}</span>
       <span class="ge-head-btns">
-        <button class="ge-adj-min" type="button" title="Minimise">&minus;</button>
+        <button class="ge-adj-min" type="button" title="Riduci a icona">&minus;</button>
       </span>
     </div>
     <div class="ge-adj-body" data-adj-body></div>
     <div class="ge-adj-foot">
-      <button class="ge-btn ge-btn-sm ge-adj-cancel-btn" data-adj-action="cancel">Cancel</button>
-      <button class="ge-btn ge-btn-sm ge-btn-primary ge-adj-apply-btn" data-adj-action="ok">Apply</button>
+      <button class="ge-btn ge-btn-sm ge-adj-cancel-btn" data-adj-action="cancel">Annulla</button>
+      <button class="ge-btn ge-btn-sm ge-btn-primary ge-adj-apply-btn" data-adj-action="ok">Applica</button>
     </div>
     `;
     document.body.appendChild(pop);
@@ -439,7 +439,7 @@ export function createAdjPopupSystem({ composite, saveState, renderLayerPanel })
         <label>${label}</label>
         <input type="range" min="${min}" max="${max}" value="${value}" data-key="${key}" />
         <span class="ge-adj-value">${value}${suffix || ''}</span>
-        <button class="ge-adj-revert" type="button" title="Reset this slider" data-revert-key="${key}">${revertIcon}</button>
+        <button class="ge-adj-revert" type="button" title="Reimposta questo cursore" data-revert-key="${key}">${revertIcon}</button>
       </div>
     `;
     if (type === 'brightness-contrast') {
@@ -497,7 +497,7 @@ export function createAdjPopupSystem({ composite, saveState, renderLayerPanel })
         <input type="range" min="-100" max="100" value="${value}" data-key="${key}" />
         <span class="ge-adj-cb-dot" style="background:${rightCol}"></span>
         <span class="ge-adj-value">${value}</span>
-        <button class="ge-adj-revert" type="button" title="Reset this slider" data-revert-key="${key}">${revertIcon}</button>
+        <button class="ge-adj-revert" type="button" title="Reimposta questo cursore" data-revert-key="${key}">${revertIcon}</button>
       </div>
     `;
       // Tone picker: one tone group visible at a time. Remember the

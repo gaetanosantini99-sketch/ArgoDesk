@@ -332,6 +332,25 @@ class ChatProcessor:
             except Exception as e:
                 logger.warning(f"RAG retrieval failed: {e}")
 
+            # GraphRAG-lite (Fase 5): inject a compact knowledge-graph subgraph
+            # next to the RAG chunks, behind a feature flag. "What is connected
+            # to X" complements RAG's "find text about X".
+            try:
+                from src.settings import load_settings as _ls
+                if _ls().get("knowledge_graph_enabled"):
+                    from services.knowledge.graph_query import subgraph_for_query
+                    from core.constants import ORG_OWNER as _ORG
+                    # Prefer the company graph; fall back to the user's own.
+                    sub = subgraph_for_query(message, _ORG if owner else None)
+                    if not sub.get("summary") and owner:
+                        sub = subgraph_for_query(message, owner)
+                    if sub.get("summary"):
+                        preface.append(untrusted_context_message(
+                            "knowledge graph (entities and relations)", sub["summary"],
+                        ))
+            except Exception as e:
+                logger.debug(f"graph retrieval failed: {e}")
+
         # Add web search if enabled
         web_sources = []
         if use_web:

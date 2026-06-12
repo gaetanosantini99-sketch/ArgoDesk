@@ -333,8 +333,8 @@ function _initModelPickerDropdown() {
       favDot.textContent = '●';
       const _setFavState = (on) => {
         favDot.classList.toggle('active', on);
-        favDot.title = on ? 'Remove from favorites' : 'Add to favorites';
-        favDot.setAttribute('aria-label', on ? 'Remove from favorites' : 'Add to favorites');
+        favDot.title = on ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti';
+        favDot.setAttribute('aria-label', on ? 'Rimuovi dai preferiti' : 'Aggiungi ai preferiti');
         favDot.setAttribute('aria-pressed', on ? 'true' : 'false');
       };
       _setFavState(favs.includes(m.mid));
@@ -602,7 +602,7 @@ function _initModelPickerDropdown() {
 
 /**
  * Update the model picker label to show the current model.
- * Always visible — shows current model name or "Select model" if none.
+ * Always visible — shows current model name or "Seleziona modello" if none.
  * Called after selectSession, createDirectChat, and model switch.
  */
 export function updateModelPicker() {
@@ -643,7 +643,7 @@ export function updateModelPicker() {
   // shared browser the previous account's first favorited model would
   // silently pre-populate the chatbox of the next user that signed in. If
   // we have no session model and no pending-chat pick, fall through to
-  // the "Select model" placeholder below.
+  // the "Seleziona modello" placeholder below.
 
   // Check if selected model is still available — fall back ONLY for pending chats with no user selection
   // Never override an existing session's model — the user explicitly chose it
@@ -685,7 +685,7 @@ export function updateModelPicker() {
     }
   }
 
-  const displayName = modelId ? modelId.split('/').pop() : 'Select model';
+  const displayName = modelId ? modelId.split('/').pop() : 'Seleziona modello';
   const logo = modelId ? providerLogo(modelId) : null;
   if (logo) {
     label.innerHTML = '<span class="model-picker-logo">' + logo + '</span> ' + displayName;

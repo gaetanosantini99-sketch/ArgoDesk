@@ -55,8 +55,8 @@ export function createCloneTool({ activeLayer, saveState, strokeTo, showToast })
       }
       if (state.cloneSourceX === null || state.cloneSourceY === null) {
         showToast(isTouchEvt
-          ? 'Double-tap first to set a clone source'
-          : 'Alt-click first to set a clone source');
+          ? 'Tocca due volte prima per impostare una sorgente di clonazione'
+          : 'Alt+clic prima per impostare una sorgente di clonazione');
         return;
       }
       if (!layer || layer.locked) return;
