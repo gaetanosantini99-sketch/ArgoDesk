@@ -70,6 +70,24 @@ for cu in \
         break
     fi
 done
+# Expose pip-installed CUDA libs to the dynamic linker so CUDA-enabled
+# binaries (llama-server built with -DGGML_CUDA=ON, vLLM, etc.) can find
+# libcudart.so.X and libcublas.so.X at runtime without a system ldconfig.
+if [ -n "$CUDA_HOME" ]; then
+    _cuda_ld="${CUDA_HOME}/lib"
+    [ -d "${CUDA_HOME}/lib64" ] && _cuda_ld="${CUDA_HOME}/lib64:${_cuda_ld}"
+    export LD_LIBRARY_PATH="${_cuda_ld}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+    unset _cuda_ld
+fi
+# Also expose cu12 runtime libs so pre-built llama-cpp-python CUDA 12.x wheels
+# (which link against libcudart.so.12 / libcublas.so.12) can load even when
+# the primary toolchain is cu13.
+for _cu12lib in \
+    /app/.local/lib/python*/site-packages/nvidia/cuda_runtime/lib \
+    /app/.local/lib/python*/site-packages/nvidia/cublas/lib \
+    /app/.local/lib/python*/site-packages/nvidia/cuda_nvrtc/lib; do
+    [ -d "$_cu12lib" ] && export LD_LIBRARY_PATH="${_cu12lib}${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+done
 # Disable the FlashInfer JIT sampler unconditionally — it is sampler-only
 # and has no impact on the attention path, but requires nvcc + matching
 # CUDA headers at startup. Without this, vLLM crashes with "Could not find

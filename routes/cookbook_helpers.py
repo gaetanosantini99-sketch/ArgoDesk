@@ -578,8 +578,27 @@ def _append_llama_cpp_linux_accel_build_lines(runner_lines: list[str]) -> None:
     runner_lines.append('        return 1')
     runner_lines.append('      }')
     runner_lines.append('      if _argodesk_has_cudart; then')
+    # cmake FindCUDAToolkit looks for an unversioned libcudart.so but pip-installed
+    # nvidia wheels only ship versioned libs (e.g. libcudart.so.13). Create the
+    # symlink if absent so FindCUDAToolkit resolves CUDA_CUDART correctly.
+    runner_lines.append('        _cuh="${CUDA_HOME:-/usr/local/cuda}"')
+    # cmake FindCUDAToolkit needs unversioned symlinks (libcudart.so, libcublas.so);
+    # pip-installed nvidia wheels only ship versioned .so.N files.
+    runner_lines.append('        for _lib in libcudart libcublas libcublasLt; do')
+    runner_lines.append('          _vlib=$(ls "$_cuh/lib/${_lib}.so".* 2>/dev/null | head -1)')
+    runner_lines.append('          [ -n "$_vlib" ] && [ ! -e "$_cuh/lib/${_lib}.so" ] && ln -sf "$(basename "$_vlib")" "$_cuh/lib/${_lib}.so" 2>/dev/null || true')
+    runner_lines.append('        done')
+    runner_lines.append('        export LD_LIBRARY_PATH="$_cuh/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"')
     runner_lines.append('        echo "[argodesk] CUDA nvcc + cudart found — building llama-server with CUDA (GPU) support..."')
-    runner_lines.append('        cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON && cmake --build build -j"$NPROC" --target llama-server && ln -sf ~/llama.cpp/build/bin/llama-server ~/bin/llama-server')
+    # -DCCCL_DISABLE_CTK_COMPATIBILITY_CHECK: pip-installed nvidia/cu13 ships nvcc 13.2
+    # but cuda_runtime_api.h at CUDART_VERSION=13000 (13.0); the CCCL header errors on
+    # this minor mismatch even though the build works fine — disable the check explicitly.
+    # -DCMAKE_EXE_LINKER_FLAGS / -DCMAKE_SHARED_LINKER_FLAGS with -L$_cuh/lib: the
+    # pip-installed nvidia wheels don't install CUDA libs into ldconfig; without an
+    # explicit -L flag the final link step can't resolve versioned symbols like
+    # cudaPeekAtLastError@libcudart.so.13 that ggml-cuda.so pulls in transitively.
+    # -rpath ensures the binary finds the libs at runtime without LD_LIBRARY_PATH.
+    runner_lines.append('        cmake -B build -DCMAKE_BUILD_TYPE=Release -DGGML_CUDA=ON -DCUDAToolkit_ROOT="$_cuh" -DCMAKE_CUDA_FLAGS="-DCCCL_DISABLE_CTK_COMPATIBILITY_CHECK" -DCMAKE_EXE_LINKER_FLAGS="-L$_cuh/lib -Wl,-rpath,$_cuh/lib" -DCMAKE_SHARED_LINKER_FLAGS="-L$_cuh/lib -Wl,-rpath,$_cuh/lib" && cmake --build build -j"$NPROC" --target llama-server && ln -sf ~/llama.cpp/build/bin/llama-server ~/bin/llama-server')
     runner_lines.append('      else')
     runner_lines.append('        echo "[argodesk] WARNING: nvcc found but CUDA runtime (libcudart.so) is not visible — building llama-server for CPU only."')
     runner_lines.append('        echo "[argodesk]   GPU inference will not be available for this llama.cpp build."')

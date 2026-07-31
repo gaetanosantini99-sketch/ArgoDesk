@@ -392,6 +392,32 @@ def test_llama_cpp_linux_bootstrap_cuda_cmake_present_when_cudart_found():
     assert 'CUDA nvcc + cudart found' in script
 
 
+def test_llama_cpp_linux_bootstrap_cuda_cmake_passes_toolkit_root_and_creates_symlink():
+    """cmake must receive CUDAToolkit_ROOT and a libcudart.so symlink must be created.
+
+    pip-installed nvidia wheels only ship versioned libs (libcudart.so.13);
+    cmake FindCUDAToolkit needs an unversioned libcudart.so symlink and the
+    CUDAToolkit_ROOT variable to discover it.
+    """
+    runner_lines = []
+    _append_llama_cpp_linux_accel_build_lines(runner_lines)
+    script = "\n".join(runner_lines)
+
+    assert '-DCUDAToolkit_ROOT=' in script
+    assert 'libcudart' in script and 'ln -sf' in script
+    assert 'libcublas' in script, "cublas symlink must also be created for cmake FindCUDAToolkit"
+    assert 'CCCL_DISABLE_CTK_COMPATIBILITY_CHECK' in script, (
+        "must disable CCCL version check: nvidia/cu13 ships nvcc 13.2 but CUDART_VERSION=13000"
+    )
+    assert 'CMAKE_EXE_LINKER_FLAGS' in script and 'CMAKE_SHARED_LINKER_FLAGS' in script, (
+        "must pass -L$_cuh/lib + -rpath so the linker resolves versioned CUDA symbols "
+        "like cudaPeekAtLastError@libcudart.so.13 without system-wide ldconfig entries"
+    )
+    symlink_idx = script.index('ln -sf')
+    cuda_cmake_idx = script.index('DGGML_CUDA=ON')
+    assert symlink_idx < cuda_cmake_idx, "symlink creation must precede the CUDA cmake invocation"
+
+
 def test_llama_cpp_linux_bootstrap_nvcc_without_cudart_warns_and_falls_back():
     """When nvcc exists but cudart is absent, the script must warn and use CPU-only cmake."""
     runner_lines = []
